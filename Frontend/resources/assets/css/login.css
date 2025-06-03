@@ -1,0 +1,106 @@
+@font-face {
+    font-family: averta;
+    src: url(../font/Averta-Semibold.otf);
+}
+
+div {
+    font-family: averta;
+}
+
+.title_form {
+    text-align: center;
+    padding: 30px 5px 0px 15px
+}
+
+.title2 {
+    font-weight: 800;
+    font-size: 30px;
+}
+
+label {
+    color: gray;
+}
+
+form {
+    height: 100%;
+}
+
+.form-input {
+    padding-top: 30px;
+}
+
+.remember {
+    padding-top: 20px
+}
+
+.btn-div {
+    text-align: center;
+    padding-top: 20px;
+}
+
+.card-login {
+    margin-top: 10%;
+    /* box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22); */
+}
+
+.card-body-login {
+    background-color: whitesmoke;
+    padding: 0;
+    box-shadow: 10px 10px 5px midnightblue;
+}
+
+.btn {
+    width: 100%;
+}
+
+.logo {
+    background-image: url('../dist/img/sti.png');
+    background-repeat: no-repeat;
+    background-size: 80%;
+    background-position: center;
+}
+
+.content_body {
+    margin-right: 0;
+}
+
+.links>a {
+    color: #636b6f;
+    padding: 0 25px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.dropdown-item {
+    display: inline;
+}
+
+.card-login {
+    margin-top: 10rem;
+}
+
+
+.links {
+    text-align: end;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.hide {
+    display: none;
+}
+
+.pass {
+    margin-top: 5%;
+}
+
+.main-form {
+    height: 40px;
+}
+
+.select2-results__option--selectable {
+    height: 60px !important;
+}
