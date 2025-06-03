@@ -1,0 +1,18 @@
+{"level":"info","message":{"data":[4,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:27:19.812Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:27:19.813Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL3","CMD_Decriptions":"Giá trị của kênh ADC 3 ( 4 - 20mA )","crc":"98","payload":[{"payload_name":"status","payload_unit":"null","status":16640}],"status":true},"timestamp":"2025-04-05T06:27:19.813Z"}
+{"level":"info","message":{"data":[4,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:29:37.006Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:29:37.008Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL3","CMD_Decriptions":"Giá trị của kênh ADC 3 ( 4 - 20mA )","crc":"98","payload":[{"payload_name":"status","payload_unit":"null","status":16640}],"status":true},"timestamp":"2025-04-05T06:29:37.008Z"}
+{"level":"info","message":{"data":[4,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:30:24.571Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:30:24.572Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL3","CMD_Decriptions":"Giá trị của kênh ADC 3 ( 4 - 20mA )","crc":"98","payload":[{"payload_name":"status","payload_unit":"null","status":16640}],"status":true},"timestamp":"2025-04-05T06:30:24.572Z"}
+{"level":"info","message":{"data":[2,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:45:53.000Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:45:53.002Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL1","CMD_Decriptions":"Giá trị của kênh ADC 1 ( 0 - 10V )","crc":"98","payload":[{"data":16640,"payload_name":"data","payload_unit":"Volts"}],"status":true},"timestamp":"2025-04-05T06:45:53.003Z"}
+{"level":"info","message":{"data":[3,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:48:12.721Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:48:12.722Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL2","CMD_Decriptions":"Giá trị của kênh ADC 2 ( 0 - 10V )","crc":"98","payload":[{"payload_name":"status","payload_unit":"null","status":16640}],"status":true},"timestamp":"2025-04-05T06:48:12.722Z"}
+{"level":"info","message":{"data":[5,2,2,65,0,98],"type":"Buffer"},"timestamp":"2025-04-05T06:48:22.303Z"}
+{"level":"info","message":"Data Sau Khi Convert : ","timestamp":"2025-04-05T06:48:22.304Z"}
+{"level":"info","message":{"CMD":"CMD_ADC_CHANNEL4","CMD_Decriptions":"Giá trị của kênh ADC 4 ( 4 - 20mA )","crc":"98","payload":[{"payload_name":"status","payload_unit":"null","status":16640}],"status":true},"timestamp":"2025-04-05T06:48:22.304Z"}

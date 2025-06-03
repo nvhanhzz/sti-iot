@@ -1,0 +1,654 @@
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:28:52.474Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:28:52.475Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:30:23.638Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:30:23.639Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:30:23.642Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:30:23.952Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:30:23.958Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:30:23.963Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:30:23.968Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:30:26.593Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:30:26.594Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:30:26.595Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:30:26.754Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:30:26.759Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:30:26.768Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:30:26.776Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:30:30.896Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:30:30.897Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:30:30.899Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:30:31.051Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:30:31.056Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:30:31.060Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:30:31.064Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:31:09.789Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:31:09.790Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:31:09.793Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:31:10.076Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:31:10.081Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:31:10.087Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:31:10.095Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:31:36.942Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:31:36.943Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:31:36.946Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:31:37.129Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:31:37.135Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:31:37.142Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:31:37.149Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:32:16.953Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:32:16.954Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:32:16.956Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:32:17.294Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:32:17.299Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:32:17.304Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:32:17.309Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:32:43.902Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:32:43.904Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:36:04.688Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:36:04.689Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:36:25.592Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:36:25.593Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:36:38.621Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:36:38.622Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:39:28.194Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:39:28.195Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:39:28.217Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:39:28.419Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:39:28.426Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:39:28.435Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:39:28.441Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:39:28.441Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:39:28.441Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:39:28.473Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:39:57.992Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:39:57.993Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:39:58.018Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:39:58.285Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:39:58.291Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:39:58.296Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:39:58.302Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:39:58.302Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:39:58.303Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:39:58.333Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:40:20.735Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:40:20.736Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:40:20.751Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:40:20.934Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:40:20.938Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:40:20.942Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:40:20.947Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:40:20.947Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:40:20.947Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:41:52.979Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:41:52.980Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:41:53.002Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:41:53.264Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:41:53.269Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:41:53.273Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:41:53.279Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:41:53.279Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:41:53.279Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:41:53.284Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:41:53.285Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:42:03.574Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:42:03.575Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:42:03.586Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:42:03.756Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:42:03.762Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:42:03.771Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:42:03.781Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:42:03.782Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:42:03.783Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:42:03.788Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:42:03.788Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:43:17.433Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:43:17.434Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:43:17.446Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:43:17.617Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:43:17.627Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:43:17.638Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:43:17.643Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:43:17.644Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:43:17.644Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:43:17.648Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:43:17.649Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:44:12.100Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:44:12.101Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:44:12.118Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:44:12.245Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:44:12.250Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:44:12.255Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:44:12.260Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:44:12.260Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:44:12.261Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:44:12.265Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:44:12.266Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:45:16.373Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:45:16.374Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:45:16.388Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:45:16.538Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:45:16.544Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:45:16.550Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:45:16.556Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:45:16.556Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:45:16.556Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:45:16.563Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:45:16.564Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:46:07.751Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:46:07.752Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:46:07.767Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:46:07.944Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:46:07.950Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:46:07.956Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:46:07.961Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:46:07.962Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:46:07.962Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:46:07.969Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:46:07.970Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:46:13.084Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:46:13.085Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:46:13.094Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:46:13.249Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:46:13.253Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:46:13.257Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:46:13.265Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:46:13.265Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:46:13.266Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:46:13.270Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:46:13.271Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:46:49.705Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:46:49.705Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:46:49.741Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:46:49.931Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:46:49.937Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:46:49.941Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:46:49.945Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:46:49.946Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:46:49.946Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:46:49.951Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:46:49.952Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:48:04.992Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:48:04.993Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:48:05.001Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:48:05.169Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:48:05.187Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:48:05.192Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:48:05.197Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:48:05.197Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:48:05.197Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:48:05.202Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:48:05.203Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:55:11.212Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:55:11.213Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:55:11.255Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:55:11.480Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:55:11.486Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:55:11.497Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:55:11.503Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:55:11.504Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:55:11.505Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:55:11.529Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:55:11.536Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:55:12.713Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:55:12.713Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:55:12.721Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:55:12.869Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:55:12.875Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:55:12.881Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:55:12.889Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:55:12.889Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:55:12.890Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:55:12.896Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:55:12.896Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:56:01.708Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:56:01.709Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:56:01.725Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:56:01.986Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:56:01.996Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:56:02.005Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:56:02.013Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:56:02.013Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:56:02.013Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:56:02.031Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:56:02.031Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:56:04.386Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:56:04.386Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:56:04.392Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:56:04.560Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:56:04.572Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:56:04.578Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:56:04.582Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:56:04.583Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:56:04.583Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:56:04.598Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:56:04.598Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:56:12.247Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:56:12.248Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:56:12.257Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:56:12.459Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:56:12.466Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:56:12.471Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:56:12.481Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:56:12.482Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:56:12.482Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:56:12.488Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:56:12.488Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T06:56:39.244Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T06:56:39.244Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T06:56:39.252Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T06:56:39.423Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T06:56:39.428Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T06:56:39.433Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T06:56:39.438Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T06:56:39.439Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T06:56:39.439Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T06:56:39.444Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T06:56:39.444Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:08:55.532Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:08:55.533Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:08:55.561Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:08:55.710Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:08:55.714Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:08:55.718Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:08:55.724Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:08:55.724Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:08:55.724Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:08:55.729Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:08:55.729Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:11:02.711Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:11:02.713Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:11:02.752Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:11:02.927Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:11:02.936Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:11:02.946Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:11:02.956Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:11:02.956Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:11:02.957Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:11:02.964Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:11:02.965Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:19:15.918Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:19:15.919Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:19:15.928Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:19:16.082Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:19:16.089Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:19:16.097Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:19:16.101Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:19:16.102Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:19:16.102Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:19:16.107Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:19:16.108Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:19:33.712Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:19:33.713Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:19:33.720Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:19:33.903Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:19:33.908Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:19:33.914Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:19:33.920Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:19:33.921Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:19:33.921Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:19:33.926Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:19:33.926Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:23:06.807Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:23:06.808Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:23:06.815Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:23:07.002Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:23:07.008Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:23:07.015Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:23:07.023Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:23:07.024Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:23:07.024Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:23:07.031Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:23:07.032Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:23:25.575Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:23:25.576Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:23:25.581Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:23:25.741Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:23:25.746Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:23:25.752Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:23:25.758Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:23:25.758Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:23:25.759Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:23:25.763Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:23:25.763Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:24:01.263Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:24:01.264Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:24:01.269Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:24:01.415Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:24:01.419Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:24:01.423Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:24:01.430Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:24:01.431Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:24:01.431Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:24:01.435Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:24:01.435Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:24:32.833Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:24:32.833Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:24:32.839Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:24:32.975Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:24:32.982Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:24:32.989Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:24:32.995Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:24:32.995Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:24:32.996Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:24:33.000Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:24:33.000Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:24:53.882Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:24:53.883Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:24:53.889Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:24:54.083Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:24:54.089Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:24:54.095Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:24:54.114Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:24:54.114Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:24:54.114Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:24:54.120Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:24:54.121Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:25:35.071Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:25:35.072Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:25:35.081Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:25:35.257Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:25:35.262Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:25:35.268Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:25:35.276Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:25:35.276Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:25:35.276Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:25:35.280Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:25:35.281Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:26:17.880Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:26:17.880Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:26:17.886Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:26:18.051Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:26:18.054Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:26:18.063Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:26:18.068Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:26:18.069Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:26:18.069Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:26:18.074Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:26:18.075Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:26:36.684Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:26:36.685Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:26:36.692Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:26:36.840Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:26:36.844Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:26:36.849Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:26:36.855Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:26:36.855Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:26:36.856Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:26:36.863Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:26:36.864Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:26:47.478Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:26:47.478Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:26:47.486Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:26:47.621Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:26:47.628Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:26:47.652Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:26:47.661Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:26:47.662Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:26:47.662Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:26:47.668Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:26:47.668Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:27:03.863Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:27:03.864Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:27:03.894Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:27:04.059Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:27:04.064Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:27:04.068Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:27:04.073Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:27:04.074Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:27:04.074Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:27:04.078Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:27:04.079Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:31:02.330Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:31:02.331Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:31:02.360Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:31:02.540Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:31:02.549Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:31:02.556Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:31:02.562Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:31:02.562Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:31:02.563Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:31:02.568Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:31:02.568Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:31:40.812Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:31:40.812Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:31:40.838Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:31:41.008Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:31:41.014Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:31:41.020Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:31:41.025Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:31:41.026Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:31:41.026Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:31:41.032Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:31:41.033Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:35:45.538Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:35:45.539Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:35:45.563Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:35:45.756Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:35:45.762Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:35:45.767Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:35:45.772Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:35:45.772Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:35:45.773Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:35:45.780Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:35:45.780Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:37:29.540Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:37:29.541Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:37:29.552Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:37:29.729Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:37:29.734Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:37:29.739Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:37:29.744Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:37:29.744Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:37:29.745Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:37:29.750Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:37:29.750Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:40:47.677Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:40:47.678Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:40:47.686Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:40:47.864Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:40:47.870Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:40:47.876Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:40:47.881Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:40:47.882Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:40:47.882Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:40:47.886Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:40:47.887Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:42:35.453Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:42:35.455Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:42:35.500Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:42:35.728Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:42:35.734Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:42:35.739Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:42:35.749Z"}
+{"level":"info","message":"Thực Hiện Lấy Dữ Liệu Order","timestamp":"2025-03-19T07:42:35.750Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:42:35.750Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:42:35.758Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:42:35.759Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:42:35.802Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:43:02.470Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:43:02.471Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:43:02.484Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:43:02.682Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:43:02.690Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:43:02.699Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:43:02.705Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:43:02.706Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:43:02.713Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:43:02.714Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:43:02.737Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:51:50.099Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:51:50.100Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:51:50.137Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:51:50.267Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:51:50.275Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:51:50.286Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:51:50.293Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:51:50.294Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:51:50.298Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:51:50.299Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:51:50.320Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:53:44.079Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:53:44.080Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:53:44.104Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:53:44.231Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:53:44.235Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:53:44.241Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:53:44.247Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:53:44.248Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:53:44.256Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:53:44.256Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:53:44.283Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:56:28.762Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:56:28.762Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:56:28.768Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:56:28.877Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:56:28.882Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:56:28.887Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:56:28.892Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:56:28.893Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:56:28.898Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:56:28.898Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:56:28.921Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T07:58:25.526Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T07:58:25.527Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T07:58:25.535Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T07:58:25.674Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T07:58:25.683Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T07:58:25.688Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T07:58:25.696Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T07:58:25.697Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T07:58:25.703Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T07:58:25.703Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T07:58:25.713Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:17:53.888Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:17:53.889Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:17:53.896Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:17:54.031Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:17:54.049Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:17:54.054Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:17:54.074Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:17:54.074Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:17:54.080Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:17:54.081Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:17:54.103Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:31:25.542Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:31:25.543Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:31:25.547Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:31:25.715Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:31:25.722Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:31:25.729Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:31:25.745Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:31:25.745Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:31:25.754Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:31:25.755Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:31:25.777Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:38:39.928Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:38:39.929Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:38:39.942Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:38:40.065Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:38:40.070Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:38:40.077Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:38:40.082Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:38:40.083Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:38:40.087Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:38:40.088Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:38:40.115Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:39:29.421Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:39:29.421Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:39:29.430Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:39:29.587Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:39:29.592Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:39:29.599Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:39:29.605Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:39:29.607Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:39:29.620Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:39:29.621Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:39:29.639Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:40:47.215Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:40:47.216Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:40:47.220Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:40:47.346Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:40:47.351Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:40:47.357Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:40:47.364Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:40:47.364Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:40:47.368Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:40:47.369Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:40:47.389Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:42:44.035Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:42:44.035Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:42:44.041Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:42:44.151Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:42:44.156Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:42:44.161Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:42:44.165Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:42:44.165Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:42:44.169Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:42:44.170Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:42:44.194Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:43:14.392Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:43:14.392Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:43:14.400Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:43:14.503Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:43:14.508Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:43:14.513Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:43:14.519Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:43:14.519Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:43:14.526Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:43:14.526Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:43:14.542Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:43:49.456Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:43:49.456Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:43:49.488Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:43:49.641Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:43:49.653Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:43:49.667Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:43:49.675Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:43:49.675Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:43:49.686Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:43:49.686Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:43:49.713Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:43:53.486Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:43:53.487Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:43:53.496Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:43:53.643Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:43:53.650Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:43:53.659Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:43:53.666Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:43:53.667Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:43:53.671Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:43:53.672Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:43:53.687Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:45:00.263Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:45:00.264Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:45:00.271Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:45:00.373Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:45:00.377Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:45:00.381Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:45:00.386Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:45:00.386Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:45:00.390Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:45:00.390Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:45:00.400Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T08:45:18.322Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T08:45:18.323Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T08:45:18.328Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T08:45:18.442Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T08:45:18.449Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T08:45:18.455Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T08:45:18.461Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T08:45:18.461Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T08:45:18.467Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T08:45:18.468Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T08:45:18.480Z"}
+{"level":"info","message":"Thực Hiện Tính Toán Kế Hoạch ................","timestamp":"2025-03-19T09:22:51.628Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu MasterData","timestamp":"2025-03-19T09:22:51.630Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy !","timestamp":"2025-03-19T09:22:51.676Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Sản Phẩm !","timestamp":"2025-03-19T09:22:51.807Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Máy --- Sản Phẩm !","timestamp":"2025-03-19T09:22:51.812Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ca Sản Xuất !","timestamp":"2025-03-19T09:22:51.821Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Ngày Nghỉ !","timestamp":"2025-03-19T09:22:51.826Z"}
+{"level":"info","message":"⏳Truy Xuất Dữ Liệu Order","timestamp":"2025-03-19T09:22:51.827Z"}
+{"level":"info","message":"✅Hoàn Thành Lấy Dữ Liệu Order !","timestamp":"2025-03-19T09:22:51.834Z"}
+{"level":"info","message":"⏳Tính Toán Phân Bổ Kế Hoạch","timestamp":"2025-03-19T09:22:51.835Z"}
+{"level":"info","message":"✅Hoàn Thành Phân Bổ Kế Hoạch !","timestamp":"2025-03-19T09:22:51.870Z"}

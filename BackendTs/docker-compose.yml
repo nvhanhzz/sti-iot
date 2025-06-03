@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-sti
+    environment:
+      MYSQL_ROOT_PASSWORD: sti@1234
+      MYSQL_DATABASE: sti_mes_2025_dev
+      MYSQL_USER: sti
+      MYSQL_PASSWORD: sti@1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+
+  emqx:
+    image: emqx/emqx:5.0.24
+    container_name: emqx_node
+    ports:
+      - "1883:1883"     # MQTT
+      - "8883:8883"     # MQTT SSL
+      - "8083:8083"     # API, MQTT over QUIC (EMQX 5.x), MQTT WebSocket
+      - "8084:8084"     # Dashboard HTTPS, MQTT over QUIC/SSL (EMQX 5.x), MQTT WebSocket SSL
+      - "18083:18083"   # EMQX Dashboard HTTP
+    environment:
+      EMQX_NAME: my_emqx_instance
+      EMQX_HOST: localhost
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_etc:/opt/emqx/etc
+      - emqx_log:/opt/emqx/log
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-sti
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    restart: always
+
+volumes:
+  mysql_data:
+  emqx_data:
+  emqx_etc:
+  emqx_log:

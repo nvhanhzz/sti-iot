@@ -1,0 +1,1572 @@
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:29:29.115Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:29:29.116Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:29:29.370Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:29:29.373Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:29:29.374Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:29:29.374Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:29:29.414Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:29:29.426Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:29:29.428Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:29:29.430Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:40:36.313Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:40:36.314Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:40:36.425Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:40:36.429Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:40:36.430Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:40:36.431Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:40:36.456Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:40:36.457Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:40:36.460Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:40:36.468Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:41:05.439Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:41:05.441Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:41:05.533Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:41:05.537Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:41:05.539Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:41:05.539Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:41:05.565Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:41:05.567Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:41:05.570Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:41:05.579Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:41:52.730Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:41:52.733Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:41:52.814Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:41:52.817Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:41:52.818Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:41:52.818Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:41:52.841Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:41:52.843Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:41:52.845Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:41:52.853Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:42:00.018Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:42:00.021Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:42:00.097Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:42:00.100Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:42:00.101Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:42:00.102Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:42:00.126Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:42:00.128Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:42:00.131Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:42:00.140Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:42:23.267Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:42:23.269Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:42:23.350Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:42:23.353Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:42:23.354Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:42:23.355Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:42:23.383Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:42:23.391Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:42:23.394Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:42:23.396Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:42:36.258Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:42:36.260Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:42:36.333Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:42:36.336Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:42:36.337Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:42:36.337Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:42:36.362Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:42:36.364Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:42:36.366Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:42:36.383Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:43:12.342Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:43:12.344Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:43:12.429Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:43:12.432Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:43:12.433Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:43:12.433Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:43:12.458Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:43:12.460Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:43:12.463Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:43:12.472Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:43:50.148Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:43:50.150Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:43:50.232Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:43:50.237Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:43:50.239Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:43:50.240Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:43:50.282Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:43:50.285Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:43:50.287Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:43:50.298Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:43:59.295Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:43:59.297Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:43:59.386Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:43:59.389Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:43:59.390Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:43:59.391Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:43:59.418Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:43:59.427Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:43:59.430Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:43:59.432Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:44:27.722Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:44:27.723Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:44:27.807Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:44:27.810Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:44:27.811Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:44:27.811Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:44:27.838Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:44:27.847Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:44:27.849Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:44:27.851Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:44:57.955Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:44:57.957Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:44:58.037Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:44:58.041Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:44:58.042Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:44:58.043Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:44:58.071Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:44:58.079Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:44:58.081Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:44:58.083Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:45:36.791Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:45:36.792Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:45:36.866Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:45:36.874Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:45:36.876Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:45:36.877Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:45:36.911Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:45:36.913Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:45:36.917Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:45:36.926Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:45:49.191Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:45:49.193Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:45:49.303Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:45:49.309Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:45:49.311Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:45:49.311Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:45:49.339Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:45:49.348Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:45:49.422Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:45:49.426Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:46:16.214Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:46:16.216Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:46:16.287Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:46:16.289Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:46:16.290Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:46:16.291Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:46:16.315Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:46:16.324Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:46:16.326Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:46:16.327Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:46:25.354Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:46:25.355Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:46:25.422Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:46:25.425Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:46:25.426Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:46:25.427Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:46:25.452Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:46:25.454Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:46:25.457Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:46:25.465Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:46:40.104Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:46:40.106Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:46:40.305Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:46:40.310Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:46:40.312Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:46:40.313Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:46:40.343Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:46:40.351Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:46:40.353Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:46:40.355Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:46:53.915Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:46:53.917Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:46:54.089Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:46:54.092Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:46:54.093Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:46:54.094Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:46:54.120Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:46:54.129Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:46:54.131Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:46:54.132Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:47:13.322Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:47:13.324Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:47:13.396Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:47:13.399Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:47:13.400Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:47:13.400Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:47:13.427Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:47:13.435Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:47:13.437Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:47:13.439Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:47:43.499Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:47:43.501Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:47:43.611Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:47:43.614Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:47:43.615Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:47:43.616Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:47:43.642Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:47:43.644Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:47:43.647Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:47:43.655Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:48:08.081Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:48:08.083Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:48:08.180Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:48:08.183Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:48:08.184Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:48:08.184Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:48:08.209Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:48:08.211Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:48:08.214Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:48:08.222Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:48:55.262Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:48:55.264Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:48:55.363Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:48:55.367Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:48:55.369Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:48:55.369Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:48:55.396Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:48:55.404Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:48:55.405Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:48:55.406Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:49:16.405Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:49:16.407Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:49:16.485Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:49:16.487Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:49:16.488Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:49:16.489Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:49:16.512Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:49:16.514Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:49:16.517Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:49:16.524Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:49:18.311Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:49:18.313Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:49:18.375Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:49:18.377Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:49:18.378Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:49:18.379Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:49:18.403Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:49:18.412Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:49:18.413Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:49:18.415Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:51:41.959Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:51:41.961Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:51:42.190Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:51:42.196Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:51:42.199Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:51:42.200Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:51:42.240Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:51:42.250Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:51:42.252Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:51:42.253Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:51:50.465Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:51:50.467Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:51:50.546Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:51:50.549Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:51:50.550Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:51:50.550Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:51:50.576Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:51:50.577Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:51:50.580Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:51:50.589Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:52:11.377Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:52:11.379Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:52:11.460Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:52:11.463Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:52:11.464Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:52:11.464Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:52:11.489Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:52:11.491Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:52:11.494Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:52:11.505Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:52:14.409Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:52:14.411Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:52:14.492Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:52:14.495Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:52:14.496Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:52:14.497Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:52:14.520Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:52:14.522Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:52:14.525Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:52:14.533Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:52:54.692Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:52:54.694Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:52:54.820Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:52:54.825Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:52:54.826Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:52:54.827Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:52:54.855Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:52:54.868Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:52:54.870Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:52:54.873Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:56:05.773Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:56:05.775Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:56:05.849Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:56:05.852Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:56:05.853Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:56:05.854Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:56:05.877Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:56:05.878Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:56:05.881Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:56:05.889Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T01:56:07.293Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T01:56:07.295Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T01:56:07.413Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T01:56:07.417Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T01:56:07.418Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T01:56:07.418Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T01:56:07.445Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T01:56:07.453Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T01:56:07.454Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T01:56:07.456Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:02:07.897Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:02:07.899Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:02:07.968Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:02:07.970Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:02:07.972Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:02:07.973Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:02:07.997Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:02:07.998Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:02:08.001Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:02:08.009Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:06:45.376Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:06:45.377Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:06:45.456Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:06:45.459Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:06:45.460Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:06:45.461Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:06:45.487Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:06:45.495Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:06:45.496Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:06:45.498Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:07:05.003Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:07:05.006Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:07:05.104Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:07:06.084Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:07:06.085Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:07:06.176Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:07:06.179Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:07:06.180Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:07:06.180Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:07:06.206Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:07:06.214Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:07:06.216Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:07:06.217Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:07:59.922Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:07:59.924Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:08:00.018Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:08:00.022Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:08:00.024Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:08:00.024Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:08:00.054Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:08:00.073Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:08:00.076Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:08:00.077Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:08:51.099Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:08:51.100Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:08:51.173Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:08:51.175Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:08:51.176Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:08:51.176Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:08:51.203Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:08:51.211Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:08:51.213Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:08:51.214Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:10:35.858Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:10:35.859Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:10:35.947Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:10:35.950Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:10:35.951Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:10:35.952Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:10:35.980Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:10:35.982Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:10:35.984Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:10:35.993Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:10:48.203Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:10:48.204Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:10:48.317Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:10:48.322Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:10:48.324Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:10:48.325Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:10:48.353Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:10:48.354Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:10:48.357Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:10:48.366Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:11:14.981Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:11:14.983Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:11:15.280Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:11:15.283Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:11:15.285Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:11:15.286Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:11:15.314Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:11:15.324Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:11:15.341Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:11:15.343Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:13:48.224Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:13:48.226Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:13:48.300Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:13:48.302Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:13:48.303Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:13:48.304Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:13:48.327Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:13:48.329Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:13:48.331Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:13:48.339Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:13:54.143Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:13:54.145Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:13:54.231Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:13:54.243Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:13:54.244Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:13:54.245Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:13:54.270Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:13:54.272Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:13:54.274Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:13:54.282Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:27:17.776Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:27:17.778Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:27:17.861Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:27:17.866Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:27:17.868Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:27:17.869Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:27:17.898Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:27:17.906Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:27:17.908Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:27:17.909Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:29:23.204Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:29:23.206Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:29:23.280Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:29:23.283Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:29:23.284Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:29:23.285Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:29:23.310Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:29:23.312Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:29:23.315Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:29:23.324Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:29:45.485Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:29:45.487Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:29:45.575Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:29:45.579Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:29:45.581Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:29:45.582Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:29:45.615Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:29:45.628Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:29:45.631Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:29:45.632Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:30:00.417Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:30:00.419Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:30:00.498Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:30:00.501Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:30:00.502Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:30:00.502Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:30:00.527Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:30:00.536Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:30:00.537Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:30:00.538Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:30:05.122Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:30:05.123Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:30:05.208Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:30:05.211Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:30:05.212Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:30:05.213Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:30:05.246Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:30:05.250Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:30:05.255Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:30:05.267Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:30:27.509Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:30:27.511Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:30:27.592Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:30:27.594Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:30:27.595Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:30:27.596Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:30:27.620Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:30:27.628Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:30:27.630Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:30:27.631Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:30:31.340Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:30:31.342Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:30:31.412Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:30:31.415Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:30:31.416Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:30:31.416Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:30:31.440Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:30:31.441Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:30:31.445Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:30:31.452Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:31:40.010Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:31:40.012Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:31:40.087Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:31:40.090Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:31:40.091Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:31:40.091Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:31:40.117Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:31:40.126Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:31:40.128Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:31:40.129Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:31:58.985Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:31:58.986Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:31:59.068Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:31:59.071Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:31:59.072Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:31:59.073Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:31:59.098Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:31:59.100Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:31:59.103Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:31:59.110Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:33:03.457Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:33:03.459Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:33:03.546Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:33:03.549Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:33:03.550Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:33:03.550Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:33:03.574Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:33:03.576Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:33:03.578Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:33:03.590Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:33:37.269Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:33:37.271Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:33:37.360Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:33:37.364Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:33:37.365Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:33:37.366Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:33:37.393Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:33:37.403Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:33:37.405Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:33:37.406Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:33:47.332Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:33:47.334Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:33:47.498Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:33:47.504Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:33:47.506Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:33:47.507Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:33:47.535Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:33:47.544Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:33:47.545Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:33:47.547Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:34:35.441Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:34:35.443Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:34:35.517Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:34:35.522Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:34:35.524Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:34:35.525Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:34:35.554Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:34:35.562Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:34:35.564Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:34:35.565Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:35:03.019Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:35:03.020Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:35:03.107Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:35:03.111Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:35:03.112Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:35:03.113Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:35:03.139Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:35:03.147Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:35:03.153Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:35:03.155Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:35:25.589Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:35:25.591Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:35:25.676Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:35:25.679Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:35:25.680Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:35:25.681Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:35:25.710Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:35:25.720Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:35:25.722Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:35:25.724Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:35:39.777Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:35:39.779Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:35:39.864Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:35:39.866Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:35:39.868Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:35:39.869Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:35:39.895Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:35:39.904Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:35:39.906Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:35:39.908Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:36:17.128Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:36:17.129Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:36:17.199Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:36:17.201Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:36:17.202Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:36:17.203Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:36:17.227Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:36:17.235Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:36:17.236Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:36:17.238Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:36:33.222Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:36:33.224Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:36:33.299Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:36:33.302Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:36:33.304Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:36:33.304Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:36:33.339Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:36:33.341Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:36:33.344Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:36:33.354Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:36:56.665Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:36:56.666Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:36:56.733Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:36:56.735Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:36:56.736Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:36:56.737Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:36:56.762Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:36:56.771Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:36:56.772Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:36:56.774Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:37:36.711Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:37:36.713Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:37:36.801Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:37:36.805Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:37:36.807Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:37:36.808Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:37:36.843Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:37:36.851Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:37:36.853Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:37:36.854Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:44:02.160Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:44:02.162Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:44:02.237Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:44:02.240Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:44:02.241Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:44:02.243Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:44:02.270Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:44:02.278Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:44:02.280Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:44:02.281Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:44:04.468Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:44:04.470Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:44:04.548Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:44:04.551Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:44:04.552Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:44:04.552Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:44:04.576Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:44:04.578Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:44:04.582Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:44:04.590Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:45:01.942Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:45:01.944Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:45:02.027Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:45:02.030Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:45:02.031Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:45:02.031Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:45:02.065Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:45:02.073Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:45:02.075Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:45:02.076Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:45:04.357Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:45:04.359Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:45:04.435Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:45:04.438Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:45:04.439Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:45:04.440Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:45:04.468Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:45:04.476Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:45:04.478Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:45:04.479Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:47:47.636Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:47:47.638Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:47:47.715Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:47:47.717Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:47:47.718Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:47:47.719Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:47:47.744Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:47:47.746Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:47:47.748Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:47:47.757Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:48:35.354Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:48:35.360Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:48:35.443Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:48:35.446Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:48:35.447Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:48:35.447Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:48:35.472Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:48:35.474Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:48:35.477Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:48:35.490Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:48:36.686Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:48:36.688Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:48:36.780Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:48:36.783Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:48:36.784Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:48:36.784Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:48:36.809Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:48:36.813Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:48:36.815Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:48:36.824Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:48:38.902Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:48:38.904Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:48:38.975Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:48:38.977Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:48:38.978Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:48:38.980Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:48:39.006Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:48:39.008Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:48:39.011Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:48:39.021Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:49:15.074Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:49:15.075Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:49:15.145Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:49:15.148Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:49:15.149Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:49:15.149Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:49:15.194Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:49:15.198Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:49:15.206Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:49:15.217Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:52:15.895Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:52:15.897Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:52:15.973Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:52:15.977Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:52:15.979Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:52:15.979Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:52:16.011Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:52:16.020Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:52:16.022Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:52:16.024Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:52:38.424Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:52:38.426Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:52:38.517Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:52:38.522Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:52:38.524Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:52:38.525Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:52:38.557Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:52:38.559Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:52:38.561Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:52:38.570Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:54:02.714Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:54:02.715Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:54:02.776Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:54:02.778Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:54:02.779Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:54:02.780Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:54:02.805Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:54:02.806Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:54:02.809Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:54:02.817Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:54:51.419Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:54:51.421Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:54:51.490Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:54:51.496Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:54:51.497Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:54:51.498Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:54:51.533Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:54:51.544Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:54:51.546Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:54:51.553Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:57:10.521Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:57:10.523Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:57:10.591Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T02:57:11.518Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T02:57:11.520Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T02:57:11.584Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T02:57:11.586Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T02:57:11.587Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T02:57:11.588Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T02:57:11.612Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T02:57:11.620Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T02:57:11.629Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T02:57:11.631Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:23:30.026Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:23:30.028Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:23:30.110Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:23:30.114Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:23:30.116Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:23:30.116Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:23:30.158Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:23:30.160Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:23:30.162Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:23:30.174Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:23:36.968Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:23:36.970Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:23:37.052Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:23:37.056Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:23:37.057Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:23:37.058Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:23:37.085Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:23:37.093Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:23:37.095Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:23:37.096Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:23:49.019Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:23:49.021Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:23:50.064Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:23:50.066Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:23:50.130Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:23:50.133Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:23:50.134Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:23:50.135Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:23:50.160Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:23:50.168Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:23:50.170Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:23:50.171Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:24:11.680Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:24:11.682Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:24:11.763Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:24:11.767Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:24:11.768Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:24:11.768Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:24:11.795Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:24:11.804Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:24:11.806Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:24:11.807Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:26:29.282Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:26:29.283Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:26:29.377Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:26:29.379Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:26:29.380Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:26:29.381Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:26:29.420Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:26:29.430Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:26:29.433Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:26:29.435Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:28:33.873Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:28:33.874Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:28:34.290Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:28:34.294Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:28:34.297Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:28:34.302Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:28:34.331Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:28:34.340Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:28:34.342Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:28:34.343Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:29:20.741Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:29:20.743Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:29:20.822Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:29:20.827Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:29:20.828Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:29:20.829Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:29:20.871Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:29:20.874Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:29:20.878Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:29:20.904Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:29:40.559Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:29:40.561Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:29:41.544Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:29:41.545Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:29:41.634Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:29:41.636Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:29:41.637Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:29:41.638Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:29:41.664Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:29:41.673Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:29:41.686Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:29:41.688Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:33:19.498Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:33:19.500Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:33:19.593Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:33:19.596Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:33:19.596Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:33:19.597Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:33:19.624Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:33:19.632Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:33:19.634Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:33:19.636Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:33:50.893Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:33:50.895Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:33:50.974Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:33:50.978Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:33:50.979Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:33:50.979Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:33:51.008Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:33:51.012Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:33:51.015Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:33:51.023Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:34:23.466Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:34:23.468Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:34:24.529Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:34:24.530Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:34:24.605Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:34:24.608Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:34:24.609Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:34:24.610Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:34:24.634Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:34:24.636Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:34:24.638Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:34:24.646Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:34:34.644Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:34:34.646Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:34:34.734Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:34:34.736Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:34:34.737Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:34:34.738Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:34:34.767Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:34:34.769Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:34:34.774Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:34:34.791Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:35:00.434Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:35:00.437Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:35:00.527Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:35:00.530Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:35:00.532Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:35:00.533Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:35:00.560Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:35:00.568Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:35:00.570Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:35:00.572Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:35:41.451Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:35:41.452Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:35:41.562Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:35:41.567Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:35:41.569Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:35:41.569Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:35:41.600Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:35:41.626Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:35:41.629Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:35:41.632Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:36:03.837Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:36:03.838Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:36:03.908Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:36:03.910Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:36:03.911Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:36:03.912Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:36:03.954Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:36:03.956Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:36:03.959Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:36:03.969Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:36:31.929Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:36:31.931Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:36:32.306Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:36:32.313Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:36:32.315Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:36:32.317Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:36:32.348Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:36:32.357Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:36:32.369Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:36:32.370Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:38:28.020Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:38:28.021Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:38:28.089Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:38:28.091Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:38:28.092Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:38:28.093Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:38:28.123Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:38:28.125Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:38:28.129Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:38:28.137Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:39:10.473Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:39:10.475Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:39:10.556Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:39:10.558Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:39:10.559Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:39:10.560Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:39:10.584Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:39:10.586Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:39:10.589Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:39:10.610Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:39:29.815Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:39:29.816Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:39:29.916Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:39:29.919Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:39:29.920Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:39:29.920Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:39:29.945Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:39:29.947Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:39:29.950Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:39:29.958Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:43:00.642Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:43:00.644Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:43:00.737Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:43:00.740Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:43:00.741Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:43:00.742Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:43:00.775Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:43:00.783Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:43:00.793Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:43:00.795Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:47:58.388Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:47:58.389Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:47:58.477Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:47:58.481Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:47:58.482Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:47:58.483Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:47:58.521Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:47:58.530Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:47:58.532Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:47:58.533Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:48:14.945Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:48:14.946Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:48:15.018Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:48:15.021Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:48:15.021Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:48:15.022Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:48:15.055Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:48:15.056Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:48:15.059Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:48:15.069Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:49:54.576Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:49:54.578Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:49:54.673Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:49:54.676Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:49:54.677Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:49:54.677Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:49:54.706Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:49:54.716Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:49:54.718Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:49:54.720Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T04:51:02.865Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T04:51:02.866Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T04:51:02.987Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T04:51:02.993Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T04:51:02.995Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T04:51:02.996Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T04:51:03.026Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T04:51:03.034Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T04:51:03.035Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T04:51:03.037Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:20:48.707Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:20:48.708Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:20:48.799Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:20:48.804Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:20:48.807Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:20:48.809Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:20:48.835Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:20:48.837Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:20:48.840Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:20:48.860Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:20:50.700Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:20:50.702Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:20:50.819Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:20:50.824Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:20:50.825Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:20:50.827Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:20:50.853Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:20:50.861Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:20:50.863Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:20:50.864Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:21:27.588Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:21:27.590Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:21:28.701Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:21:28.703Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:21:28.792Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:21:28.798Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:21:28.799Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:21:28.800Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:21:28.834Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:21:28.843Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:21:28.844Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:21:28.846Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:22:06.254Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:22:06.255Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:22:07.277Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:22:07.280Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:22:07.362Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:22:07.367Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:22:07.369Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:22:07.370Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:22:07.395Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:22:07.403Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:22:07.405Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:22:07.406Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:22:12.464Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:22:12.466Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:22:12.565Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:22:12.569Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:22:12.570Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:22:12.571Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:22:12.600Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:22:12.608Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:22:12.610Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:22:12.611Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:26:21.390Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:26:21.392Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:26:21.510Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:26:21.513Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:26:21.514Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:26:21.515Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:26:21.553Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:26:21.555Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:26:21.561Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:26:21.572Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:29:39.360Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:29:39.362Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:29:39.478Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:29:39.481Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:29:39.482Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:29:39.483Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:29:39.511Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:29:39.519Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:29:39.521Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:29:39.522Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:30:22.476Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:30:22.478Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:30:22.585Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:30:22.589Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:30:22.590Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:30:22.590Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:30:22.622Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:30:22.632Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:30:22.633Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:30:22.635Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:31:10.514Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:31:10.515Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:31:10.639Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:31:10.641Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:31:10.642Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:31:10.642Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:31:10.668Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:31:10.676Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:31:10.678Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:31:10.679Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:31:38.020Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:31:38.022Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:31:38.098Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:31:38.102Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:31:38.104Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:31:38.104Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:31:38.132Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:31:38.141Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:31:38.143Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:31:38.144Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:33:11.100Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:33:11.102Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:33:11.177Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:33:11.180Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:33:11.181Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:33:11.181Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:33:11.209Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:33:11.216Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:33:11.218Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:33:11.219Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:33:51.061Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:33:51.063Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:33:51.164Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:33:51.167Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:33:51.168Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:33:51.168Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:33:51.206Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:33:51.208Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:33:51.211Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:33:51.219Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:35:15.077Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:35:15.079Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:35:15.271Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:35:15.277Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:35:15.278Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:35:15.279Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:35:15.307Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:35:15.316Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:35:15.318Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:35:15.319Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:36:02.063Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:36:02.065Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:36:02.233Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:36:02.238Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:36:02.239Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:36:02.240Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:36:02.271Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:36:02.280Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:36:02.282Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:36:02.283Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:37:32.513Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:37:32.515Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:37:32.610Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:37:32.615Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:37:32.617Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:37:32.617Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:37:32.649Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:37:32.657Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:37:32.659Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:37:32.660Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:37:38.368Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:37:38.370Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:37:38.456Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:37:38.460Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:37:38.460Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:37:38.461Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:37:38.494Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:37:38.496Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:37:38.499Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:37:38.508Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:38:10.570Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:38:10.572Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:38:10.681Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:38:10.684Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:38:10.686Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:38:10.686Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:38:10.713Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:38:10.721Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:38:10.723Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:38:10.724Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:38:13.986Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:38:13.988Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:38:14.077Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:38:14.080Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:38:14.081Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:38:14.081Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:38:14.110Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:38:14.118Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:38:14.119Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:38:14.121Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:38:40.154Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:38:40.156Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:38:40.358Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:38:40.363Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:38:40.365Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:38:40.365Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:38:40.392Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:38:40.401Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:38:40.402Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:38:40.404Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:38:44.985Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:38:44.987Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:38:45.096Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:38:45.101Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:38:45.102Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:38:45.104Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:38:45.133Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:38:45.141Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:38:45.143Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:38:45.148Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:39:16.300Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:39:16.301Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:39:16.407Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:39:16.411Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:39:16.413Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:39:16.414Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:39:16.441Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:39:16.449Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:39:16.451Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:39:16.452Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:39:32.902Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:39:32.904Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:39:33.015Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:39:33.018Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:39:33.020Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:39:33.021Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:39:33.050Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:39:33.059Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:39:33.061Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:39:33.063Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:39:58.314Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:39:58.316Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:39:58.411Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:39:58.414Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:39:58.415Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:39:58.416Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:39:58.440Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:39:58.443Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:39:58.446Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:39:58.455Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:40:48.170Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:40:48.172Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:40:48.293Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:40:48.296Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:40:48.297Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:40:48.298Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:40:48.325Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:40:48.334Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:40:48.335Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:40:48.337Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:41:08.208Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:41:08.210Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:41:08.294Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:41:08.296Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:41:08.297Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:41:08.298Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:41:08.327Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:41:08.330Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:41:08.334Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:41:08.345Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:41:26.571Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:41:26.573Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:41:26.892Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:41:26.899Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:41:26.901Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:41:26.902Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:41:26.940Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:41:26.949Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:41:26.978Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:41:26.980Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:42:32.701Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:42:32.703Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:42:32.870Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:42:32.873Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:42:32.875Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:42:32.875Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:42:32.904Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:42:32.912Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:42:32.922Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:42:32.924Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:42:41.074Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:42:41.075Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:42:41.203Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:42:41.207Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:42:41.208Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:42:41.209Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:42:41.236Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:42:41.245Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:42:41.246Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:42:41.248Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:42:58.425Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:42:58.429Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:42:58.605Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:42:58.609Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:42:58.610Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:42:58.610Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:42:58.642Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:42:58.650Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:42:58.652Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:42:58.653Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:43:26.541Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:43:26.542Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:43:26.708Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:43:26.712Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:43:26.714Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:43:26.714Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:43:26.744Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:43:26.753Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:43:26.754Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:43:26.755Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:05.423Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:05.424Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:44:05.508Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:44:05.511Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:44:05.512Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:44:05.513Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:44:05.539Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:44:05.547Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:44:05.578Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:44:05.580Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:13.311Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:13.313Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:44:13.442Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:44:13.445Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:44:13.446Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:44:13.447Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:44:13.471Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:44:13.473Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:44:13.476Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:44:13.483Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:27.242Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:27.243Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:44:27.402Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:44:27.406Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:44:27.408Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:44:27.408Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:44:27.438Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:44:27.446Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:44:27.448Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:44:27.449Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:32.533Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:32.535Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:33.531Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:33.532Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:44:33.664Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:44:33.667Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:44:33.669Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:44:33.669Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:44:33.708Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:44:33.716Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:44:33.718Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:44:33.720Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:44:52.121Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:44:52.123Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:44:52.229Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:44:52.234Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:44:52.236Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:44:52.237Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:44:52.264Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:44:52.272Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:44:52.274Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:44:52.275Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:48:43.009Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:48:43.011Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:48:43.110Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:48:43.114Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:48:43.115Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:48:43.116Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:48:43.158Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:48:43.162Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:48:43.166Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:48:43.175Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:49:10.650Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:49:10.651Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:49:10.781Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:49:10.785Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:49:10.786Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:49:10.787Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:49:10.814Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:49:10.823Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:49:10.827Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:49:10.829Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:49:30.342Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:49:30.343Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:49:30.534Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:49:30.537Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:49:30.538Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:49:30.539Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:49:30.577Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:49:30.588Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:49:30.594Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:49:30.596Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:49:34.877Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:49:34.879Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:49:35.053Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:49:35.058Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:49:35.059Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:49:35.060Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:49:35.101Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:49:35.104Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:49:35.109Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:49:35.118Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:49:50.464Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:49:50.469Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:49:51.557Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:49:51.559Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:49:51.803Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:49:51.809Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:49:51.811Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:49:51.811Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:49:51.854Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:49:51.866Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:49:51.872Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:49:51.875Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:51:27.632Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:51:27.633Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:51:27.769Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:51:27.772Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:51:27.773Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:51:27.774Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:51:27.800Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:51:27.808Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:51:27.810Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:51:27.811Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:51:45.395Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:51:45.398Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:51:45.507Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:51:45.510Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:51:45.511Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:51:45.512Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:51:45.541Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:51:45.551Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:51:45.553Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:51:45.555Z"}
+{"level":"info","message":"📩 Received on [device_send/C4:D8:D5:96:4F:4C]: \u0005\u0002\u0002A\u0000b","timestamp":"2025-04-08T06:51:52.826Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T06:52:48.628Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T06:52:48.630Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T06:52:48.739Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T06:52:48.741Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T06:52:48.742Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T06:52:48.743Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T06:52:48.773Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T06:52:48.782Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T06:52:48.784Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T06:52:48.786Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T07:38:33.330Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T07:38:48.774Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T07:38:48.776Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T07:38:48.869Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T07:38:48.873Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T07:38:48.885Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T07:38:48.886Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T07:38:48.931Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T07:38:48.940Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T07:38:48.946Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T07:38:48.948Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:36:01.262Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:36:01.264Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:36:01.337Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:36:01.339Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:36:01.340Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:36:01.341Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:36:01.366Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:36:01.375Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:36:01.377Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:36:01.378Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:41:06.174Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:41:06.176Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:41:06.247Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:41:06.251Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:41:06.252Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:41:06.252Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:41:06.276Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:41:06.278Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:41:06.280Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:41:06.290Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:42:11.803Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:42:11.804Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:42:11.868Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:42:11.870Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:42:11.871Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:42:11.871Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:42:11.896Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:42:11.904Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:42:11.907Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:42:11.908Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:42:22.860Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:42:22.862Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:42:22.948Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:42:22.950Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:42:22.952Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:42:22.952Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:42:22.984Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:42:22.986Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:42:22.989Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:42:22.997Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:49:35.893Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:49:35.896Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:49:35.977Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:49:35.980Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:49:35.983Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:49:35.984Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:49:36.015Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:49:36.017Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:49:36.020Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:49:36.031Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:52:08.279Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:52:08.281Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:52:08.424Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:52:08.429Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:52:08.430Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:52:08.431Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:52:08.468Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:52:08.476Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:52:08.478Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:52:08.480Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:53:16.057Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:53:16.059Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:53:16.120Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:53:16.123Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:53:16.124Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:53:16.125Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:53:16.148Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:53:16.157Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:53:16.158Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:53:16.159Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:53:45.686Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:53:45.688Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:53:45.750Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:53:45.752Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:53:45.753Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:53:45.753Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:53:45.777Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:53:45.779Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:53:45.781Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:53:45.789Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:54:43.413Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:54:43.414Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:54:43.489Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:54:43.491Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:54:43.492Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:54:43.493Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:54:43.515Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:54:43.516Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:54:43.519Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:54:43.527Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:54:56.562Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:54:56.564Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:54:56.639Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:54:56.642Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:54:56.643Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:54:56.644Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:54:56.669Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:54:56.677Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:54:56.680Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:54:56.681Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:55:09.405Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:55:09.407Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:55:09.470Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:55:09.472Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:55:09.473Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:55:09.474Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:55:09.498Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:55:09.500Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:55:09.503Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:55:09.510Z"}
+{"level":"info","message":"Queue start","timestamp":"2025-04-08T08:59:54.104Z"}
+{"level":"info","message":"Get data Iot","timestamp":"2025-04-08T08:59:54.106Z"}
+{"level":"info","message":"Queue initialized","timestamp":"2025-04-08T08:59:54.181Z"}
+{"level":"info","message":"Scheduled jobs initialized","timestamp":"2025-04-08T08:59:54.183Z"}
+{"level":"info","message":"File watcher initialized","timestamp":"2025-04-08T08:59:54.184Z"}
+{"level":"info","message":"Mqtt configs : ","timestamp":"2025-04-08T08:59:54.185Z"}
+{"level":"info","message":"Connect DB Success","timestamp":"2025-04-08T08:59:54.210Z"}
+{"level":"info","message":"Server is running on port 3335","timestamp":"2025-04-08T08:59:54.212Z"}
+{"level":"info","message":"✅ MQTT connected","timestamp":"2025-04-08T08:59:54.214Z"}
+{"0":"device_send/+","level":"info","message":"✅ Subscribed to topics:","timestamp":"2025-04-08T08:59:54.223Z"}
