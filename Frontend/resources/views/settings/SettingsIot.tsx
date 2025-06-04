@@ -29,7 +29,7 @@ const SettingsIot: React.FC = () => {
     const [formSearch] = Form.useForm();
     const defautForm: IotCMDInterface = {};
     const [formData] = useState<IotCMDInterface>(defautForm);
-    const [formDataSearch, setformDataSearch] = useState<IotCMDInterface>(defautForm);
+    const [formDataSearch] = useState<IotCMDInterface>(defautForm);
     const [modal2Open, setModal2Open] = useState(false);
     const { changePageName } = useOutletContext<ContextType>();
 

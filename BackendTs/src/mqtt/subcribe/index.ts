@@ -22,14 +22,6 @@ const subscribeToTopics = (client: MqttClient) => {
         const topicSend = topicSplit.length > 1 ? topicSplit[0] : null;
         const mac = topicSplit.length > 1 ? topicSplit[1] : null;
         if (mac) {
-            const objMsg = {
-                mac: (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '',
-                topic: topic,
-                message: bufferToHexFormat(message),
-                status: 'in',
-                type: 1,
-                time: moment().format('YYYY-MM-DD HH:mm:ss.SSS')
-            };
             const Iot = MasterIotGlobal.findByMac(mac);
             if (Iot) {
                 const IotStatus = IotStatusGlobal.findById(Iot.id);
