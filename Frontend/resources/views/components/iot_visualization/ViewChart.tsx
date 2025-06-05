@@ -44,6 +44,83 @@ const STATIC_COLOR_MAP: string[] = [
     "#800080", "#00CED1", "#DC143C", "#008080", "#8B4513"
 ];
 
+// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian
+const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
+    if (data.length < 2) return data;
+
+    const result: DataPoint[] = [];
+    const sortedData = [...data].sort((a, b) =>
+        moment(a.time, "HH:mm:ss.SSS").valueOf() - moment(b.time, "HH:mm:ss.SSS").valueOf()
+    );
+
+    for (let i = 0; i < sortedData.length; i++) {
+        result.push(sortedData[i]);
+
+        // Nếu không phải điểm cuối cùng, kiểm tra khoảng cách thời gian
+        if (i < sortedData.length - 1) {
+            const currentTime = moment(sortedData[i].time, "HH:mm:ss.SSS");
+            const nextTime = moment(sortedData[i + 1].time, "HH:mm:ss.SSS");
+            const timeDiff = nextTime.diff(currentTime);
+
+            // Nếu khoảng cách > 5 giây, tạo điểm trung gian
+            if (timeDiff > 5000) {
+                const midTime = moment(currentTime.valueOf() + timeDiff / 2);
+                const midPoint: DataPoint = {
+                    time: midTime.format("HH:mm:ss.SSS")
+                };
+
+                // Nội suy giá trị cho mỗi key
+                keys.forEach(key => {
+                    const currentValue = sortedData[i][key] as number;
+                    const nextValue = sortedData[i + 1][key] as number;
+
+                    if (typeof currentValue === 'number' && typeof nextValue === 'number') {
+                        midPoint[key] = (currentValue + nextValue) / 2;
+                    } else if (typeof currentValue === 'number') {
+                        midPoint[key] = currentValue;
+                    } else if (typeof nextValue === 'number') {
+                        midPoint[key] = nextValue;
+                    } else {
+                        midPoint[key] = 0;
+                    }
+                });
+
+                result.push(midPoint);
+            }
+        }
+    }
+
+    return result;
+};
+
+// Hàm làm mượt dữ liệu bằng moving average
+const smoothData = (data: DataPoint[], keys: string[], windowSize: number = 3): DataPoint[] => {
+    if (data.length < windowSize) return data;
+
+    return data.map((point, index) => {
+        const smoothedPoint: DataPoint = { ...point };
+
+        keys.forEach(key => {
+            const values: number[] = [];
+            const start = Math.max(0, index - Math.floor(windowSize / 2));
+            const end = Math.min(data.length - 1, index + Math.floor(windowSize / 2));
+
+            for (let i = start; i <= end; i++) {
+                const value = data[i][key];
+                if (typeof value === 'number' && !isNaN(value)) {
+                    values.push(value);
+                }
+            }
+
+            if (values.length > 0) {
+                smoothedPoint[key] = values.reduce((sum, val) => sum + val, 0) / values.length;
+            }
+        });
+
+        return smoothedPoint;
+    });
+};
+
 const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [chartData, setChartData] = useState<DataPoint[]>([]);
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
@@ -98,18 +175,24 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         newValidRecords.forEach((record: any) => {
             let dataKey: string;
             if (record.CMD === 'CMD_ADC_CHANNEL1') {
-                dataKey = `ADC1_Value (V})`;
+                dataKey = `ADC1_Value (V)`;
             } else if (record.CMD === 'CMD_ADC_CHANNEL2') {
-                dataKey = `ADC2_Value (mA})`;
+                dataKey = `ADC2_Value (mA)`;
             } else {
                 return; // Skip nếu không phải ADC channel
             }
 
             currentBatchKeys.add(dataKey);
 
+            // Xử lý giá trị null/undefined và đảm bảo giá trị hợp lệ
+            let value = parseFloat(record.data);
+            if (isNaN(value)) {
+                value = 0; // Thay vị null/undefined bằng 0
+            }
+
             const newPoint: DataPoint = {
                 time: record.time,
-                [dataKey]: parseFloat(record.data) || 0
+                [dataKey]: value
             };
             newPoints.push(newPoint);
         });
@@ -131,12 +214,28 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             const mergedDataMap = new Map<string, DataPoint>();
             combinedData.forEach(point => {
                 if (mergedDataMap.has(point.time)) {
-                    mergedDataMap.set(point.time, { ...mergedDataMap.get(point.time), ...point });
+                    const existingPoint = mergedDataMap.get(point.time)!;
+                    // Kết hợp dữ liệu, ưu tiên giá trị mới nếu có
+                    Object.keys(point).forEach(key => {
+                        if (key !== 'time' && point[key] !== null && point[key] !== undefined) {
+                            existingPoint[key] = point[key];
+                        }
+                    });
                 } else {
                     mergedDataMap.set(point.time, { ...point });
                 }
             });
+
             let finalChartData = Array.from(mergedDataMap.values());
+
+            // Áp dụng nội suy và làm mượt dữ liệu
+            const allKeys = Array.from(new Set([...chartDataKeys, ...Array.from(currentBatchKeys)]));
+
+            // Nội suy để tạo điểm trung gian
+            finalChartData = interpolateData(finalChartData, allKeys);
+
+            // Làm mượt dữ liệu
+            finalChartData = smoothData(finalChartData, allKeys, 3);
 
             // Giữ 300 phần tử mới nhất
             const MAX_DATA_POINTS = 300;
@@ -166,7 +265,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             processedRecordsRef.current = new Set(toKeep);
         }
 
-    }, [dataIotsDetail.data]);
+    }, [dataIotsDetail.data, chartDataKeys]);
 
     // --- Các hàm định dạng ---
     const tooltipFormatter = useCallback((value: any, name: string) => {
@@ -189,7 +288,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         <>
             {/* Debug info */}
             <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
-                Data Points: {chartData.length} | Keys: {chartDataKeys.join(', ')} | Last Update: {lastUpdateTime} | Processed Records: {processedRecordsRef.current.size}
+                Data Points: {chartData.length} | Keys: {chartDataKeys.join(', ')} | Last Update: {lastUpdateTime} | Processed Records: {processedRecordsRef.current.size} | Status: Smoothed
             </div>
 
             <ResponsiveContainer width="100%" height={300}>
@@ -221,7 +320,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                         labelFormatter={tooltipLabelFormatter}
                     />
                     <Legend
-                        wrapperStyle={{ fontSize: 11, textAlign: 'center', paddingTop: '10px' }}
+                        wrapperStyle={{ fontSize: 13, textAlign: 'center', paddingTop: '10px' }}
                     />
                     {chartDataKeys.map((dataKey, index) => (
                         <Line
@@ -230,9 +329,9 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                             dataKey={dataKey}
                             stroke={STATIC_COLOR_MAP[index % STATIC_COLOR_MAP.length]}
                             strokeWidth={2}
-                            dot={{ r: 2, strokeWidth: 0 }}
+                            dot={false} // Tắt dots để đường line mượt hơn
                             activeDot={{ r: 4, strokeWidth: 0 }}
-                            connectNulls={false}
+                            connectNulls={true} // Kết nối qua null values
                         />
                     ))}
                 </LineChart>

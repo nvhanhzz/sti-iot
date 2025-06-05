@@ -5,7 +5,7 @@ import {
     SendDistinctIots,
     LockIots,
     deviceSendData,
-    serverPublish
+    serverPublish, controlSerialCommand
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
@@ -16,6 +16,7 @@ router.get("/get-distinct-iots", SendDistinctIots);
 router.post("/lock-iots", LockIots);
 router.post("/device-send-data", deviceSendData);
 router.post("/server-publish", serverPublish);
+router.post("/serial-command", controlSerialCommand);
 
 router.post("/active-data-iots", UpdateDataIots);
 router.get("/payload-type/get-data-payload-type", sendDataPayloadType);

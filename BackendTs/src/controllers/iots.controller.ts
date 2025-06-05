@@ -15,6 +15,13 @@ import {ConvertDatatoHex} from "../global/convertData.global";
 
 const CMD_RESPOND_TIMESTAMP = 0x14; // Trong C++ code của bạn, CMD_RESPOND_TIMESTAMP là 0x14 (decimal 20)
 const PAYLOAD_I32 = 0x06;           // int32 (Timestamp là số nguyên 32-bit)
+const PAYLOAD_STRING = 0x0A;
+
+const CMD_SERIAL = {
+    "serial_rs485": 0x11,
+    "serial_rs232": 0x12,
+    "serial_tcp": 0x13
+}
 
 export const sendDataIots = async (req: Request, res: Response) => {
     try {
@@ -107,7 +114,7 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
         // 3. Xây dựng các phần của gói tin hex
         const cmdHex = CMD_RESPOND_TIMESTAMP.toString(16).toUpperCase().padStart(2, '0'); // "14"
         const lengthHex = '04'; // Timestamp là 4 byte (cho int32/uint32)
-        const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0'); // "07"
+        const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0'); // "06"
 
         // Ghép nối các phần payload: length | type | data
         const payloadPart = `${lengthHex}${typeHex}${timestampDataHex}`; // Ví dụ: "0407683FFA1C"
@@ -236,6 +243,68 @@ export const serverPublish = async (req: Request, res: Response) => {
         res.status(200).send("OK");
     } catch (error) {
         console.error("Error in Lock IotCmd:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+export const controlSerialCommand = async (req: Request, res: Response) => {
+    try {
+        const mac = req.body.mac;
+        const serialType = req.body.type; // "serial_rs485", "serial_rs232", "serial_tcp"
+        const command = req.body.command; // String command từ user
+
+        // 1. Lấy CMD từ mapping
+        // @ts-ignore
+        const cmd = CMD_SERIAL[serialType];
+        if (!cmd) {
+            return res.status(400).send({ message: "Invalid serial type" });
+        }
+
+        // 2. Chuyển command string thành hex
+        const commandBuffer = Buffer.from(command, 'utf8');
+        const dataHex = commandBuffer.toString('hex').toUpperCase();
+
+        // 3. Tính toán length của hex data (số bytes)
+        const dataLength = commandBuffer.length;
+
+        // 4. Xây dựng các phần của gói tin hex
+        const cmdHex = cmd.toString(16).toUpperCase().padStart(2, '0'); // CMD hex
+        const lengthHex = dataLength.toString(16).toUpperCase().padStart(2, '0'); // Length hex (1 byte)
+        const typeHex = PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0');
+
+        // 5. Ghép nối payload: length | type | data
+        const payloadPart = `${lengthHex}${typeHex}${dataHex}`;
+
+        // 6. Tính toán CRC cho phần CMD + Payload
+        const dataForCrcCalculation = Buffer.from(`${cmdHex}${payloadPart}`, 'hex');
+        const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
+        const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
+
+        // 7. Ghép nối để tạo gói tin hex hoàn chỉnh
+        const hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
+
+        console.log(`Serial Command - Type: ${serialType}, CMD: ${cmdHex}, Data: ${dataHex}, Complete: ${hexToSend}`);
+
+        // 8. Gửi gói tin hex qua MQTT
+        publishMessage(client, `device/response/${mac}`, hexToSend);
+
+        res.status(200).send({
+            message: "Serial command sent successfully",
+            data: {
+                serialType: serialType,
+                originalCommand: command,
+                hexCommand: hexToSend,
+                breakdown: {
+                    cmd: cmdHex,
+                    length: lengthHex,
+                    type: typeHex,
+                    data: dataHex,
+                    crc: crcHex
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Error in controlSerialCommand:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };

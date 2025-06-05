@@ -11,11 +11,11 @@ interface DataIotsProps {
 const CardList: React.FC<DataIotsProps> = ({ dataIots, onUpdateDeviceType }) => {
     const [cardCount, setCardCount] = useState<number>(5);
     const [colsPerRow, setColsPerRow] = useState<number>(1);
-    const [titleFontSize, setTitleFontSize] = useState<number>(16);
+    const [titleFontSize, setTitleFontSize] = useState<number>(17);
     const [contentFontSize, setContentFontSize] = useState<number>(14);
     const [maxHeightSettings, setMaxHeightSettings] = useState<number>(500);
     const [minHeightSettings, setMinHeightSettings] = useState<number>(260);
-    const [isSettingMode, setIsSettingMode] = useState<boolean>(true);
+    const [isSettingMode] = useState<boolean>(true);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
@@ -50,13 +50,13 @@ const CardList: React.FC<DataIotsProps> = ({ dataIots, onUpdateDeviceType }) => 
                     >
                         Mở Cài Đặt
                     </Button>
-                    <Button
-                        type="default"
-                        onClick={() => setIsSettingMode(!isSettingMode)}
-                        style={{ marginBottom: 20, marginLeft: 10 }}
-                    >
-                        {isSettingMode ? "Chuyển sang Hiển Thị" : "Chuyển sang Cài Đặt"}
-                    </Button>
+                    {/*<Button*/}
+                    {/*    type="default"*/}
+                    {/*    onClick={() => setIsSettingMode(!isSettingMode)}*/}
+                    {/*    style={{ marginBottom: 20, marginLeft: 10 }}*/}
+                    {/*>*/}
+                    {/*    {isSettingMode ? "Chuyển sang Hiển Thị" : "Chuyển sang Cài Đặt"}*/}
+                    {/*</Button>*/}
                     <Button
                         type="default"
                         onClick={toggleFullscreen}

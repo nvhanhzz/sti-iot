@@ -164,9 +164,6 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
         let currentBufferIndex = 1; // Bắt đầu từ byte thứ hai (sau cmdCode)
         let fieldDefCounter = 0; // Để ánh xạ với cmdFieldDefs
 
-        if (buffer[0] === 14 || 15) {
-            debugger;
-        }
         while (currentBufferIndex < buffer.length - 1) { // Lặp cho đến byte trước CRC cuối cùng
             // Kiểm tra xem còn đủ byte để đọc dataLength (1 byte) và sensorType (1 byte) không
             if ((buffer.length - 1) - currentBufferIndex < 2) {
