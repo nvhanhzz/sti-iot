@@ -6,8 +6,8 @@ const { Title } = Typography;
 
 interface ConfigIotsProps {
     dataIotsDetail: any;
-    dataOnEvent: any;
-    settings: boolean;
+    dataOnEvent: any; // This prop is not used in the current component, consider removing if truly not needed.
+    settings: boolean; // This prop is not used in the current component, consider removing if truly not needed.
 }
 
 // Định nghĩa kiểu cho titleButton
@@ -35,58 +35,82 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     useEffect(() => {
         try {
-            // Bắt đầu với các button mặc định
             let processedData = [...defaultButtons];
 
-            // Nếu có data từ device, cập nhật trạng thái
             if (dataIotsDetail.data && Array.isArray(dataIotsDetail.data)) {
                 const allowedCMDs = ["CMD_INPUT_CHANNEL1", "CMD_INPUT_CHANNEL2", "CMD_INPUT_CHANNEL3", "CMD_INPUT_CHANNEL4", "CMD_PUSH_TCP", "CMD_PUSH_UDP"];
 
                 processedData = processedData.map(defaultItem => {
-                    // Tìm data tương ứng từ device
                     const deviceData = dataIotsDetail.data.find((item: any) =>
                         allowedCMDs.includes(item.CMD) && item.CMD === defaultItem.CMD
                     );
 
-                    // Nếu tìm thấy data từ device, cập nhật trạng thái
                     if (deviceData) {
                         return {
                             ...defaultItem,
-                            data: Boolean(deviceData.data) // Đảm bảo là boolean
+                            data: Boolean(deviceData.data)
                         };
                     }
-
-                    // Nếu không tìm thấy, giữ nguyên trạng thái mặc định (false)
                     return defaultItem;
                 });
             }
-
             setData(processedData);
-            console.log("Processed Data:", processedData);
         } catch (error) {
-            console.error("Lỗi khi xử lý data:", error);
-            // Nếu có lỗi, sử dụng data mặc định
+            console.error("Error processing data:", error);
             setData(defaultButtons);
         }
     }, [dataIotsDetail]);
 
     return (
-        <Flex wrap="wrap" gap="large" justify="center">
-            {data.map((item: any, index: number) => (
-                <Card key={index} style={{ width: "400px", textAlign: "center" }}>
-                    <Title level={5}>{titleButton[item.dataName] || item.dataName}</Title>
-                    <Divider />
-                    <Button
-                        type="primary"
-                        danger={!item.data}
-                        style={{
-                            backgroundColor: item.data ? "#52c41a" : undefined,
-                            borderColor: item.data ? "#52c41a" : undefined,
-                            color: "white",
-                        }}
-                    >
-                        {item.data ? <CheckOutlined /> : <CloseOutlined />}
-                    </Button>
+        <Flex
+            wrap="wrap"
+            gap="24px" // Increased gap for better spacing between cards
+            justify="center"
+            align="flex-start" // Align items to the start of the cross axis
+            style={{ padding: '20px', height: '350px' }} // Add some padding around the entire flex container
+        >
+            {data.map((item: any) => (
+                <Card
+                    key={item.CMD} // Use a unique key like CMD for better performance and stability
+                    hoverable // Add a hover effect to cards
+                    style={{
+                        width: "180px", // Increased card width for more content space
+                        minHeight: "120px", // Ensure consistent card height
+                        textAlign: "center",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between", // Distribute space vertically
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.1)", // Subtle shadow for depth
+                        borderRadius: "8px", // Slightly rounded corners
+                    }}
+                    bodyStyle={{ padding: '16px' }} // Adjust padding inside the card body
+                >
+                    <div>
+                        <Title level={5} style={{ marginBottom: '8px', fontSize: '16px' }}>
+                            {titleButton[item.dataName] || item.dataName}
+                        </Title>
+                        <Divider style={{ margin: '8px 0' }} /> {/* Compact divider */}
+                    </div>
+                    <Flex justify="center" align="center" style={{ flexGrow: 1 }}> {/* Center the button and let it grow */}
+                        <Button
+                            type="primary"
+                            danger={!item.data}
+                            size="large" // Make the button larger
+                            icon={item.data ? <CheckOutlined /> : <CloseOutlined />}
+                            style={{
+                                backgroundColor: item.data ? "#52c41a" : "#ff4d4f", // Explicit danger color
+                                borderColor: item.data ? "#52c41a" : "#ff4d4f",
+                                color: "white",
+                                width: "60px", // Fixed width for a consistent button size
+                                height: "60px", // Fixed height for a consistent button size
+                                borderRadius: "50%", // Make the button circular
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "all 0.3s ease", // Smooth transition for hover/active states
+                            }}
+                        />
+                    </Flex>
                 </Card>
             ))}
         </Flex>

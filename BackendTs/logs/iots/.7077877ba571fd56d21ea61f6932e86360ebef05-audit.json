@@ -34,6 +34,11 @@
             "date": 1749085010074,
             "name": "logs/iots/iots-2025-06-05.log",
             "hash": "33a41939d84c38bdb9ca0f0c529aa4fc35b07506944f9e711ea9fbb3aa335762"
+        },
+        {
+            "date": 1749171055780,
+            "name": "logs/iots/iots-2025-06-06.log",
+            "hash": "db5577abedd9f6c7cdaa2357bf44fbb7f350c3d517178f537a1a346d3c3cfcb9"
         }
     ],
     "hashType": "sha256"

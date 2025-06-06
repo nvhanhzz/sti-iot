@@ -1,16 +1,13 @@
 import React, { useState, useCallback, memo } from "react";
-import { Card, Col, Button, Modal, Space, Form, Radio, message, Input, Badge, Tooltip, Tabs, Descriptions } from "antd";
+import { Card, Col, Button, Modal, Space, message, Input, Badge, Tooltip, Tabs, Descriptions, Row } from "antd";
 import { LuFileOutput, LuFileInput } from "react-icons/lu";
 import { MdInfo } from "react-icons/md";
 import { BiTerminal } from "react-icons/bi";
 import { HiOutlineStatusOnline, HiOutlineStatusOffline } from "react-icons/hi";
-import { AiOutlineControl, AiOutlineEye } from "react-icons/ai";
-import { FiSettings } from "react-icons/fi";
+import { AiOutlineControl } from "react-icons/ai";
 import ViewButton from "./iot_visualization/ViewButton";
 import ViewChart from "./iot_visualization/ViewChart";
 import ViewTable from "./iot_visualization/ViewTable";
-import IotService from "../../../services/IotService.ts";
-import ViewCount from "./iot_visualization/ViewCount.tsx";
 
 const { TextArea } = Input;
 const { TabPane } = Tabs;
@@ -32,7 +29,6 @@ interface IotCardProps {
     maxHeightSettings: number;
     minHeightSettings: number;
     isSettingMode: boolean;
-    onUpdateDeviceType: (deviceId: number, newType: number) => void;
 }
 
 const IotCard: React.FC<IotCardProps> = memo(({
@@ -40,19 +36,15 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                                   colsPerRow,
                                                   titleFontSize,
                                                   contentFontSize,
-                                                  maxHeightSettings,
-                                                  minHeightSettings,
-                                                  onUpdateDeviceType,
                                               }) => {
     const [loading, setLoading] = useState<{[key: string]: boolean}>({});
-    const [displayModalVisible, setDisplayModalVisible] = useState<boolean>(false);
     const [controlModalVisible, setControlModalVisible] = useState<boolean>(false);
     const [serialModalVisible, setSerialModalVisible] = useState<boolean>(false);
     const [infoModalVisible, setInfoModalVisible] = useState<boolean>(false);
     const [currentSerialType, setCurrentSerialType] = useState<string>('');
     const [serialCommand, setSerialCommand] = useState<string>('');
+    const [ipSerialTCP, setIpSerialTcp] = useState<string>('');
     const [serialLoading, setSerialLoading] = useState<boolean>(false);
-    const [displayForm] = Form.useForm();
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
         try {
@@ -70,26 +62,47 @@ const IotCard: React.FC<IotCardProps> = memo(({
         }
     }, []);
 
-    const sendSerialCommand = useCallback(async (mac: string, serialType: string, command: string): Promise<any> => {
+    const sendSerialCommand = useCallback(async (mac: string, serialType: string, command: string, ipTcpSerial?: string): Promise<any> => {
         try {
             setSerialLoading(true);
+
+            // Construct the request body dynamically
+            const requestBody: { mac: string; type: string; command: string; ipTcpSerial?: string } = {
+                mac: mac,
+                type: serialType.toLowerCase(),
+                command: command,
+            };
+
+            // Only add ipTcpSerial to the body if it's provided
+            if (ipTcpSerial) {
+                requestBody.ipTcpSerial = ipTcpSerial;
+            }
+
             const response = await fetch('http://localhost:3335/api/iots/serial-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    mac: mac,
-                    type: serialType.toLowerCase(),
-                    command: command
-                })
+                body: JSON.stringify(requestBody), // Use the dynamically created requestBody
             });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (!response.ok) {
+                // Attempt to parse error message from response if available
+                const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || response.statusText}`);
+            }
+
             message.success(`Gửi lệnh ${serialType} thành công`);
             setSerialCommand('');
             setSerialModalVisible(false);
+            return await response.json(); // Return the response data if successful
         } catch (error) {
             console.error('Error sending serial command:', error);
-            message.error(`Lỗi khi gửi lệnh ${serialType}`);
-            throw error;
+            // Display a more specific error message if possible
+            if (error instanceof Error) {
+                message.error(`Lỗi khi gửi lệnh ${serialType}: ${error.message}`);
+            } else {
+                message.error(`Lỗi khi gửi lệnh ${serialType}`);
+            }
+            throw error; // Re-throw the error for further handling up the call stack
         } finally {
             setSerialLoading(false);
         }
@@ -97,49 +110,23 @@ const IotCard: React.FC<IotCardProps> = memo(({
 
     const openControlModal = useCallback(() => setControlModalVisible(true), []);
     const closeControlModal = useCallback(() => setControlModalVisible(false), []);
-    const openInfoModal = useCallback(() => setInfoModalVisible(true), []);
     const closeInfoModal = useCallback(() => setInfoModalVisible(false), []);
 
     const openSerialModal = useCallback((serialType: string) => {
         setCurrentSerialType(serialType);
         setSerialCommand('');
         setSerialModalVisible(true);
+        // Reset IP khi mở modal
+        setIpSerialTcp('');
     }, []);
 
     const closeSerialModal = useCallback(() => {
         setSerialModalVisible(false);
         setCurrentSerialType('');
         setSerialCommand('');
+        // Reset IP khi đóng modal
+        setIpSerialTcp('');
     }, []);
-
-    const openDisplayModal = useCallback(() => {
-        displayForm.setFieldsValue({ type: item.type || 1 });
-        setDisplayModalVisible(true);
-    }, [item.type, displayForm]);
-
-    const closeDisplayModal = useCallback(() => {
-        setDisplayModalVisible(false);
-        displayForm.resetFields();
-    }, [displayForm]);
-
-    const handleDisplayTypeUpdate = useCallback(async () => {
-        try {
-            const values = await displayForm.validateFields();
-            const newType = values.type;
-
-            const updateData = { id: item.id, type: newType };
-            const response: any = await IotService.PostDataUpdateIots(updateData);
-            if (response.status === 200) {
-                onUpdateDeviceType(item.id, newType);
-            }
-
-            message.success("Cập nhật kiểu hiển thị thành công");
-            closeDisplayModal();
-        } catch (error) {
-            console.error('Error updating display type:', error);
-            message.error("Lỗi khi cập nhật kiểu hiển thị");
-        }
-    }, [displayForm, item.id, onUpdateDeviceType, closeDisplayModal]);
 
     const handleCommand = useCallback(async (deviceMac: string, type: keyof typeof HEX_COMMANDS, isOn: boolean) => {
         const loadingKey = `${deviceMac}-${type}-${isOn ? 'on' : 'off'}`;
@@ -162,14 +149,31 @@ const IotCard: React.FC<IotCardProps> = memo(({
             message.warning('Vui lòng nhập lệnh!');
             return;
         }
-        await sendSerialCommand(item.mac, currentSerialType, serialCommand);
-    }, [serialCommand, currentSerialType, item.mac, sendSerialCommand]);
+
+        if (currentSerialType.toUpperCase() === "SERIAL_TCP") {
+            await sendSerialCommand(item.mac, currentSerialType, serialCommand, ipSerialTCP);
+        } else {
+            await sendSerialCommand(item.mac, currentSerialType, serialCommand);
+        }
+    }, [serialCommand, currentSerialType, item.mac, sendSerialCommand, ipSerialTCP]);
 
     const renderControlRow = useCallback((label: string, type: keyof typeof HEX_COMMANDS, deviceMac: string) => {
         const onLoadingKey = `${deviceMac}-${type}-on`;
         const offLoadingKey = `${deviceMac}-${type}-off`;
         const isOnLoading = loading[onLoadingKey] || false;
         const isOffLoading = loading[offLoadingKey] || false;
+
+        const blueOnColor = {
+            background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+            borderColor: '#60a5fa',
+            boxShadow: '0 2px 8px rgba(96, 165, 250, 0.3)'
+        };
+
+        const redOffColor = {
+            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            borderColor: '#ef4444',
+            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+        };
 
         return (
             <div key={type}
@@ -181,7 +185,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                      padding: '16px 20px',
                      marginBottom: '12px',
                      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                     borderRadius: '12px',
+                     borderRadius: '8px',
                      border: '1px solid #e2e8f0',
                      transition: 'all 0.3s ease',
                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
@@ -211,12 +215,10 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         disabled={isOnLoading || isOffLoading}
                         onClick={() => handleCommand(deviceMac, type, true)}
                         style={{
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            borderColor: '#10b981',
+                            ...blueOnColor,
                             fontWeight: '600',
-                            borderRadius: '8px',
+                            borderRadius: '6px', // Đã chỉnh
                             minWidth: '70px',
-                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
                         }}
                     >
                         BẬT
@@ -229,12 +231,10 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         disabled={isOnLoading || isOffLoading}
                         onClick={() => handleCommand(deviceMac, type, false)}
                         style={{
+                            ...redOffColor,
                             fontWeight: '600',
-                            borderRadius: '8px',
+                            borderRadius: '6px', // Đã chỉnh
                             minWidth: '70px',
-                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            borderColor: '#ef4444',
-                            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
                         }}
                     >
                         TẮT
@@ -254,7 +254,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                      padding: '16px 20px',
                      marginBottom: '12px',
                      background: 'linear-gradient(135deg, #fefcfb 0%, #fef7f0 100%)',
-                     borderRadius: '12px',
+                     borderRadius: '8px',
                      border: '1px solid #fed7aa',
                      transition: 'all 0.3s ease',
                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
@@ -288,7 +288,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         borderColor: '#f59e0b',
                         color: 'white',
                         fontWeight: '600',
-                        borderRadius: '8px',
+                        borderRadius: '6px', // Đã chỉnh
                         boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
                     }}
                     icon={<BiTerminal />}
@@ -298,16 +298,6 @@ const IotCard: React.FC<IotCardProps> = memo(({
             </div>
         );
     }, [openSerialModal]);
-
-    const getDisplayTypeText = useCallback((type: number) => {
-        switch (type) {
-            case 1: return 'Nút bấm';
-            case 2: return 'Bảng dữ liệu';
-            case 3: return 'Biểu đồ';
-            case 4: return 'Đếm số';
-            default: return 'Không xác định';
-        }
-    }, []);
 
     const getSerialTypeColor = useCallback((serialType: string) => {
         switch (serialType) {
@@ -319,7 +309,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
     }, []);
 
     return (
-        <Col span={Math.max(1, Math.floor(24 / colsPerRow))}>
+        <Col span={Math.max(1, Math.floor(24 / colsPerRow))} style={{minHeight: "1000px"}}>
             <Card
                 bordered={false}
                 style={{
@@ -342,7 +332,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            marginBottom: '16px'
+                            marginBottom: '4px' // Giảm margin bottom để MAC lên gần title
                         }}>
                             <Badge
                                 status={item.connected ? 'success' : 'error'}
@@ -358,6 +348,15 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             </span>
                         </div>
 
+                        {/* Địa chỉ MAC được đưa lên đây */}
+                        <div style={{
+                            fontSize: '13px',
+                            color: '#64748b',
+                            marginBottom: '16px' // Giữ khoảng cách với các nút trạng thái
+                        }}>
+                            <strong>MAC:</strong> {item.mac}
+                        </div>
+
                         <div style={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -370,7 +369,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     display: 'flex',
                                     alignItems: 'center',
                                     padding: '6px 12px',
-                                    borderRadius: '20px',
+                                    borderRadius: '10px',
                                     background: item.connected
                                         ? 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)'
                                         : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
@@ -393,7 +392,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     display: 'flex',
                                     alignItems: 'center',
                                     padding: '6px 12px',
-                                    borderRadius: '20px',
+                                    borderRadius: '10px',
                                     background: item.input
                                         ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
                                         : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
@@ -416,7 +415,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     display: 'flex',
                                     alignItems: 'center',
                                     padding: '6px 12px',
-                                    borderRadius: '20px',
+                                    borderRadius: '10px',
                                     background: item.output
                                         ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
                                         : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
@@ -433,56 +432,6 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     </span>
                                 </div>
                             </Tooltip>
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: '12px',
-                            flexWrap: 'wrap'
-                        }}>
-                            <Tooltip title="Xem thông tin thiết bị">
-                                <Button
-                                    type="default"
-                                    size="large"
-                                    icon={<MdInfo />}
-                                    onClick={openInfoModal}
-                                    style={{
-                                        borderRadius: '12px',
-                                        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                                        borderColor: '#3b82f6',
-                                        color: 'white',
-                                        fontWeight: '600',
-                                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-                                        minWidth: '48px',
-                                        height: '48px'
-                                    }}
-                                />
-                            </Tooltip>
-
-                            <Tooltip title="Cài đặt hiển thị">
-                                <Button
-                                    type="default"
-                                    size="large"
-                                    icon={<FiSettings />}
-                                    onClick={openDisplayModal}
-                                    disabled={!item.connected}
-                                    style={{
-                                        borderRadius: '12px',
-                                        background: item.connected
-                                            ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-                                            : '#e5e7eb',
-                                        borderColor: item.connected ? '#8b5cf6' : '#d1d5db',
-                                        color: item.connected ? 'white' : '#9ca3af',
-                                        fontWeight: '600',
-                                        boxShadow: item.connected
-                                            ? '0 4px 12px rgba(139, 92, 246, 0.3)'
-                                            : 'none',
-                                        minWidth: '48px',
-                                        height: '48px'
-                                    }}
-                                />
-                            </Tooltip>
 
                             <Tooltip title="Điều khiển thiết bị">
                                 <Button
@@ -490,17 +439,17 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     size="large"
                                     icon={<AiOutlineControl />}
                                     onClick={openControlModal}
-                                    disabled={!item.connected}
+                                    // disabled={!item.connected}
                                     style={{
-                                        borderRadius: '12px',
+                                        borderRadius: '10px', // Đã chỉnh
                                         background: item.connected
-                                            ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                                            ? 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
                                             : '#e5e7eb',
-                                        borderColor: item.connected ? '#f59e0b' : '#d1d5db',
+                                        borderColor: item.connected ? '#60a5fa' : '#d1d5db',
                                         color: item.connected ? 'white' : '#9ca3af',
                                         fontWeight: '600',
                                         boxShadow: item.connected
-                                            ? '0 4px 12px rgba(245, 158, 11, 0.3)'
+                                            ? '0 4px 12px rgba(96, 165, 250, 0.3)'
                                             : 'none',
                                         minWidth: '48px',
                                         height: '48px'
@@ -508,57 +457,100 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                 />
                             </Tooltip>
                         </div>
-
-                        <div style={{
-                            marginTop: '16px',
-                            padding: '12px',
-                            background: 'rgba(148, 163, 184, 0.1)',
-                            borderRadius: '8px',
-                            fontSize: '12px',
-                            color: '#64748b'
-                        }}>
-                            <div><strong>MAC:</strong> {item.mac}</div>
-                            <div><strong>Hiển thị:</strong> {getDisplayTypeText(item.type || 1)}</div>
-                        </div>
                     </div>
                 }
             >
                 <div style={{
                     padding: "20px",
                     textAlign: "left",
-                    height: `${Math.max(minHeightSettings, Math.min(maxHeightSettings, 400))}px`,
-                    overflowX: "auto",
+                    minHeight: `${800}px`,
+                    overflowY: "auto",
                     fontSize: `${contentFontSize}px`,
                     background: 'rgba(255, 255, 255, 0.6)',
                     borderRadius: '12px',
                     border: '1px solid rgba(226, 232, 240, 0.5)'
                 }}>
-                    {item.type ? (
-                        item.type === 1 ? (
-                            <ViewButton dataIotsDetail={item} dataOnEvent={{}} settings={false} />
-                        ) : item.type === 2 ? (
-                            <ViewTable dataIotsDetail={item} dataOnEvent={{}} settings={false} />
-                        ) : item.type === 3 ? (
-                            <ViewChart dataIotsDetail={item} settings={false} />
-                        ) : item.type === 4 ? (
-                            <ViewCount dataIotsDetail={item} dataOnEvent={{}} settings={false} />
-                        ) : (
-                            <></>
-                        )
-                    ) : (
-                        <div style={{
-                            textAlign: 'center',
-                            color: '#94a3b8',
-                            padding: '40px 20px',
-                            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                            borderRadius: '8px',
-                            border: '2px dashed #cbd5e1'
-                        }}>
-                            <AiOutlineEye style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }} />
-                            <div style={{ fontSize: '16px', fontWeight: '600' }}>Chưa cấu hình kiểu hiển thị</div>
-                            <div style={{ fontSize: '14px', marginTop: '8px' }}>Nhấn vào nút cài đặt để chọn kiểu hiển thị</div>
-                        </div>
-                    )}
+                    <Row gutter={20}>
+                        <Col span={12}>
+                            <div style={{
+                                marginBottom: '20px',
+                                paddingBottom: '20px'
+                            }}>
+                                <h3 style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#334155',
+                                    marginBottom: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    Nút bấm
+                                </h3>
+                                <div style={{
+                                    background: '#f8fafc',
+                                    padding: '15px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #e2e8f0'
+                                }}>
+                                    <ViewButton dataIotsDetail={item} dataOnEvent={{}} settings={false} />
+                                </div>
+                            </div>
+                        </Col>
+
+                        <Col span={12}>
+                            <div style={{
+                                marginBottom: '0px',
+                                paddingBottom: '0px'
+                            }}>
+                                <h3 style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#334155',
+                                    marginBottom: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    Biểu đồ
+                                </h3>
+                                <div style={{
+                                    background: '#f8fafc',
+                                    padding: '15px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #e2e8f0'
+                                }}>
+                                    <ViewChart dataIotsDetail={item} settings={false} />
+                                </div>
+                            </div>
+                        </Col>
+
+                        <Col span={24}>
+                            <div style={{
+                                marginBottom: '20px',
+                                paddingBottom: '20px',
+                                borderBottom: '1px solid #e2e8f0'
+                            }}>
+                                <h3 style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#334155',
+                                    marginBottom: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    Bảng dữ liệu
+                                </h3>
+                                <div style={{
+                                    background: '#f8fafc',
+                                    padding: '15px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #e2e8f0'
+                                }}>
+                                    <ViewTable dataIotsDetail={item} dataOnEvent={{}} settings={false} />
+                                </div>
+                            </div>
+
+                        </Col>
+                    </Row>
                 </div>
             </Card>
 
@@ -581,7 +573,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                 open={infoModalVisible}
                 onCancel={closeInfoModal}
                 footer={[
-                    <Button key="close" onClick={closeInfoModal} style={{ fontWeight: '600' }}>
+                    <Button key="close" onClick={closeInfoModal} style={{ fontWeight: '600', borderRadius: '6px' }}> {/* Đã chỉnh */}
                         Đóng
                     </Button>
                 ]}
@@ -601,9 +593,6 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     {item.connected ? <HiOutlineStatusOnline style={{ marginRight: '4px' }} /> : <HiOutlineStatusOffline style={{ marginRight: '4px' }} />}
                                     {item.connected ? 'Đang kết nối' : 'Mất kết nối'}
                                 </span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Kiểu hiển thị">
-                                {getDisplayTypeText(item.type || 1)}
                             </Descriptions.Item>
                             <Descriptions.Item label="Trạng thái Input">
                                 <span style={{ color: item.input ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center' }}>
@@ -628,12 +617,12 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         <div style={{
                             fontSize: '20px',
                             fontWeight: '700',
-                            color: '#1e293b',
+                            color: '#2563eb',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <AiOutlineControl style={{ marginRight: '8px', fontSize: '24px', color: '#f59e0b' }} />
+                            <AiOutlineControl style={{ marginRight: '8px', fontSize: '24px', color: '#2563eb' }} />
                             Điều khiển thiết bị
                         </div>
                         <div style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>
@@ -649,7 +638,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         onClick={closeControlModal}
                         style={{
                             fontWeight: '600',
-                            borderRadius: '8px'
+                            borderRadius: '6px' // Đã chỉnh
                         }}
                     >
                         Đóng
@@ -660,10 +649,15 @@ const IotCard: React.FC<IotCardProps> = memo(({
             >
                 {item && (
                     <div style={{ padding: '16px 0' }}>
-                        <Tabs defaultActiveKey="1" centered size="large">
+                        <Tabs
+                            defaultActiveKey="1"
+                            centered
+                            size="large"
+                            tabBarStyle={{ borderBottom: '1px solid #e2e8f0' }}
+                        >
                             <TabPane
                                 tab={
-                                    <span style={{ fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center', color: '#3b82f6' }}>
                                         <LuFileOutput style={{ marginRight: '8px', fontSize: '20px' }} />
                                         Điều khiển Output
                                     </span>
@@ -681,7 +675,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             </TabPane>
                             <TabPane
                                 tab={
-                                    <span style={{ fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center', color: '#f59e0b' }}>
                                         <BiTerminal style={{ marginRight: '8px', fontSize: '20px' }} />
                                         Điều khiển Serial
                                     </span>
@@ -726,7 +720,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         onClick={closeSerialModal}
                         style={{
                             fontWeight: '600',
-                            borderRadius: '8px'
+                            borderRadius: '6px' // Đã chỉnh
                         }}
                     >
                         Hủy
@@ -740,12 +734,12 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             background: `linear-gradient(135deg, ${getSerialTypeColor(currentSerialType)} 0%, ${getSerialTypeColor(currentSerialType)}dd 100%)`,
                             borderColor: getSerialTypeColor(currentSerialType),
                             fontWeight: '600',
-                            borderRadius: '8px',
+                            borderRadius: '6px', // Đã chỉnh
                             boxShadow: `0 4px 12px ${getSerialTypeColor(currentSerialType)}40`
                         }}
                         icon={<BiTerminal />}
                     >
-                        Gửi lệnh
+                        Gửi dữ liệu
                     </Button>
                 ]}
                 width={650}
@@ -771,9 +765,40 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             Loại kết nối: {currentSerialType}
                         </div>
                         <div style={{ fontSize: '14px', color: '#64748b' }}>
-                            Nhập lệnh điều khiển serial cho thiết bị này
+                            Nhập dữ liệu serial cho thiết bị này
                         </div>
                     </div>
+
+                    {
+                        currentSerialType.toUpperCase() === "SERIAL_TCP" && (
+                            <div style={{ marginBottom: '12px' }}>
+                                <label style={{
+                                    display: 'block',
+                                    marginBottom: '12px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    color: '#334155'
+                                }}>
+                                    IP:
+                                </label>
+                                <Input
+                                    value={ipSerialTCP}
+                                    onChange={(e) => {
+                                        setIpSerialTcp(e.target.value)
+                                    }}
+                                    placeholder={`Nhập IP cho ${currentSerialType}...`}
+                                    style={{
+                                        fontSize: '14px',
+                                        fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                                        resize: 'vertical',
+                                        borderRadius: '8px',
+                                        border: '2px solid #e2e8f0',
+                                        background: '#fafafa'
+                                    }}
+                                />
+                            </div>
+                        )
+                    }
 
                     <div style={{ marginBottom: '12px' }}>
                         <label style={{
@@ -783,13 +808,13 @@ const IotCard: React.FC<IotCardProps> = memo(({
                             fontWeight: '600',
                             color: '#334155'
                         }}>
-                            Lệnh điều khiển:
+                            Dữ liệu:
                         </label>
                         <TextArea
                             value={serialCommand}
                             onChange={(e) => setSerialCommand(e.target.value)}
-                            placeholder={`Nhập lệnh ${currentSerialType}...`}
-                            rows={8} // Tăng chiều cao mặc định
+                            placeholder={`Nhập dữ liệu ${currentSerialType}...`}
+                            rows={8}
                             style={{
                                 fontSize: '14px',
                                 fontFamily: 'Monaco, Consolas, "Courier New", monospace',
@@ -801,102 +826,6 @@ const IotCard: React.FC<IotCardProps> = memo(({
                         />
                     </div>
                 </div>
-            </Modal>
-
-            <Modal
-                title={
-                    <div style={{ textAlign: 'center', padding: '8px 0' }}>
-                        <div style={{
-                            fontSize: '20px',
-                            fontWeight: '700',
-                            color: '#1e293b',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <FiSettings style={{ marginRight: '8px', fontSize: '24px', color: '#8b5cf6' }} />
-                            Cài đặt hiển thị
-                        </div>
-                    </div>
-                }
-                open={displayModalVisible}
-                onCancel={closeDisplayModal}
-                footer={[
-                    <Button
-                        key="cancel"
-                        onClick={closeDisplayModal}
-                        style={{
-                            fontWeight: '600',
-                            borderRadius: '8px'
-                        }}
-                    >
-                        Hủy
-                    </Button>,
-                    <Button
-                        key="submit"
-                        type="primary"
-                        onClick={handleDisplayTypeUpdate}
-                        style={{
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                            borderColor: '#8b5cf6',
-                            fontWeight: '600',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
-                        }}
-                    >
-                        Cập nhật
-                    </Button>
-                ]}
-                width={450}
-            >
-                {item && (
-                    <Form
-                        form={displayForm}
-                        layout="vertical"
-                        initialValues={{ type: item.type || 1 }}
-                        style={{ padding: '16px 0' }}
-                    >
-                        <div style={{
-                            marginBottom: '20px',
-                            textAlign: 'center',
-                            background: '#f8fafc',
-                            padding: '16px',
-                            borderRadius: '8px',
-                            border: '1px solid #e2e8f0'
-                        }}>
-                            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
-                                {item.name}
-                            </div>
-                            <div style={{ fontSize: '14px', color: '#64748b', fontFamily: 'monospace' }}>
-                                MAC: {item.mac}
-                            </div>
-                        </div>
-
-                        <Form.Item
-                            label="Chọn kiểu hiển thị"
-                            name="type"
-                            rules={[{ required: true, message: 'Vui lòng chọn kiểu hiển thị!' }]}
-                        >
-                            <Radio.Group>
-                                <Radio value={1}>🎛️ Nút bấm</Radio>
-                                <Radio value={2}>📊 Bảng dữ liệu</Radio>
-                                <Radio value={3}>📈 Biểu đồ</Radio>
-                            </Radio.Group>
-                        </Form.Item>
-
-                        <div style={{
-                            background: '#fffbeb',
-                            padding: '16px',
-                            borderRadius: '8px',
-                            marginTop: '16px',
-                            border: '1px solid #fbbf24'
-                        }}>
-                            <div style={{ fontSize: '14px', color: '#92400e' }}>
-                                ℹ️ <strong>Hiện tại: {getDisplayTypeText(item.type || 1)}</strong>
-                            </div>
-                        </div>
-                    </Form>
-                )}
             </Modal>
         </Col>
     );

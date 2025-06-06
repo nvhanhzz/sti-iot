@@ -124,7 +124,7 @@ const smoothData = (data: DataPoint[], keys: string[], windowSize: number = 3): 
 const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [chartData, setChartData] = useState<DataPoint[]>([]);
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
-    const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
+    const [, setLastUpdateTime] = useState<string>('');
 
     // Sử dụng ref để theo dõi records đã xử lý (dựa trên CMD + time)
     const processedRecordsRef = useRef<Set<string>>(new Set());
@@ -286,12 +286,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     return (
         <>
-            {/* Debug info */}
-            <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
-                Data Points: {chartData.length} | Keys: {chartDataKeys.join(', ')} | Last Update: {lastUpdateTime} | Processed Records: {processedRecordsRef.current.size} | Status: Smoothed
-            </div>
-
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={chartData}>
                     <CartesianGrid stroke="#ccc" strokeDasharray="4 4" vertical={false} />
                     <XAxis

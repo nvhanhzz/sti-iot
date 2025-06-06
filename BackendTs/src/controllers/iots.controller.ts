@@ -151,8 +151,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                 if (payload.payload_name === 'timestamp') {
                     const dateObject = new Date(payload.timestamp * 1000);
 
-                    const adjustedHour = (dateObject.getHours() - 7 + 24) % 24;
-                    const hours = String(adjustedHour).padStart(2, '0');
+                    // const adjustedHour = (dateObject.getHours() - 7 + 24) % 24;
+                    const hours = String(dateObject.getHours()).padStart(2, '0');
                     const minutes = String(dateObject.getMinutes()).padStart(2, '0');
                     const seconds = String(dateObject.getSeconds()).padStart(2, '0');
                     const milliseconds = String(dateObject.getMilliseconds()).padStart(3, '0');
@@ -249,43 +249,78 @@ export const serverPublish = async (req: Request, res: Response) => {
 
 export const controlSerialCommand = async (req: Request, res: Response) => {
     try {
-        const mac = req.body.mac;
-        const serialType = req.body.type; // "serial_rs485", "serial_rs232", "serial_tcp"
-        const command = req.body.command; // String command từ user
+        const { mac, type: serialType, command, ipTcpSerial } = req.body;
 
-        // 1. Lấy CMD từ mapping
-        // @ts-ignore
-        const cmd = CMD_SERIAL[serialType];
-        if (!cmd) {
-            return res.status(400).send({ message: "Invalid serial type" });
+        if (!mac || !serialType || !command) {
+            res.status(400).send({ message: "Missing required parameters: mac, type, or command." });
+            return;
         }
 
-        // 2. Chuyển command string thành hex
+        // Nếu là serial_tcp, ipTcpSerial vẫn là bắt buộc
+        if (serialType === 'serial_tcp' && !ipTcpSerial) {
+            res.status(400).send({ message: "ipTcpSerial is required for serial_tcp type." });
+            return;
+        }
+
+        const cmd = CMD_SERIAL[serialType as keyof typeof CMD_SERIAL];
+        if (cmd === undefined) {
+            res.status(400).send({ message: `Invalid serial type: "${serialType}".` });
+            return;
+        }
+
+        // Chuyển đổi command (data) sang buffer và hex
         const commandBuffer = Buffer.from(command, 'utf8');
         const dataHex = commandBuffer.toString('hex').toUpperCase();
+        const stringCommandLength = commandBuffer.length;
 
-        // 3. Tính toán length của hex data (số bytes)
-        const dataLength = commandBuffer.length;
+        let payloadPart = ''; // Phần payload tổng thể (IP + Data hoặc chỉ Data)
+        let hexToSend = ''; // Gói hex hoàn chỉnh để gửi
 
-        // 4. Xây dựng các phần của gói tin hex
-        const cmdHex = cmd.toString(16).toUpperCase().padStart(2, '0'); // CMD hex
-        const lengthHex = dataLength.toString(16).toUpperCase().padStart(2, '0'); // Length hex (1 byte)
-        const typeHex = PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0');
+        const cmdHex = cmd.toString(16).toUpperCase().padStart(2, '0');
 
-        // 5. Ghép nối payload: length | type | data
-        const payloadPart = `${lengthHex}${typeHex}${dataHex}`;
+        if (serialType === 'serial_tcp' && ipTcpSerial) {
+            // Xử lý ipTcpSerial là một chuỗi (string)
+            const ipBuffer = Buffer.from(ipTcpSerial, 'utf8');
+            const ipHex = ipBuffer.toString('hex').toUpperCase();
+            const ipLength = ipBuffer.length;
 
-        // 6. Tính toán CRC cho phần CMD + Payload
+            const ipLengthHex = ipLength.toString(16).toUpperCase().padStart(2, '0');
+            const ipTypeHex = PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0'); // Kiểu payload cho IP cũng là STRING
+            const ipSegment = `${ipLengthHex}${ipTypeHex}${ipHex}`;
+
+            // Xử lý command (data) là một chuỗi (string)
+            const stringCommandLengthHex = stringCommandLength.toString(16).toUpperCase().padStart(2, '0');
+            const stringCommandTypeHex = PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0');
+            const stringSegment = `${stringCommandLengthHex}${stringCommandTypeHex}${dataHex}`;
+
+            // Nối segment IP và segment chuỗi data
+            payloadPart = `${ipSegment}${stringSegment}`;
+
+        } else {
+            // Đối với các loại serial khác, chỉ là segment chuỗi command
+            const stringCommandLengthHex = stringCommandLength.toString(16).toUpperCase().padStart(2, '0');
+            const stringCommandTypeHex = PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0');
+            payloadPart = `${stringCommandLengthHex}${stringCommandTypeHex}${dataHex}`;
+        }
+
+        // Tính toán CRC dựa trên CMD + tất cả các segment payload
         const dataForCrcCalculation = Buffer.from(`${cmdHex}${payloadPart}`, 'hex');
+        // Giả định calculateCRC8 là một hàm đã được định nghĩa ở nơi khác
         const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
         const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
 
-        // 7. Ghép nối để tạo gói tin hex hoàn chỉnh
-        const hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
+        // Gói hex hoàn chỉnh
+        hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
 
-        console.log(`Serial Command - Type: ${serialType}, CMD: ${cmdHex}, Data: ${dataHex}, Complete: ${hexToSend}`);
+        console.log(`[Serial Command] Type: ${serialType}, CMD: ${cmdHex}, Data: ${dataHex}, IP (as String): ${ipTcpSerial || 'N/A'}, Complete Packet: ${hexToSend}`);
 
-        // 8. Gửi gói tin hex qua MQTT
+        // Kiểm tra kết nối MQTT và gửi tin nhắn
+        if (!client || !client.connected) {
+            console.error("MQTT client not connected. Cannot publish message.");
+            res.status(500).send({ message: "MQTT client not connected. Please try again later." });
+            return;
+        }
+        // Giả định publishMessage và client đã được định nghĩa
         publishMessage(client, `device/response/${mac}`, hexToSend);
 
         res.status(200).send({
@@ -293,18 +328,25 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
             data: {
                 serialType: serialType,
                 originalCommand: command,
+                ipTcpSerial: ipTcpSerial || null,
                 hexCommand: hexToSend,
                 breakdown: {
                     cmd: cmdHex,
-                    length: lengthHex,
-                    type: typeHex,
-                    data: dataHex,
+                    // Cập nhật breakdown để phản ánh IP là dạng string payload
+                    ipDataSegment: serialType === 'serial_tcp' && ipTcpSerial
+                        ? `${Buffer.from(ipTcpSerial, 'utf8').length.toString(16).toUpperCase().padStart(2, '0')}${PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0')}${Buffer.from(ipTcpSerial, 'utf8').toString('hex').toUpperCase()}`
+                        : 'N/A',
+                    stringDataSegment: `${stringCommandLength.toString(16).toUpperCase().padStart(2, '0')}${PAYLOAD_STRING.toString(16).toUpperCase().padStart(2, '0')}${dataHex}`,
                     crc: crcHex
                 }
             }
         });
     } catch (error) {
         console.error("Error in controlSerialCommand:", error);
-        res.status(500).send({ message: "Internal Server Error" });
+        if (error instanceof Error) {
+            res.status(500).send({ message: `Internal Server Error: ${error.message}` });
+        } else {
+            res.status(500).send({ message: "Internal Server Error" });
+        }
     }
 };
