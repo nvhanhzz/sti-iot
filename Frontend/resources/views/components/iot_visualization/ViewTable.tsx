@@ -11,6 +11,17 @@ interface ConfigIotsProps {
     settings: boolean;
 }
 
+// Hàm stringToHex này không còn được sử dụng trực tiếp cho mục đích hiển thị data nữa,
+// nhưng vẫn được giữ lại nếu có các logic khác cần đến nó trong tương lai.
+// Nếu không, bạn có thể xóa nó hoàn toàn.
+const stringToHex = (str: string) => {
+    let hex = '';
+    for (let i = 0; i < str.length; i++) {
+        hex += str.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
+    }
+    return hex.trim();
+};
+
 const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [allProcessedData, setAllProcessedData] = useState<any[]>([]);
     const [selectedCMD, setSelectedCMD] = useState<string | null>(null);
@@ -18,10 +29,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [columns, setColumns] = useState<any[]>([]);
     const [isColumnSettingsModalVisible, setIsColumnSettingsModalVisible] = useState(false);
 
-    // State để lưu các cột đã bị ẩn
     const [hiddenColumnKeys, setHiddenColumnKeys] = useState<Set<string>>(new Set());
-    // visibleColumnKeys không cần là state riêng nữa, có thể tính toán trong useEffect hoặc useMemo
-    // Tuy nhiên, việc giữ nó là state và cập nhật nó thông qua useEffect là một cách hợp lệ
     const [visibleColumnKeys, setVisibleColumnKeys] = useState<Set<string>>(new Set());
 
 
@@ -54,10 +62,15 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
 
     const filteredData = useMemo(() => {
-        if (!selectedCMD) {
-            return allProcessedData;
+        let currentData = allProcessedData;
+
+        if (selectedCMD) {
+            currentData = currentData.filter(row => row.CMD === selectedCMD);
         }
-        return allProcessedData.filter(row => row.CMD === selectedCMD);
+
+        currentData = currentData.filter(row => row.CMD && !row.CMD.toLowerCase().includes('notify'));
+
+        return currentData;
     }, [allProcessedData, selectedCMD]);
 
 
@@ -72,18 +85,28 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         });
 
         const generatedCols = [
-            { title: "CMD", dataIndex: "CMD", key: "CMD", render: (text: string) => text.replace("CMD_", "").replace("PUSH_", "") },
+            { title: "CMD", dataIndex: "CMD", key: "CMD", render: (text: string) => text.replace("CMD_", "") },
             ...Array.from(allPayloadNames).map(payloadName => ({
                 title: payloadName.toUpperCase(),
                 dataIndex: payloadName,
                 key: payloadName,
-                render: (value: any) => {
+                render: (value: any, record: any) => {
                     if (value === null || value === undefined) return "-";
                     if (typeof value === 'boolean') return value ? "True" : "False";
+
+                    // === START REMOVED LOGIC ===
+                    // // Logic mới: Chuyển đổi sang hex cho CMD_PUSH_TCP hoặc CMD_PUSH_UDP và payload_name là 'data'
+                    // if (payloadName === 'data' && (record.CMD === 'CMD_PUSH_TCP' || record.CMD === 'CMD_PUSH_UDP')) {
+                    //     if (typeof value === 'string') {
+                    //         return `${value} / ${stringToHex(value)}`;
+                    //     }
+                    // }
+                    // === END REMOVED LOGIC ===
+
                     if (payloadName === 'id' && typeof value === 'number' && String(value).length === 10) {
                         return moment.unix(value).format("HH:mm:ss.SSS");
                     }
-                    return String(value);
+                    return String(value); // Default rendering
                 },
             })),
             { title: "Unit", dataIndex: "unit", key: "unit" },
@@ -94,11 +117,10 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     }, [allProcessedData]);
 
 
-    // --- SỬA ĐỔI ĐOẠN CODE GÂY LỖI TS2304 và TS7033 ---
     useEffect(() => {
-        setColumns(dynamicColumns); // columns luôn lưu tất cả các cột tiềm năng
+        setColumns(dynamicColumns);
 
-        setVisibleColumnKeys(() => { // KHÔNG CẦN prevVisibleKeys ở đây vì chúng ta đang TÍNH TOÁN LẠI hoàn toàn
+        setVisibleColumnKeys(() => {
             const newVisibleKeys = new Set<string>();
             dynamicColumns.forEach(col => {
                 if (!hiddenColumnKeys.has(col.key)) {
@@ -107,10 +129,9 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             });
             return newVisibleKeys;
         });
-    }, [dynamicColumns, hiddenColumnKeys]); // Phụ thuộc vào dynamicColumns và hiddenColumnKeys
+    }, [dynamicColumns, hiddenColumnKeys]);
 
 
-    // Hàm xử lý khi checkbox ẩn/hiện cột thay đổi (giữ nguyên)
     const handleColumnVisibilityChange = useCallback((key: string, checked: boolean) => {
         setVisibleColumnKeys(prevVisibleKeys => {
             const newVisibleKeys = new Set(prevVisibleKeys);
@@ -122,7 +143,6 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return newVisibleKeys;
         });
 
-        // Cập nhật hiddenColumnKeys
         setHiddenColumnKeys(prevHiddenKeys => {
             const newHiddenKeys = new Set(prevHiddenKeys);
             if (checked) {
@@ -132,7 +152,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             }
             return newHiddenKeys;
         });
-    }, []); // Không còn lỗi TS2304/TS7033 ở đây vì logic đúng rồi
+    }, []);
 
     const getRenderedColumns = useCallback(() => {
         return columns.filter(col => visibleColumnKeys.has(col.key));
@@ -143,7 +163,11 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     const uniqueCMDs = useMemo(() => {
         const cmds = new Set<string>();
-        allProcessedData.forEach(row => cmds.add(row.CMD));
+        allProcessedData.forEach(row => {
+            if (row.CMD && !row.CMD.toLowerCase().includes('notify')) {
+                cmds.add(row.CMD);
+            }
+        });
         return Array.from(cmds);
     }, [allProcessedData]);
 
@@ -165,7 +189,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                     >
                         {uniqueCMDs.map(cmd => (
                             <Option key={cmd} value={cmd}>
-                                {cmd.replace("CMD_", "").replace("PUSH_", "")}
+                                {cmd.replace("CMD_", "")}
                             </Option>
                         ))}
                     </Select>
