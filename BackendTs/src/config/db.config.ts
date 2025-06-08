@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize";
 import { config } from "./index";
 import { queryLogger } from "../config/logger/query.logger";
 import mongoose from "mongoose";
+import IotSettings from "../models/sql/iot_settings.models";
 
 export const sequelize = new Sequelize(
     config.db.database,
@@ -20,6 +21,20 @@ export const connectDatabases = async () => {
         try {
             await sequelize.authenticate();
             queryLogger.info("MySQL Database connected");
+
+            console.log('Updating all IoT device statuses to "closed" on startup...');
+            await IotSettings.update(
+                {
+                    tcp_status: 'closed',
+                    udp_status: 'closed'
+                },
+                {
+                    where: {}, // Áp dụng cho TẤT CẢ các bản ghi
+                    silent: true // Tùy chọn: ngăn Sequelize in ra câu lệnh SQL UPDATE
+                }
+            );
+            console.log('All IoT device statuses successfully set to "closed".');
+
         } catch (error) {
             queryLogger.error("MySQL connection error:", error);
             process.exit(1);

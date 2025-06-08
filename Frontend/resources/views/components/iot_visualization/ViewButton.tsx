@@ -16,8 +16,8 @@ const titleButton: { [key: string]: string } = {
     "CMD_INPUT_CHANNEL2": "DIGITAL INPUT 2",
     "CMD_INPUT_CHANNEL3": "DIGITAL INPUT 3",
     "CMD_INPUT_CHANNEL4": "DIGITAL INPUT 4",
-    "CMD_PUSH_TCP": "TCP",
-    "CMD_PUSH_UDP": "UDP"
+    "CMD_NOTIFY_TCP": "TCP",
+    "CMD_NOTIFY_UDP": "UDP"
 };
 
 // Định nghĩa các button mặc định (luôn hiển thị)
@@ -26,8 +26,8 @@ const defaultButtons = [
     { CMD: "CMD_INPUT_CHANNEL2", dataName: "CMD_INPUT_CHANNEL2", data: false },
     { CMD: "CMD_INPUT_CHANNEL3", dataName: "CMD_INPUT_CHANNEL3", data: false },
     { CMD: "CMD_INPUT_CHANNEL4", dataName: "CMD_INPUT_CHANNEL4", data: false },
-    { CMD: "CMD_PUSH_TCP", dataName: "CMD_PUSH_TCP", data: false },
-    { CMD: "CMD_PUSH_UDP", dataName: "CMD_PUSH_UDP", data: false }
+    { CMD: "CMD_NOTIFY_TCP", dataName: "CMD_NOTIFY_TCP", data: false },
+    { CMD: "CMD_NOTIFY_UDP", dataName: "CMD_NOTIFY_UDP", data: false }
 ];
 
 const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
@@ -38,7 +38,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             let processedData = [...defaultButtons];
 
             if (dataIotsDetail.data && Array.isArray(dataIotsDetail.data)) {
-                const allowedCMDs = ["CMD_INPUT_CHANNEL1", "CMD_INPUT_CHANNEL2", "CMD_INPUT_CHANNEL3", "CMD_INPUT_CHANNEL4", "CMD_PUSH_TCP", "CMD_PUSH_UDP"];
+                const allowedCMDs = ["CMD_INPUT_CHANNEL1", "CMD_INPUT_CHANNEL2", "CMD_INPUT_CHANNEL3", "CMD_INPUT_CHANNEL4", "CMD_NOTIFY_TCP", "CMD_NOTIFY_UDP"];
 
                 processedData = processedData.map(defaultItem => {
                     const deviceData = dataIotsDetail.data.find((item: any) =>

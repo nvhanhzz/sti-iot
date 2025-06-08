@@ -12,8 +12,12 @@ import client from "../mqtt";
 import moment from "moment";
 import {MasterIotInterface} from "../interface";
 import {ConvertDatatoHex} from "../global/convertData.global";
+import logger from "../config/logger";
+import IotSettings from "../models/sql/iot_settings.models";
 
 const CMD_RESPOND_TIMESTAMP = 0x14; // Trong C++ code của bạn, CMD_RESPOND_TIMESTAMP là 0x14 (decimal 20)
+const CMD_NOTIFY_TCP = 0x3C;
+const CMD_NOTIFY_UDP = 0x3D;
 const PAYLOAD_I32 = 0x06;           // int32 (Timestamp là số nguyên 32-bit)
 const PAYLOAD_STRING = 0x0A;
 
@@ -22,6 +26,11 @@ const CMD_SERIAL = {
     "serial_rs232": 0x12,
     "serial_tcp": 0x13
 }
+
+const HEX_COMMANDS = {
+    tcp: { on: '15 01 00 00 93', off: '16 01 00 00 A9' },
+    udp: { on: '17 01 00 00 BF', off: '18 01 00 00 6D' }
+} as const;
 
 export const sendDataIots = async (req: Request, res: Response) => {
     try {
@@ -100,8 +109,8 @@ export const calculateCRC8 = (data: Buffer): number => {
 };
 
 export const deviceUpdateData = async (topic: string, message: Buffer) => {
+    const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
     if (message[0] === CMD_RESPOND_TIMESTAMP) { // Kiểm tra nếu lệnh là yêu cầu timestamp (CMD_RESPOND_TIMESTAMP có giá trị 0x14 = 20)
-        const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
 
         // 1. Lấy Timestamp hiện tại (số giây kể từ Epoch)
         const currentEpochTimestamp = Math.floor(Date.now() / 1000); // Ví dụ: 1717408476
@@ -157,12 +166,6 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     const seconds = String(dateObject.getSeconds()).padStart(2, '0');
                     const milliseconds = String(dateObject.getMilliseconds()).padStart(3, '0');
 
-                    // if (hours === '07') {
-                    //     console.log("7777");
-                    // } else {
-                    //     console.log(123);
-                    // }
-
                     dataJson.time = `${hours}:${minutes}:${seconds}.${milliseconds}`;
                     break;
                 }
@@ -183,7 +186,23 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     DataMsgGlobal.updateMultipleKey(dataMsgDetail, ['device_id', 'dataName']);
                 }
             }
-            sendDataRealTime(dataIot.id);
+
+            if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
+                const iotDevice = await IotSettings.findOne({
+                    where: { mac: mac }
+                });
+
+                if (iotDevice) {
+                    const updateField = message[0] === CMD_NOTIFY_TCP ? 'tcp_status' : 'udp_status';
+                    const updateStatus = dataJson.payload[0][dataJson.payload[0].payload_name] === 1 ? 'opened' : 'closed';
+
+                    iotDevice.set(updateField, updateStatus);
+                    await iotDevice.save();
+
+                    MasterIotGlobal.update(iotDevice.toJSON());
+                }
+            }
+            await sendDataRealTime(dataIot.id);
         }
     }
 };
@@ -196,7 +215,20 @@ export const sendDataRealTime = async (id: any) => {
             const dataMsgDetail =
             {
                 device_id: data.id,
-                payload: dataPayload
+                payload: await Promise.all(dataPayload.map(async (item) => {
+                    const iotDevice = await IotSettings.findOne({
+                        where: { id: item.device_id }
+                    });
+                    if (item.CMD === "CMD_PUSH_TCP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
+                        return null;
+                    }
+                    if (item.CMD === "CMD_PUSH_UDP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
+                        return null;
+                    }
+
+                    return item;
+                }))
+                    .then(results => results.filter(item => item !== null))
             }
             await EmitData("iot_send_data_" + data.id, dataMsgDetail);
         }
@@ -237,12 +269,59 @@ export const deviceSendData = async (req: Request, res: Response) => {
 
 export const serverPublish = async (req: Request, res: Response) => {
     try {
-        const hexToSend = req.body.hex;
-        const mac = req.body.mac;
+        const hexToSend: string = req.body.hex;
+        const mac: string = req.body.mac;
+
+        if (!mac || !hexToSend) {
+            return res.status(400).send({ message: "MAC and hex command are required." });
+        }
+
+        const iotDevice = await IotSettings.findOne({
+            where: { mac: mac }
+        });
+
+        if (!iotDevice) {
+            return res.status(404).send({ message: `IoT device with MAC ${mac} not found.` });
+        }
+
+        let updateStatus: 'requestOpen' | 'requestClose' | null = null;
+        let updateField: 'tcp_status' | 'udp_status' | null = null;
+
+        if (hexToSend === HEX_COMMANDS.tcp.on) {
+            updateStatus = 'requestOpen';
+            updateField = 'tcp_status';
+        } else if (hexToSend === HEX_COMMANDS.tcp.off) {
+            updateStatus = 'requestClose';
+            updateField = 'tcp_status';
+        } else if (hexToSend === HEX_COMMANDS.udp.on) {
+            updateStatus = 'requestOpen';
+            updateField = 'udp_status';
+        } else if (hexToSend === HEX_COMMANDS.udp.off) {
+            updateStatus = 'requestClose';
+            updateField = 'udp_status';
+        } else {
+            logger.warn(`Unknown HEX command received for MAC ${mac}: ${hexToSend}. No status update performed.`);
+        }
+
+        if (updateField && updateStatus) {
+            // Cập nhật trạng thái trong database
+            iotDevice.set(updateField, updateStatus);
+            await iotDevice.save();
+            logger.info(`Updated ${updateField} for device ${mac} in DB to ${updateStatus}.`);
+
+            // <-- Cập nhật dữ liệu trong global storage sử dụng phương thức 'update' có sẵn -->
+            // Chuyển đối tượng Sequelize model thành plain object bằng .toJSON()
+            MasterIotGlobal.update(iotDevice.toJSON());
+            logger.info(`Updated ${updateField} for device ${mac} in global storage to ${updateStatus}.`);
+        }
+
         publishMessage(client, `device/response/${mac}`, hexToSend);
+        logger.info(`Published HEX command ${hexToSend} to device/response/${mac}`);
+
         res.status(200).send("OK");
+
     } catch (error) {
-        console.error("Error in Lock IotCmd:", error);
+        logger.error("Error in serverPublish:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };

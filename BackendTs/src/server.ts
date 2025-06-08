@@ -37,6 +37,10 @@ app.use("/api", routes);
 
 const startServer = async () => {
     try {
+        // Database connection
+        await connectDatabases();
+        logger.info("Connect DB Success");
+
         // Run non-blocking tasks in parallel
         await Promise.all([
             initQueue(),
@@ -46,10 +50,6 @@ const startServer = async () => {
 
         // MQTT and Socket setup
         subscribeToTopics(initMqtt); // Subscribe to topics after MQTT is initialized
-
-        // Database connection
-        await connectDatabases();
-        logger.info("Connect DB Success");
 
         // Start server
         server.listen(config.port, () => {

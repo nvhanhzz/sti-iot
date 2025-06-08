@@ -19,6 +19,15 @@ IotSettings.init(
         user_updated: { type: BIGINT, allowNull: true, },
         time_updated: { type: DATE, allowNull: true, },
         isdelete: { type: BOOLEAN, allowNull: true, defaultValue: 0 },
+        // Các trường mới cho trạng thái TCP và UDP
+        tcp_status: {
+            type: DataTypes.ENUM('requestOpen', 'opened', 'requestClose', 'closed'),
+            allowNull: true,
+        },
+        udp_status: {
+            type: DataTypes.ENUM('requestOpen', 'opened', 'requestClose', 'closed'),
+            allowNull: true,
+        },
     },
     {
         sequelize,

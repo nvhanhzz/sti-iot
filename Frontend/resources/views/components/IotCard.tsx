@@ -484,7 +484,7 @@ const IotCard: React.FC<IotCardProps> = memo(({
                                     display: 'flex',
                                     alignItems: 'center'
                                 }}>
-                                    Nút bấm
+                                    Trạng thái
                                 </h3>
                                 <div style={{
                                     background: '#f8fafc',
