@@ -42,3 +42,25 @@
 {"level":"info","message":"Received buffer: <\u0001\u0001\u0001�","timestamp":"2025-06-08T11:07:40.718Z"}
 {"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:07:54.165Z"}
 {"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:07:54.165Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T11:16:41.928Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:17:06.390Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:17:06.391Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:17:21.796Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:17:21.797Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T11:17:31.323Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:17:35.011Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:17:35.012Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:18:07.257Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:18:07.258Z"}
+{"level":"info","message":"Received buffer (hex): 3C010101E9","timestamp":"2025-06-08T11:18:32.406Z"}
+{"level":"info","message":"Received buffer: <\u0001\u0001\u0001�","timestamp":"2025-06-08T11:18:32.407Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:18:46.786Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:18:46.787Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T11:18:58.029Z"}
+{"level":"info","message":"Received buffer (hex): 3C010101E9","timestamp":"2025-06-08T11:19:07.219Z"}
+{"level":"info","message":"Received buffer: <\u0001\u0001\u0001�","timestamp":"2025-06-08T11:19:07.220Z"}
+{"level":"info","message":"Received buffer (hex): 150B0A3139322E3136382E312E31030A9192939C","timestamp":"2025-06-08T11:19:17.274Z"}
+{"level":"info","message":"Received buffer: \u0015\u000b\n192.168.1.1\u0003\n����","timestamp":"2025-06-08T11:19:17.275Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T16:32:53.667Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T16:35:06.772Z"}
+{"level":"info","message":"🔥 Client mất kết nối: SERVER (admin)","timestamp":"2025-06-08T16:35:21.733Z"}

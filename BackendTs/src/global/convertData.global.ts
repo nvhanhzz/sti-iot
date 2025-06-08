@@ -145,40 +145,24 @@ export const ConvertHextoData = (hexStr: string, dataType: string | undefined) =
             }
 
         case "string":
-            // Bước 1: Kiểm tra tính hợp lệ cơ bản của chuỗi hex
-            // (chỉ chứa ký tự hex và có độ dài chẵn)
             if (!/^[0-9a-fA-F]*$/.test(hexStr) || hexStr.length % 2 !== 0) {
-                return hexStr; // Trả về y nguyên nếu không phải chuỗi hex hợp lệ hoặc độ dài lẻ
+                return hexStr;
             }
 
             const bytes = hexStr.match(/.{2}/g);
             if (!bytes) {
-                return hexStr; // Trả về y nguyên nếu không thể chia thành các cặp byte (ví dụ: chuỗi rỗng)
-            }
-
-            let allBytesArePrintableAscii = true;
-            const byteArray = Uint8Array.from(bytes.map(byte => {
-                const parsedByte = parseInt(byte, 16);
-                // Kiểm tra xem byte có nằm trong phạm vi ASCII hiển thị hay không (32 đến 126)
-                // Hoặc các ký tự điều khiển phổ biến như tab (9), newline (10), carriage return (13)
-                if (
-                    (parsedByte < 32 || parsedByte > 126) && // Không phải ký tự hiển thị thông thường
-                    parsedByte !== 9 && // Tab
-                    parsedByte !== 10 && // Line Feed
-                    parsedByte !== 13    // Carriage Return
-                ) {
-                    allBytesArePrintableAscii = false;
-                }
-                return parsedByte;
-            }));
-
-            // Nếu có bất kỳ byte nào không phải ASCII hiển thị, trả về chuỗi hex gốc
-            if (!allBytesArePrintableAscii) {
                 return hexStr;
             }
 
-            // Nếu tất cả các byte đều là ASCII hiển thị, thì tiến hành decode
-            return new TextDecoder().decode(byteArray);
+            const byteArray = Uint8Array.from(bytes.map(byte => parseInt(byte, 16)));
+
+            const decodedString = new TextDecoder('utf-8', { fatal: false }).decode(byteArray);
+
+            if (decodedString.includes('\ufffd')) {
+                return hexStr;
+            }
+
+            return decodedString;
 
         case "boolean":
             // Boolean thường là 1 byte = 2 ký tự hex (00 hoặc 01)

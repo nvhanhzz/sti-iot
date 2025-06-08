@@ -273,7 +273,8 @@ export const serverPublish = async (req: Request, res: Response) => {
         const mac: string = req.body.mac;
 
         if (!mac || !hexToSend) {
-            return res.status(400).send({ message: "MAC and hex command are required." });
+            res.status(400).send({ message: "MAC and hex command are required." });
+            return;
         }
 
         const iotDevice = await IotSettings.findOne({
@@ -281,7 +282,8 @@ export const serverPublish = async (req: Request, res: Response) => {
         });
 
         if (!iotDevice) {
-            return res.status(404).send({ message: `IoT device with MAC ${mac} not found.` });
+            res.status(404).send({ message: `IoT device with MAC ${mac} not found.` });
+            return;
         }
 
         let updateStatus: 'requestOpen' | 'requestClose' | null = null;
@@ -326,6 +328,13 @@ export const serverPublish = async (req: Request, res: Response) => {
     }
 };
 
+// Hàm kiểm tra định dạng IP v4
+const isValidIpAddress = (ip: string): boolean => {
+    // Regex cho IPv4 đơn giản
+    const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return ipv4Regex.test(ip);
+};
+
 export const controlSerialCommand = async (req: Request, res: Response) => {
     try {
         const { mac, type: serialType, command, ipTcpSerial } = req.body;
@@ -336,9 +345,16 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
         }
 
         // Nếu là serial_tcp, ipTcpSerial vẫn là bắt buộc
-        if (serialType === 'serial_tcp' && !ipTcpSerial) {
-            res.status(400).send({ message: "ipTcpSerial is required for serial_tcp type." });
-            return;
+        if (serialType === 'serial_tcp') {
+            if (!ipTcpSerial) {
+                res.status(400).send({ message: "ipTcpSerial is required for serial_tcp type." });
+                return;
+            }
+            // THÊM VALIDATE IP TẠI ĐÂY
+            if (typeof ipTcpSerial !== 'string' || !isValidIpAddress(ipTcpSerial)) {
+                res.status(400).send({ message: `Invalid ipTcpSerial format. Must be a valid IPv4 address string.` });
+                return;
+            }
         }
 
         const cmd = CMD_SERIAL[serialType as keyof typeof CMD_SERIAL];

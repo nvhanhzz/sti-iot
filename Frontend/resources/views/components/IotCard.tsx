@@ -91,8 +91,6 @@ const IotCard: React.FC<IotCardProps> = memo(({
             }
 
             message.success(`Gửi lệnh ${serialType} thành công`);
-            setSerialCommand('');
-            setSerialModalVisible(false);
             return await response.json(); // Return the response data if successful
         } catch (error) {
             console.error('Error sending serial command:', error);

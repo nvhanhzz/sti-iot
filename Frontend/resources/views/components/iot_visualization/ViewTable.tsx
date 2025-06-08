@@ -11,17 +11,6 @@ interface ConfigIotsProps {
     settings: boolean;
 }
 
-// Hàm stringToHex này không còn được sử dụng trực tiếp cho mục đích hiển thị data nữa,
-// nhưng vẫn được giữ lại nếu có các logic khác cần đến nó trong tương lai.
-// Nếu không, bạn có thể xóa nó hoàn toàn.
-const stringToHex = (str: string) => {
-    let hex = '';
-    for (let i = 0; i < str.length; i++) {
-        hex += str.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
-    }
-    return hex.trim();
-};
-
 const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [allProcessedData, setAllProcessedData] = useState<any[]>([]);
     const [selectedCMD, setSelectedCMD] = useState<string | null>(null);
@@ -90,18 +79,9 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                 title: payloadName.toUpperCase(),
                 dataIndex: payloadName,
                 key: payloadName,
-                render: (value: any, record: any) => {
+                render: (value: any) => {
                     if (value === null || value === undefined) return "-";
                     if (typeof value === 'boolean') return value ? "True" : "False";
-
-                    // === START REMOVED LOGIC ===
-                    // // Logic mới: Chuyển đổi sang hex cho CMD_PUSH_TCP hoặc CMD_PUSH_UDP và payload_name là 'data'
-                    // if (payloadName === 'data' && (record.CMD === 'CMD_PUSH_TCP' || record.CMD === 'CMD_PUSH_UDP')) {
-                    //     if (typeof value === 'string') {
-                    //         return `${value} / ${stringToHex(value)}`;
-                    //     }
-                    // }
-                    // === END REMOVED LOGIC ===
 
                     if (payloadName === 'id' && typeof value === 'number' && String(value).length === 10) {
                         return moment.unix(value).format("HH:mm:ss.SSS");
@@ -240,7 +220,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                     <tr key={row.key} style={{ backgroundColor: rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9', }}>
                         {renderedColumns.map((col: any) => {
                             const value = row[col.dataIndex];
-                            const renderedValue = col.render ? col.render(value, row) : value;
+                            const renderedValue = col.render ? col.render(value) : value;
 
                             return (
                                 <td key={`${row.key}-${col.key}`} style={{
