@@ -24872,7 +24872,7 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     position: fixed !important;
     margin-bottom: 90px;
     top: 0;
-    z-index: 999999999;
+    z-index: 1;
     background-color: #4680ff;
     width: calc(100% - 80px);
 }

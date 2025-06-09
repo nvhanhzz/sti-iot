@@ -147,14 +147,14 @@ const vi =
         description: "Mô Tả Thông Tin Lệnh",
         type: "Kiểu Lệnh",
         ip: "IP Thiết Bị",
-        mac: "MAC Thiết Bị",
+        mac: "Địa chỉ MAC",
         type_view: "Kiểu Hiển Thị",
         view_button: "Hiển Thị Dạng Nút Nhấn",
         view_data: "Hiển Thị Dạng Bảng Dữ Liệu",
         view_chart: "Hiển Thị Dạng Biểu Đồ",
         view_count: "Hiển Thị Bảng Đếm Dữ Liệu",
         device_id: "ID Thiết Bị",
-        firmware: "Ver Phần Mềm",
+        firmware: "Phiên bản",
         input: "Dữ Liệu Thiết Bị Gửi Lên",
         output: "Dữ Liệu Thiết Bị Nhận Về",
     },
@@ -173,10 +173,10 @@ const vi =
         100: "Kiểu dữ liệu truyền tải không hợp lệ, kiểm tra lại",
         101: "Khóa kiểu dữ liệu truyền tải thành công",
         102: "Mở khóa kiểu dữ liệu truyền tải thành công",
-        103: "Thêm Mới Thiết Bị IOT Thành Công",
-        104: "Khóa Thiết Bị IOT Thành Công",
-        105: "Mở Khóa Thiết Bị IOT Thành Công",
-        106: "Gửi Dữ Liệu Đến IOT Hoàn Thành"
+        103: "Thêm Mới Thiết Bị Thành Công",
+        104: "Khóa Thiết Bị Thành Công",
+        105: "Mở Khóa Thiết Bị Thành Công",
+        106: "Gửi Dữ Liệu Đến Thiết bị Hoàn Thành"
     },
 }
 export default vi;

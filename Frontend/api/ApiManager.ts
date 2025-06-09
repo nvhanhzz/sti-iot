@@ -1,10 +1,8 @@
 const API_PORT = import.meta.env.VITE_API_PORT;
 const API_PORT_MASTERDATA = import.meta.env.VITE_API_PORT_MASTERDATA;
-const API_PORT_SCHEDULE = import.meta.env.VITE_API_PORT_SCHEDULE;
 const API_IP = import.meta.env.VITE_API_IP;
 const API_URL = `${window.location.protocol}//${API_IP ? API_IP : window.location.hostname}:${API_PORT}`;
 const API_URLMASTERDATA = `${window.location.protocol}//${API_IP ? API_IP : window.location.hostname}:${API_PORT_MASTERDATA}`;
-const API_URLSCHEDULE = `${window.location.protocol}//${API_IP ? API_IP : window.location.hostname}:${API_PORT_SCHEDULE}`;
 
 const LOGIN_PORT = import.meta.env.VITE_PORT_LOGIN;
 const LOGIN_URL = `${window.location.protocol}//${window.location.hostname}:${LOGIN_PORT}`;
