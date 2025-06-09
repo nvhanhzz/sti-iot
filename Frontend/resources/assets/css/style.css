@@ -20813,13 +20813,17 @@ pre[class*=language-]:before {
 }
 
 .pcoded-header .m-header {
-    width: 230px;
-    position: relative;
-    height: 50px;
+    width: 120px;
+    position: fixed; /* <-- Thay đổi thành fixed */
+    left: 0;
+    height: 50px; /* Có thể cần điều chỉnh top để khớp với header */
+    top: 0; /* Thêm top để định vị theo chiều dọc nếu cần */
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0 25px;
+    justify-content: space-between;
+    padding: 0 10px;
+    /* Có thể cần thêm z-index để đảm bảo nó hiển thị trên các phần tử khác */
+    z-index: 1000;
 }
 
 .pcoded-header .m-header .logo-dark,
@@ -22163,23 +22167,22 @@ pre[class*=language-]:before {
 .pcoded-content {
     position: relative;
     display: block;
-    padding: 25px;
-    margin-top: 140px;
+    padding: 10px;
 }
 
 .pcoded-main-container {
     background: #ecf0f5;
     position: relative;
-    margin: 0 auto;
     padding-top: 0;
     display: block;
     clear: both;
     float: unset;
     right: 0;
     top: 0;
-    margin-left: 230px;
+    margin-left: 0;
+    width: 100%;
     min-height: 100vh;
-    transition: all 0.3s ease-in-out;
+    transition: allm-header 0.3s ease-in-out;
 }
 
 /* main content end*/
@@ -24826,3 +24829,50 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
 
 /* image varient End */
 /**====== Authentication css end ======**/
+
+/* Trong file CSS của bạn */
+
+.pcoded-navbar {
+    /* Đảm bảo sidebar có position: fixed và kích thước cụ thể */
+    width: 250px; /* Ví dụ: chiều rộng mặc định của sidebar */
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    transition: width 0.3s ease; /* Quan trọng cho hiệu ứng mượt mà */
+    /* ... các style khác của sidebar ... */
+}
+
+.pcoded-navbar.navbar-collapsed {
+    width: 80px; /* Ví dụ: chiều rộng khi sidebar thu gọn */
+}
+
+
+.main-content-wrapper {
+    /* Đảm bảo nội dung chính có margin-left ban đầu bằng chiều rộng của sidebar */
+    margin-left: 250px; /* PHẢI khớp với chiều rộng mặc định của .pcoded-navbar */
+    transition: margin-left 0.3s ease; /* Quan trọng cho hiệu ứng mượt mà */
+    flex-grow: 1; /* Để nó chiếm hết không gian còn lại */
+    display: flex; /* Để header, content, footer xếp chồng lên nhau */
+    flex-direction: column;
+    min-height: 100vh; /* Đảm bảo nó cao bằng viewport */
+    /* ... các style khác của main-content-wrapper ... */
+}
+
+.main-content-wrapper.sidebar-collapsed {
+    /* Khi sidebar thu gọn, điều chỉnh margin-left của nội dung chính */
+    margin-left: 80px; /* PHẢI khớp với chiều rộng thu gọn của .pcoded-navbar.navbar-collapsed */
+}
+
+.navbar-collapsed {
+    border-radius: 0 !important;
+}
+
+.collapse {
+    position: fixed !important;
+    margin-bottom: 90px;
+    top: 0;
+    z-index: 999999999;
+    background-color: #4680ff;
+    width: calc(100% - 80px);
+}

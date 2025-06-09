@@ -8,7 +8,7 @@ interface DataIotsProps {
     onUpdateDeviceType?: (deviceId: number, newType: number) => void; // Callback để cập nhật type
 }
 
-const CardList: React.FC<DataIotsProps> = ({ dataIots, onUpdateDeviceType }) => {
+const CardList: React.FC<DataIotsProps> = ({ dataIots }) => {
     const [cardCount, setCardCount] = useState<number>(5);
     const [colsPerRow, setColsPerRow] = useState<number>(1);
     const [titleFontSize, setTitleFontSize] = useState<number>(17);
@@ -112,7 +112,6 @@ const CardList: React.FC<DataIotsProps> = ({ dataIots, onUpdateDeviceType }) => 
                         maxHeightSettings={maxHeightSettings}
                         minHeightSettings={minHeightSettings}
                         isSettingMode={isSettingMode}
-                        onUpdateDeviceType={onUpdateDeviceType || (() => {})} // Đảm bảo luôn có callback
                     />
                 ))}
             </Row>

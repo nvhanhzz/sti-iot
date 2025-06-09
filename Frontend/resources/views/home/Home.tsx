@@ -39,21 +39,6 @@ const Home: React.FC = () => {
         fetchData();
     }, []);
 
-    // Thêm callback để cập nhật device type
-    const handleUpdateDeviceType = useCallback((deviceId: number, newType: number) => {
-        setDataIots((prevData) => {
-            return prevData.map((item) => {
-                if (item.id === deviceId) {
-                    return {
-                        ...item,
-                        type: newType,
-                    };
-                }
-                return item;
-            });
-        });
-    }, []);
-
     const handleSocketEvent = useCallback((eventData: any) => {
         console.log("Event data", eventData);
         setDataIots((prevData) => {
@@ -123,7 +108,6 @@ const Home: React.FC = () => {
             <div style={{ backgroundColor: 'white' }}>
                 <CardList
                     dataIots={dataIots}
-                    onUpdateDeviceType={handleUpdateDeviceType}
                 />
             </div>
         </>

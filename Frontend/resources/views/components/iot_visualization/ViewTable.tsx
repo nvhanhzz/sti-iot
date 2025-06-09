@@ -4,15 +4,6 @@ import { Button, Checkbox, Modal, Space, Select } from "antd";
 import { SettingOutlined, FilterOutlined } from '@ant-design/icons';
 import SpecificCMDTables from "./SpecificCMDTables";
 
-// Hàm stringToHex
-const stringToHex = (str: string) => {
-    let hex = '';
-    for (let i = 0; i < str.length; i++) {
-        hex += str.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
-    }
-    return hex.trim();
-};
-
 const { Option } = Select;
 
 interface ConfigIotsProps {
@@ -32,7 +23,7 @@ interface TableColumn {
 // Cấu hình các CMD đặc biệt
 const SPECIFIC_CMD_TABLE_CONFIG = [
     { cmd: "CMD_PUSH_MODBUS_RS485", title: "Dữ liệu Modbus RS485", limit: 4 },
-    { cmd: "CMD_PUSH_MODBUS_TCP", title: "Dữ liệu Modbus TCP", limit: 4 },
+    { cmd: "CMD_PUSH_MODBUS_TCP", title: "Dữ liệu Modbus TCP", limit: 2 },
 ];
 
 const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {

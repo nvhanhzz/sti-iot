@@ -26,7 +26,7 @@ const vi =
         accounts: "Tài Khoản",
         info: "Thông Tin Cá Nhân",
         packet: "Gói Tin Truyền Nhận",
-        device_iot: "Thiết Bị IOT",
+        device_iot: "Danh Sách Thiết Bị",
         device_cmd: "CMD Thiết Bị",
         payload_type: "Kiểu Dữ Liệu"
     },
