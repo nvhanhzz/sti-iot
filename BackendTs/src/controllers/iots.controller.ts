@@ -167,6 +167,7 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     const milliseconds = String(dateObject.getMilliseconds()).padStart(3, '0');
 
                     dataJson.time = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+                    // dataJson.time = payload.timestamp;
                     break;
                 }
             }

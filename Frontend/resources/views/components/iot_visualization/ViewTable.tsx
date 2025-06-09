@@ -4,7 +4,7 @@ import { Button, Checkbox, Modal, Space, Select } from "antd";
 import { SettingOutlined, FilterOutlined } from '@ant-design/icons';
 import SpecificCMDTables from "./SpecificCMDTables";
 
-// Hàm stringToHex được giữ lại trong ViewTable.tsx
+// Hàm stringToHex
 const stringToHex = (str: string) => {
     let hex = '';
     for (let i = 0; i < str.length; i++) {
@@ -21,76 +21,158 @@ interface ConfigIotsProps {
     settings?: boolean;
 }
 
-interface TableColumn { // Định nghĩa lại cho ViewTable để nhất quán
+interface TableColumn {
     title: string;
     dataIndex: string;
     key: string;
-    render?: (value: any, record?: any, index?: number) => React.ReactNode; // Thêm index vào render
+    render?: (value: any, record?: any, index?: number) => React.ReactNode;
     width?: number;
 }
 
+// Cấu hình các CMD đặc biệt
 const SPECIFIC_CMD_TABLE_CONFIG = [
     { cmd: "CMD_PUSH_MODBUS_RS485", title: "Dữ liệu Modbus RS485", limit: 4 },
-    { cmd: "CMD_PUSH_MODBUS_RS232", title: "Dữ liệu Modbus RS232", limit: 4 },
+    { cmd: "CMD_PUSH_MODBUS_TCP", title: "Dữ liệu Modbus TCP", limit: 4 },
 ];
 
 const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [allProcessedData, setAllProcessedData] = useState<any[]>([]);
+    const [specificCMDsData, setSpecificCMDsData] = useState<{ [cmd: string]: any[] }>({});
+
     const [selectedCMD, setSelectedCMD] = useState<string[]>([]);
-
-    const [columns, setColumns] = useState<TableColumn[]>([]); // Sử dụng TableColumn
+    const [columns, setColumns] = useState<TableColumn[]>([]);
     const [isColumnSettingsModalVisible, setIsColumnSettingsModalVisible] = useState(false);
-
     const [hiddenColumnKeys, setHiddenColumnKeys] = useState<Set<string>>(new Set());
     const [visibleColumnKeys, setVisibleColumnKeys] = useState<Set<string>>(new Set());
 
+    const specialCMDsSet = useMemo(() => new Set(SPECIFIC_CMD_TABLE_CONFIG.map(c => c.cmd)), []);
+    const specificCMDsLimits = useMemo(() => {
+        const limits: { [cmd: string]: number } = {};
+        SPECIFIC_CMD_TABLE_CONFIG.forEach(config => {
+            limits[config.cmd] = config.limit;
+        });
+        return limits;
+    }, []);
 
     useEffect(() => {
-        try {
-            if (dataIotsDetail.data && Array.isArray(dataIotsDetail.data)) {
-                const sortedData = [...dataIotsDetail.data].sort((a: any, b: any) => {
-                    const timeA = moment(a.time, "HH:mm:ss.SSS");
-                    const timeB = moment(b.time, "HH:mm:ss.SSS");
-                    if (timeA.isValid() && timeB.isValid()) {
-                        return timeB.diff(timeA);
-                    }
-                    return 0;
-                });
-
-                const groupedDataMap = new Map<string, any>();
-
-                sortedData.forEach((item: any) => {
-                    const groupKey = `${item.CMD}-${item.time}`;
-
-                    if (!groupedDataMap.has(groupKey)) {
-                        groupedDataMap.set(groupKey, {
-                            key: groupKey,
-                            CMD: item.CMD,
-                            CMD_Decriptions: item.CMD_Decriptions,
-                            unit: item.unit,
-                            time: item.time
-                        });
-                    }
-                    const currentGroup = groupedDataMap.get(groupKey)!;
-                    currentGroup[item.payload_name] = item.data;
-                });
-                setAllProcessedData(Array.from(groupedDataMap.values()));
-            } else {
-                setAllProcessedData([]);
-            }
-        } catch (error) {
-            console.error("Lỗi khi xử lý data trong useEffect của ViewTable:", error);
-            setAllProcessedData([]);
+        if (!dataIotsDetail.data || !Array.isArray(dataIotsDetail.data) || dataIotsDetail.data.length === 0) {
+            return;
         }
-    }, [dataIotsDetail]);
 
+        const newIncomingRawData = [...dataIotsDetail.data];
+
+        if (newIncomingRawData.length === 0) {
+            return;
+        }
+
+        const currentAllProcessedData = [...allProcessedData];
+        const currentSpecificCMDsData = Object.fromEntries(
+            Object.entries(specificCMDsData).map(([cmd, records]) => [cmd, [...records]])
+        );
+
+        const newIncomingGroupedDataMap = new Map<string, any>();
+        const newIncomingSpecificCMDsGroupedBatch = new Map<string, any>();
+
+        const sortedNewIncomingData = [...newIncomingRawData].sort((a: any, b: any) => {
+            const timeA = moment(a.time, "HH:mm:ss.SSS");
+            const timeB = moment(b.time, "HH:mm:ss.SSS");
+            if (timeA.isValid() && timeB.isValid()) {
+                return timeB.diff(timeA);
+            }
+            return 0;
+        });
+
+        sortedNewIncomingData.forEach((item: any) => {
+            if (specialCMDsSet.has(item.CMD)) {
+                const groupKey = `${item.CMD}-${item.time}`;
+                if (!newIncomingSpecificCMDsGroupedBatch.has(groupKey)) {
+                    newIncomingSpecificCMDsGroupedBatch.set(groupKey, {
+                        key: groupKey,
+                        CMD: item.CMD,
+                        CMD_Decriptions: item.CMD_Decriptions,
+                        unit: item.unit,
+                        time: item.time,
+                    });
+                }
+                const currentGroup = newIncomingSpecificCMDsGroupedBatch.get(groupKey)!;
+                currentGroup[item.payload_name] = item.data;
+            } else {
+                const groupKey = `${item.CMD}-${item.time}`;
+                if (!newIncomingGroupedDataMap.has(groupKey)) {
+                    newIncomingGroupedDataMap.set(groupKey, {
+                        key: groupKey,
+                        CMD: item.CMD,
+                        CMD_Decriptions: item.CMD_Decriptions,
+                        unit: item.unit,
+                        time: item.time
+                    });
+                }
+                const currentGroup = newIncomingGroupedDataMap.get(groupKey)!;
+                currentGroup[item.payload_name] = item.data;
+            }
+        });
+
+        // 1. Cập nhật dữ liệu cho bảng chung (allProcessedData)
+        const updatedAllProcessedData = [...currentAllProcessedData];
+        const existingAllProcessedMap = new Map(updatedAllProcessedData.map(d => [d.key, d]));
+
+        Array.from(newIncomingGroupedDataMap.values()).forEach(newItem => {
+            if (existingAllProcessedMap.has(newItem.key)) {
+                const existingItem = existingAllProcessedMap.get(newItem.key)!;
+                Object.assign(existingItem, newItem);
+            } else {
+                updatedAllProcessedData.unshift(newItem);
+            }
+        });
+
+        updatedAllProcessedData.sort((a, b) => {
+            const timeA = moment(a.time, "HH:mm:ss.SSS");
+            const timeB = moment(b.time, "HH:mm:ss.SSS");
+            if (timeA.isValid() && timeB.isValid()) {
+                return timeB.diff(timeA);
+            }
+            return 0;
+        });
+
+        // --- GIỚI HẠN 20 BẢN GHI Ở ĐÂY ---
+        setAllProcessedData(updatedAllProcessedData.slice(0, 20)); // Chỉ giữ lại 20 bản ghi mới nhất
+
+        // 2. Cập nhật dữ liệu cho các CMD đặc biệt (specificCMDsData)
+        const newSpecificCMDsDataState = { ...currentSpecificCMDsData };
+
+        Object.keys(specificCMDsLimits).forEach(cmd => {
+            const incomingRecordsForCMD = Array.from(newIncomingSpecificCMDsGroupedBatch.values()).filter(r => r.CMD === cmd);
+            let currentRecordsForCMD = newSpecificCMDsDataState[cmd] || [];
+
+            const uniqueKeysInCurrentState = new Set(currentRecordsForCMD.map(r => r.key));
+
+            incomingRecordsForCMD.forEach(newRec => {
+                if (!uniqueKeysInCurrentState.has(newRec.key)) {
+                    currentRecordsForCMD.unshift(newRec);
+                }
+            });
+
+            currentRecordsForCMD.sort((a, b) => {
+                const timeA = moment(a.time, "HH:mm:ss.SSS");
+                const timeB = moment(b.time, "HH:mm:ss.SSS");
+                if (timeA.isValid() && timeB.isValid()) {
+                    return timeB.diff(timeA);
+                }
+                return 0;
+            });
+
+            const limit = specificCMDsLimits[cmd] || 0;
+            newSpecificCMDsDataState[cmd] = currentRecordsForCMD.slice(0, limit);
+        });
+
+        setSpecificCMDsData(newSpecificCMDsDataState);
+
+    }, [dataIotsDetail, allProcessedData, specificCMDsData, specialCMDsSet, specificCMDsLimits]);
 
     const filteredData = useMemo(() => {
         let currentData = allProcessedData;
 
-        // Bỏ lọc các CMD đặc biệt ra khỏi bảng chung, giữ nguyên logic ban đầu
-        // const specialCMDs = new Set(SPECIFIC_CMD_TABLE_CONFIG.map(c => c.cmd));
-        // currentData = currentData.filter(row => !specialCMDs.has(row.CMD));
+        currentData = currentData.filter(row => !specialCMDsSet.has(row.CMD));
 
         if (selectedCMD && selectedCMD.length > 0) {
             currentData = currentData.filter(row => selectedCMD.includes(row.CMD));
@@ -99,16 +181,11 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         currentData = currentData.filter(row => row.CMD && !row.CMD.toLowerCase().includes('notify'));
 
         return currentData;
-    }, [allProcessedData, selectedCMD]);
-
+    }, [allProcessedData, selectedCMD, specialCMDsSet]);
 
     const dynamicColumns = useMemo(() => {
         const allPayloadNames = new Set<string>();
-        allProcessedData.forEach((row: any) => {
-            // Bỏ lọc các CMD đặc biệt ra khỏi việc tạo cột động cho bảng chung
-            // const isSpecialCMD = SPECIFIC_CMD_TABLE_CONFIG.some(config => config.cmd === row.CMD);
-            // if (isSpecialCMD) return;
-
+        allProcessedData.filter(row => !specialCMDsSet.has(row.CMD)).forEach((row: any) => {
             for (const key in row) {
                 if (key !== 'key' && key !== 'CMD' && key !== 'CMD_Decriptions' && key !== 'unit' && key !== 'time' && row.hasOwnProperty(key)) {
                     allPayloadNames.add(key);
@@ -117,7 +194,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         });
 
         const generatedCols: TableColumn[] = [
-            { title: "STT", dataIndex: "stt", key: "stt", width: 50, render: (_value, _record, index) => (index !== undefined ? index + 1 : '-') }, // Thêm cột STT
+            { title: "STT", dataIndex: "stt", key: "stt", width: 50, render: (_value, _record, index) => (index !== undefined ? index + 1 : '-') },
             { title: "CMD", dataIndex: "CMD", key: "CMD", render: (text: string) => text.replace("CMD_", "") },
             ...Array.from(allPayloadNames).map(payloadName => ({
                 title: payloadName.toUpperCase(),
@@ -129,7 +206,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
                     if (payloadName === 'data' && (record.CMD === 'CMD_PUSH_TCP' || record.CMD === 'CMD_PUSH_UDP')) {
                         if (typeof value === 'string') {
-                            return `${value} / ${stringToHex(value)}`;
+                            return `${value}`;
                         }
                     }
 
@@ -144,7 +221,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         ];
 
         return generatedCols;
-    }, [allProcessedData]);
+    }, [allProcessedData, specialCMDsSet]);
 
     useEffect(() => {
         setColumns(dynamicColumns);
@@ -159,7 +236,6 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return newVisibleKeys;
         });
     }, [dynamicColumns, hiddenColumnKeys]);
-
 
     const handleColumnVisibilityChange = useCallback((key: string, checked: boolean) => {
         setVisibleColumnKeys(prevVisibleKeys => {
@@ -189,19 +265,15 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     const renderedColumns = getRenderedColumns();
 
-
     const uniqueCMDs = useMemo(() => {
         const cmds = new Set<string>();
-        // Các CMD đặc biệt vẫn được đưa vào bộ lọc của bảng chung
-        // const specialCMDs = new Set(SPECIFIC_CMD_TABLE_CONFIG.map(c => c.cmd));
         allProcessedData.forEach(row => {
-            if (row.CMD && !row.CMD.toLowerCase().includes('notify')) { // Bỏ điều kiện !specialCMDs.has(row.CMD)
+            if (row.CMD && !row.CMD.toLowerCase().includes('notify') && !specialCMDsSet.has(row.CMD)) {
                 cmds.add(row.CMD);
             }
         });
         return Array.from(cmds);
-    }, [allProcessedData]);
-
+    }, [allProcessedData, specialCMDsSet]);
 
     return (
         <div style={{
@@ -277,7 +349,6 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                         <tr key={row.key} style={{ backgroundColor: rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9', }}>
                             {renderedColumns.map((col: TableColumn) => {
                                 const value = row[col.dataIndex];
-                                // Truyền rowIndex vào hàm render của cột để tính STT
                                 const renderedValue = col.render ? col.render(value, row, rowIndex) : value;
 
                                 return (
@@ -305,7 +376,7 @@ const ViewTable: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                 </tbody>
             </table>
 
-            <SpecificCMDTables data={allProcessedData} configCMDs={SPECIFIC_CMD_TABLE_CONFIG} />
+            <SpecificCMDTables data={specificCMDsData} configCMDs={SPECIFIC_CMD_TABLE_CONFIG} />
         </div>
     );
 };
