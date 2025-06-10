@@ -24876,3 +24876,7 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     background-color: #4680ff;
     width: calc(100% - 80px);
 }
+
+.ant-flex {
+    height: unset !important;
+}

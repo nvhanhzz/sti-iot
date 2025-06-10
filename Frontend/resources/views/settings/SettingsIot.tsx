@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useOutletContext } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { EditOutlined, FilterOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -25,18 +25,97 @@ const SettingsIot: React.FC = () => {
     const [dataAll, setDataAll] = useState<IotCMDInterface[]>([]);
     const [data, setData] = useState<IotCMDInterface[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [searchValues, setSearchValues] = useState({ name: '', mac: '' });
 
     // Form instances
     const [form] = Form.useForm();
     const [formSearch] = Form.useForm();
 
-    // Set page name on component mount
+    // Refs to prevent unnecessary re-renders
+    const socketEmittedRef = useRef(false);
+    const dataAllRef = useRef<IotCMDInterface[]>([]);
+
+    // Update ref when dataAll changes
+    useEffect(() => {
+        dataAllRef.current = dataAll;
+    }, [dataAll]);
+
+    // Set page name on component mount - memoize để tránh re-run
     useEffect(() => {
         changePageName(t('navleft.device_iot'), t('navleft.settings'));
     }, [changePageName, t]);
 
-    // Table columns configuration
-    const columns: TableColumnsType<IotCMDInterface> = [
+    // Memoized status buttons để tránh re-render
+    const StatusButtons = useMemo(() => {
+        return React.memo(({ record }: { record: any }) => (
+            <Flex wrap gap="small">
+                <Popover content={record.connected ? "Đã kết nối" : "Không kết nối"}>
+                    <Button
+                        type="primary"
+                        icon={record.connected ? <TbPlugConnected /> : <TbPlugConnectedX />}
+                        style={{
+                            backgroundColor: record.connected ? '#52c41a' : '#ff4d4f',
+                            borderColor: record.connected ? '#52c41a' : '#ff4d4f',
+                        }}
+                    />
+                </Popover>
+                <Popover content={record.input ? 'Có dữ liệu vào' : 'Không có dữ liệu vào'}>
+                    <Button
+                        type="primary"
+                        icon={<LuFileInput />}
+                        style={{
+                            backgroundColor: record.input ? '#52c41a' : '#fff',
+                            color: "#000",
+                            borderColor: record.input ? '#52c41a' : '#d9d9d9',
+                        }}
+                    />
+                </Popover>
+                <Popover content={record.output ? 'Có dữ liệu ra' : 'Không có dữ liệu ra'}>
+                    <Button
+                        type="primary"
+                        icon={<LuFileOutput />}
+                        style={{
+                            backgroundColor: record.output ? '#52c41a' : '#fff',
+                            color: "#000",
+                            borderColor: record.output ? '#52c41a' : '#d9d9d9',
+                        }}
+                    />
+                </Popover>
+            </Flex>
+        ));
+    }, []);
+
+    // Memoized action buttons
+    const ActionButtons = useMemo(() => {
+        return React.memo(({ record }: { record: any }) => (
+            <Flex gap="small" wrap>
+                <Button
+                    type="primary"
+                    icon={<EditOutlined />}
+                    onClick={() => showModal(record.id ?? 0)}
+                    size="small"
+                >
+                    {t('edit')}
+                </Button>
+                <Popconfirm
+                    title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')}?`}
+                    onConfirm={() => handleLockUnlock(record.id ?? 0)}
+                >
+                    <Button
+                        type={record.isdelete == 0 ? "primary" : "default"}
+                        danger={record.isdelete == 0}
+                        icon={<DeleteOutlined />}
+                        size="small"
+                    >
+                        {record.isdelete == 0 ? t('lock') : t('un_loock')}
+                    </Button>
+                </Popconfirm>
+            </Flex>
+        ));
+    }, [t]);
+
+    // Memoized table columns để tránh re-create
+    const columns: TableColumnsType<IotCMDInterface> = useMemo(() => [
         {
             title: 'STT',
             dataIndex: 'stt',
@@ -64,78 +143,19 @@ const SettingsIot: React.FC = () => {
             dataIndex: 'status',
             key: 'status',
             width: '20%',
-            render: (_, record: any) => (
-                <Flex wrap gap="small">
-                    <Popover content={record.connected ? "Đã kết nối" : "Không kết nối"}>
-                        <Button
-                            type="primary"
-                            icon={record.connected ? <TbPlugConnected /> : <TbPlugConnectedX />}
-                            style={{
-                                backgroundColor: record.connected ? '#52c41a' : '#ff4d4f',
-                                borderColor: record.connected ? '#52c41a' : '#ff4d4f',
-                            }}
-                        />
-                    </Popover>
-                    <Popover content={record.input ? 'Có dữ liệu vào' : 'Không có dữ liệu vào'}>
-                        <Button
-                            type="primary"
-                            icon={<LuFileInput />}
-                            style={{
-                                backgroundColor: record.input ? '#52c41a' : '#fff',
-                                color: "#000",
-                                borderColor: record.input ? '#52c41a' : '#d9d9d9',
-                            }}
-                        />
-                    </Popover>
-                    <Popover content={record.output ? 'Có dữ liệu ra' : 'Không có dữ liệu ra'}>
-                        <Button
-                            type="primary"
-                            icon={<LuFileOutput />}
-                            style={{
-                                backgroundColor: record.output ? '#52c41a' : '#fff',
-                                color: "#000",
-                                borderColor: record.output ? '#52c41a' : '#d9d9d9',
-                            }}
-                        />
-                    </Popover>
-                </Flex>
-            ),
+            render: (_, record: any) => <StatusButtons record={record} />,
         },
         {
             title: t('action'),
             dataIndex: 'operation',
             key: 'operation',
             width: '15%',
-            render: (_, record: any) => (
-                <Flex gap="small" wrap>
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        onClick={() => showModal(record.id ?? 0)}
-                        size="small"
-                    >
-                        {t('edit')}
-                    </Button>
-                    <Popconfirm
-                        title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')}?`}
-                        onConfirm={() => handleLockUnlock(record.id ?? 0)}
-                    >
-                        <Button
-                            type={record.isdelete == 0 ? "primary" : "default"}
-                            danger={record.isdelete == 0}
-                            icon={<DeleteOutlined />}
-                            size="small"
-                        >
-                            {record.isdelete == 0 ? t('lock') : t('un_loock')}
-                        </Button>
-                    </Popconfirm>
-                </Flex>
-            ),
+            render: (_, record: any) => <ActionButtons record={record} />,
         },
-    ];
+    ], [t, StatusButtons, ActionButtons]);
 
-    // Data fetching function
-    const fetchData = async () => {
+    // Data fetching function - useCallback để tránh re-create
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
             const response: any = await IotService.GetDataIots({});
@@ -144,60 +164,70 @@ const SettingsIot: React.FC = () => {
             setData(responseData);
             // Reset search form
             formSearch.resetFields();
+            setSearchValues({ name: '', mac: '' });
         } catch (error) {
             console.error('Error fetching data:', error);
             message.error('Không thể tải dữ liệu');
         } finally {
             setLoading(false);
         }
-    };
+    }, [formSearch]);
 
     // Initial data load
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
-    // Search function - only triggered by button click
-    const handleSearch = async () => {
+    // Memoized filtered data để tránh filter lại không cần thiết
+    const filteredData = useMemo(() => {
+        const { name: searchName, mac: searchMac } = searchValues;
+
+        // If both fields are empty, show all data
+        if (!searchName && !searchMac) {
+            return dataAll;
+        }
+
+        // Filter data based on search criteria
+        return dataAll.filter((item: any) => {
+            const itemName = item.name ? String(item.name).toLowerCase() : '';
+            const itemMac = item.mac ? String(item.mac).toLowerCase() : '';
+
+            const matchName = searchName ? itemName.includes(searchName.toLowerCase()) : true;
+            const matchMac = searchMac ? itemMac.includes(searchMac.toLowerCase()) : true;
+
+            return matchName && matchMac;
+        });
+    }, [dataAll, searchValues]);
+
+    // Update data when filtered result changes
+    useEffect(() => {
+        setData(filteredData);
+    }, [filteredData]);
+
+    // Search function - useCallback và debounce
+    const handleSearch = useCallback(async () => {
         try {
             const values = await formSearch.validateFields();
 
             // Clean and normalize search values
-            const searchName = values.name ? String(values.name).trim().toLowerCase() : '';
-            const searchMac = values.mac ? String(values.mac).trim().toLowerCase() : '';
+            const searchName = values.name ? String(values.name).trim() : '';
+            const searchMac = values.mac ? String(values.mac).trim() : '';
 
-            // If both fields are empty, show all data
-            if (!searchName && !searchMac) {
-                setData(dataAll);
-                return;
-            }
-
-            // Filter data based on search criteria
-            const filteredData = dataAll.filter((item: any) => {
-                const itemName = item.name ? String(item.name).toLowerCase() : '';
-                const itemMac = item.mac ? String(item.mac).toLowerCase() : '';
-
-                const matchName = searchName ? itemName.includes(searchName) : true;
-                const matchMac = searchMac ? itemMac.includes(searchMac) : true;
-
-                return matchName && matchMac;
-            });
-
-            setData(filteredData);
+            setSearchValues({ name: searchName, mac: searchMac });
         } catch (error) {
             console.error("Search validation failed:", error);
         }
-    };
+    }, [formSearch]);
 
     // Clear search and show all data
-    const handleClearSearch = () => {
+    const handleClearSearch = useCallback(() => {
         formSearch.resetFields();
-        setData(dataAll);
-    };
+        setSearchValues({ name: '', mac: '' });
+    }, [formSearch]);
 
-    // Show edit modal
-    const showModal = async (id: React.Key) => {
-        const item = dataAll.find((item: any) => item.id === id);
+    // Show edit modal - useCallback
+    const showModal = useCallback(async (id: React.Key) => {
+        const item = dataAllRef.current.find((item: any) => item.id === id);
         if (item) {
             form.setFieldsValue({
                 id: item.id,
@@ -205,17 +235,16 @@ const SettingsIot: React.FC = () => {
             });
             setIsModalVisible(true);
         }
-    };
+    }, [form]);
 
-    // Handle modal cancel
-    const handleCancel = () => {
+    // Handle modal cancel - useCallback
+    const handleCancel = useCallback(() => {
         setIsModalVisible(false);
         form.resetFields();
-    };
+    }, [form]);
 
-    // Update data in both dataAll and data arrays
-    const updateItemInArrays = (updatedItem: any) => {
-        // Update dataAll
+    // Update data in both dataAll and data arrays - useCallback với batching
+    const updateItemInArrays = useCallback((updatedItem: any) => {
         setDataAll(prevDataAll => {
             const newDataAll = [...prevDataAll];
             const index = newDataAll.findIndex((item: any) => item.id === updatedItem.id);
@@ -224,20 +253,10 @@ const SettingsIot: React.FC = () => {
             }
             return newDataAll;
         });
+    }, []);
 
-        // Update data (filtered data)
-        setData(prevData => {
-            const newData = [...prevData];
-            const index = newData.findIndex((item: any) => item.id === updatedItem.id);
-            if (index >= 0) {
-                newData[index] = { ...newData[index], ...updatedItem };
-            }
-            return newData;
-        });
-    };
-
-    // Handle form submission in modal
-    const handleOk = async () => {
+    // Handle form submission in modal - useCallback
+    const handleOk = useCallback(async () => {
         const loadingMessage = message.loading('Đang cập nhật...', 0);
         try {
             const values = await form.validateFields();
@@ -263,10 +282,10 @@ const SettingsIot: React.FC = () => {
         } finally {
             loadingMessage();
         }
-    };
+    }, [form, t, updateItemInArrays]);
 
-    // Handle lock/unlock functionality
-    const handleLockUnlock = async (id: React.Key) => {
+    // Handle lock/unlock functionality - useCallback
+    const handleLockUnlock = useCallback(async (id: React.Key) => {
         const loadingMessage = message.loading('Đang xử lý...', 0);
         try {
             const dataPost = { id };
@@ -278,7 +297,6 @@ const SettingsIot: React.FC = () => {
             updateItemInArrays(updatedItem);
 
             message.success(t('errorCode.' + resData.message));
-            debugger;
         } catch (errorInfo: any) {
             const response = errorInfo?.response;
             const errorMessage = response?.data?.message || 'Something went wrong';
@@ -286,18 +304,45 @@ const SettingsIot: React.FC = () => {
         } finally {
             loadingMessage();
         }
-    };
+    }, [t, updateItemInArrays]);
 
-    // Socket event handler
+    // Socket event handler - tối ưu với throttling
     const handleSocketEvent = useCallback((eventData: any) => {
         if (!Array.isArray(eventData)) return;
 
-        eventData.forEach((socketItem: any) => {
-            updateItemInArrays(socketItem);
+        // Batch update để tránh multiple re-renders
+        const updateIds = new Set();
+        const updates = eventData.filter((socketItem: any) => {
+            if (updateIds.has(socketItem.id)) return false;
+            updateIds.add(socketItem.id);
+            return true;
         });
+
+        if (updates.length > 0) {
+            setDataAll(prevDataAll => {
+                const newDataAll = [...prevDataAll];
+                let hasChanges = false;
+
+                updates.forEach((socketItem: any) => {
+                    const index = newDataAll.findIndex((item: any) => item.id === socketItem.id);
+                    if (index >= 0) {
+                        // Chỉ update nếu có thay đổi thực sự
+                        const currentItem = newDataAll[index];
+                        const hasActualChanges = JSON.stringify(currentItem) !== JSON.stringify({...currentItem, ...socketItem});
+
+                        if (hasActualChanges) {
+                            newDataAll[index] = { ...currentItem, ...socketItem };
+                            hasChanges = true;
+                        }
+                    }
+                });
+
+                return hasChanges ? newDataAll : prevDataAll;
+            });
+        }
     }, []);
 
-    // Socket event listeners
+    // Socket event listeners - stable reference
     useEffect(() => {
         socket.on("iot_update_status", handleSocketEvent);
         return () => {
@@ -305,12 +350,18 @@ const SettingsIot: React.FC = () => {
         };
     }, [socket, handleSocketEvent]);
 
-    // Emit socket event when dataAll changes
+    // Emit socket event when dataAll changes - với debounce
     useEffect(() => {
-        if (dataAll.length > 0) {
-            socket.emit("iot:iot_status");
+        if (dataAll.length > 0 && !socketEmittedRef.current) {
+            socketEmittedRef.current = true;
+            const timer = setTimeout(() => {
+                socket.emit("iot:iot_status");
+                socketEmittedRef.current = false;
+            }, 100); // Debounce 100ms
+
+            return () => clearTimeout(timer);
         }
-    }, [dataAll, socket]);
+    }, [dataAll.length, socket]);
 
     return (
         <>
@@ -359,6 +410,12 @@ const SettingsIot: React.FC = () => {
                             columns={columns}
                             dataSource={data}
                             bordered
+                            pagination={{
+                                pageSize: 50,
+                                showSizeChanger: true,
+                                showQuickJumper: true,
+                                showTotal: (total) => `Tổng ${total} bản ghi`
+                            }}
                         />
                     )}
                 </div>
@@ -414,4 +471,4 @@ const SettingsIot: React.FC = () => {
     );
 };
 
-export default SettingsIot;
+export default React.memo(SettingsIot);

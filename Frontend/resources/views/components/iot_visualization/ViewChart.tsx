@@ -4,7 +4,8 @@ import moment from "moment";
 
 interface DataPoint {
     time: string; // Key cho XAxis, định dạng "HH:mm:ss.SSS"
-    [dataKey: string]: string | number | null; // Các keys động cho YAxis (ví dụ: "ADC1_Value (V)", "ADC2_Value (V)")
+    // Các keys động cho YAxis (ví dụ: "ADC1_Value (V)", "ADC2_Value (V)")
+    [key: string]: string | number | boolean | null | undefined;
 }
 
 interface ConfigIotsProps {
@@ -39,12 +40,37 @@ const formatNumber = (num: number | null | undefined): string => {
     return isNegative ? '-' + result : result;
 };
 
-const STATIC_COLOR_MAP: string[] = [
-    "#FF5733", "#33FF57", "#3380FF", "#FF33A1", "#FFD700",
-    "#800080", "#00CED1", "#DC143C", "#008080", "#8B4513"
-];
+// Màu mặc định khi không tìm thấy màu tùy chỉnh hoặc tĩnh
+const DEFAULT_COLOR = "#8884d8"; // Màu tím nhạt
 
-// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian
+// --- ĐÂY LÀ PHẦN ĐỔI MÀU ---
+// Định nghĩa các màu tùy chỉnh cho từng kênh dữ liệu cụ thể
+const CUSTOM_COLOR_MAP: { [key: string]: string } = {
+    "ADC1_Value (V)": "#1A73E8",      // Google Blue - Xanh dương đậm
+    "ADC2_Value (mA)": "#D93025",     // Google Red - Đỏ đậm
+    "ADC3_Value (pH)": "#F9AB00",     // Google Yellow - Vàng cam (ví dụ nếu có thêm kênh)
+    "Temperature (C)": "#00A693",     // Teal - Xanh ngọc
+    "Humidity (%)": "#8F44AD",        // Amethyst - Tím
+    // Thêm các ánh xạ khác nếu bạn có thêm kênh dữ liệu muốn tùy chỉnh màu
+};
+
+// Mảng màu dự phòng, sẽ dùng nếu CUSTOM_COLOR_MAP không có key tương ứng
+const FALLBACK_COLOR_PALETTE: string[] = [
+    "#4285F4", // Blue
+    "#EA4335", // Red
+    "#FBBC05", // Yellow
+    "#34A853", // Green
+    "#9C27B0", // Purple
+    "#00BCD4", // Cyan
+    "#FF9800", // Orange
+    "#607D8B", // Blue Grey
+    "#E91E63", // Pink
+    "#03A9F4", // Light Blue
+];
+// --- KẾT THÚC PHẦN ĐỔI MÀU ---
+
+
+// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian (giữ nguyên)
 const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
     if (data.length < 2) return data;
 
@@ -56,20 +82,17 @@ const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
     for (let i = 0; i < sortedData.length; i++) {
         result.push(sortedData[i]);
 
-        // Nếu không phải điểm cuối cùng, kiểm tra khoảng cách thời gian
         if (i < sortedData.length - 1) {
             const currentTime = moment(sortedData[i].time, "HH:mm:ss.SSS");
             const nextTime = moment(sortedData[i + 1].time, "HH:mm:ss.SSS");
             const timeDiff = nextTime.diff(currentTime);
 
-            // Nếu khoảng cách > 5 giây, tạo điểm trung gian
             if (timeDiff > 5000) {
                 const midTime = moment(currentTime.valueOf() + timeDiff / 2);
                 const midPoint: DataPoint = {
                     time: midTime.format("HH:mm:ss.SSS")
                 };
 
-                // Nội suy giá trị cho mỗi key
                 keys.forEach(key => {
                     const currentValue = sortedData[i][key] as number;
                     const nextValue = sortedData[i + 1][key] as number;
@@ -89,11 +112,10 @@ const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
             }
         }
     }
-
     return result;
 };
 
-// Hàm làm mượt dữ liệu bằng moving average
+// Hàm làm mượt dữ liệu bằng moving average (giữ nguyên)
 const smoothData = (data: DataPoint[], keys: string[], windowSize: number = 3): DataPoint[] => {
     if (data.length < windowSize) return data;
 
@@ -126,7 +148,6 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
     const [, setLastUpdateTime] = useState<string>('');
 
-    // Sử dụng ref để theo dõi records đã xử lý (dựa trên CMD + time)
     const processedRecordsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
@@ -136,7 +157,6 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
-        // Chỉ xử lý các records có time và là ADC channels
         const validRecords = newRecordsFromProps.filter((record: any) => {
             return record.time &&
                 (record.CMD === 'CMD_ADC_CHANNEL1' || record.CMD === 'CMD_ADC_CHANNEL2') &&
@@ -147,10 +167,8 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
-        // Tạo key unique cho mỗi record dựa trên CMD + time
         const getRecordKey = (record: any) => `${record.CMD}_${record.time}`;
 
-        // Lọc ra những records chưa được xử lý
         const newValidRecords = validRecords.filter((record: any) => {
             const recordKey = getRecordKey(record);
             return !processedRecordsRef.current.has(recordKey);
@@ -160,7 +178,6 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
-        // Cập nhật danh sách records đã xử lý
         newValidRecords.forEach((record: any) => {
             const recordKey = getRecordKey(record);
             processedRecordsRef.current.add(recordKey);
@@ -168,7 +185,6 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
         console.log(`📊 Chart Update: Processing ${newValidRecords.length} new ADC records with unique time`);
 
-        // Xử lý records mới
         const newPoints: DataPoint[] = [];
         const currentBatchKeys = new Set<string>();
 
@@ -179,15 +195,14 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             } else if (record.CMD === 'CMD_ADC_CHANNEL2') {
                 dataKey = `ADC2_Value (mA)`;
             } else {
-                return; // Skip nếu không phải ADC channel
+                return;
             }
 
             currentBatchKeys.add(dataKey);
 
-            // Xử lý giá trị null/undefined và đảm bảo giá trị hợp lệ
             let value = parseFloat(record.data);
             if (isNaN(value)) {
-                value = 0; // Thay vị null/undefined bằng 0
+                value = 0;
             }
 
             const newPoint: DataPoint = {
@@ -202,20 +217,16 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         }
 
         setChartData((prevChartData) => {
-            // Nối các điểm mới vào dữ liệu hiện có
             let combinedData = [...prevChartData, ...newPoints];
 
-            // Sắp xếp theo thời gian
             combinedData.sort((a, b) =>
                 moment(a.time, "HH:mm:ss.SSS").valueOf() - moment(b.time, "HH:mm:ss.SSS").valueOf()
             );
 
-            // Hợp nhất các điểm tại cùng một thời điểm
             const mergedDataMap = new Map<string, DataPoint>();
             combinedData.forEach(point => {
                 if (mergedDataMap.has(point.time)) {
                     const existingPoint = mergedDataMap.get(point.time)!;
-                    // Kết hợp dữ liệu, ưu tiên giá trị mới nếu có
                     Object.keys(point).forEach(key => {
                         if (key !== 'time' && point[key] !== null && point[key] !== undefined) {
                             existingPoint[key] = point[key];
@@ -228,16 +239,12 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
             let finalChartData = Array.from(mergedDataMap.values());
 
-            // Áp dụng nội suy và làm mượt dữ liệu
             const allKeys = Array.from(new Set([...chartDataKeys, ...Array.from(currentBatchKeys)]));
 
-            // Nội suy để tạo điểm trung gian
             finalChartData = interpolateData(finalChartData, allKeys);
 
-            // Làm mượt dữ liệu
             finalChartData = smoothData(finalChartData, allKeys, 3);
 
-            // Giữ 300 phần tử mới nhất
             const MAX_DATA_POINTS = 300;
             if (finalChartData.length > MAX_DATA_POINTS) {
                 finalChartData = finalChartData.slice(-MAX_DATA_POINTS);
@@ -251,23 +258,19 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return finalChartData;
         });
 
-        // Cập nhật chartDataKeys
         setChartDataKeys((prevChartDataKeys) => {
             const combinedSet = new Set([...prevChartDataKeys, ...Array.from(currentBatchKeys)]);
             return Array.from(combinedSet);
         });
 
-        // Dọn dẹp processedRecordsRef để tránh memory leak
-        // Chỉ giữ lại 1000 records gần nhất
         if (processedRecordsRef.current.size > 1000) {
             const recordsArray = Array.from(processedRecordsRef.current);
-            const toKeep = recordsArray.slice(-500); // Giữ 500 records gần nhất
+            const toKeep = recordsArray.slice(-500);
             processedRecordsRef.current = new Set(toKeep);
         }
 
     }, [dataIotsDetail.data, chartDataKeys]);
 
-    // --- Các hàm định dạng ---
     const tooltipFormatter = useCallback((value: any, name: string) => {
         if (value === null || value === undefined) return null;
         return [formatNumber(Number(value)), name];
@@ -286,7 +289,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     return (
         <>
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={720}>
                 <LineChart data={chartData}>
                     <CartesianGrid stroke="#ccc" strokeDasharray="4 4" vertical={false} />
                     <XAxis
@@ -322,11 +325,12 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                             type="monotone"
                             key={dataKey}
                             dataKey={dataKey}
-                            stroke={STATIC_COLOR_MAP[index % STATIC_COLOR_MAP.length]}
+                            // Sử dụng CUSTOM_COLOR_MAP trước, sau đó fallback tới FALLBACK_COLOR_PALETTE, cuối cùng là DEFAULT_COLOR
+                            stroke={CUSTOM_COLOR_MAP[dataKey] || FALLBACK_COLOR_PALETTE[index % FALLBACK_COLOR_PALETTE.length] || DEFAULT_COLOR}
                             strokeWidth={2}
-                            dot={false} // Tắt dots để đường line mượt hơn
+                            dot={false}
                             activeDot={{ r: 4, strokeWidth: 0 }}
-                            connectNulls={true} // Kết nối qua null values
+                            connectNulls={true}
                         />
                     ))}
                 </LineChart>

@@ -59,6 +59,32 @@ const createGlobalDataService = <T>(store: T[], key: keyof T) => ({
             return true;
         }
         return false;
+    },
+    replaceByMultipleKeys: (newItem: T, keys: (keyof T)[] = [key]): boolean => {
+        // Kiểm tra tất cả các key có giá trị hợp lệ
+        const hasValidKeys = keys.every((k) =>
+            newItem[k] !== undefined && newItem[k] !== null
+        );
+
+        if (!hasValidKeys) {
+            console.warn(`One or more keys are missing in newItem for replaceByMultipleKeys. Keys: ${keys.map(String).join(', ')}`);
+            return false;
+        }
+
+        // Tìm phần tử trùng theo tất cả các key
+        const index = store.findIndex((item) =>
+            keys.every((k) => item[k] === newItem[k])
+        );
+
+        if (index !== -1) {
+            // Thay thế hoàn toàn, không merge
+            store[index] = newItem;
+            return true;
+        } else {
+            // Nếu không tìm thấy, thêm mới
+            store.push(newItem);
+            return true;
+        }
     }
 });
 

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import type { RadioChangeEvent } from 'antd';
-import { NotificationOutlined, SettingOutlined, FullscreenOutlined } from '@ant-design/icons';
-import { FloatButton, Card, Drawer, Radio } from 'antd';
+import { Card, Drawer, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 // Import components (assuming correct paths)
-import FooterLayout from './FooterLayout';
 import HeaderLayout from './HeaderLayout';
 import NavLeftLayout from './NavLeftLayout';
 
@@ -24,10 +22,6 @@ const Main: React.FC = () => {
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
         localStorage.setItem('collapsed', String(!collapsed)); // Store boolean as string
-    };
-
-    const showDrawer = () => {
-        setOpen(true);
     };
 
     const onClose = () => {
@@ -62,7 +56,7 @@ const Main: React.FC = () => {
             {/* Left Navigation (Sidebar) */}
             <NavLeftLayout collapsed={collapsed} mode={mode}></NavLeftLayout>
 
-            {/* Main Content Area (Header + Content + Footer) */}
+            {/* Main Content Area (Header + Content */}
             <div className={`main-content-wrapper ${collapsed ? 'sidebar-collapsed' : ''}`}>
                 {/* Header */}
                 <HeaderLayout collapsed={collapsed} toggleCollapsed={toggleCollapsed}></HeaderLayout>
@@ -73,21 +67,7 @@ const Main: React.FC = () => {
                         <Outlet context={{ changePageName }} />
                     </div>
                 </div>
-
-                {/* Footer */}
-                <FooterLayout mode={mode}></FooterLayout>
             </div>
-
-            {/* Float Buttons - Positioned globally, might need specific CSS */}
-            <FloatButton.Group
-                trigger="click"
-                type="primary"
-                style={{ insetBlockEnd: '10vh' }} // Keep this as it is if you want it floating
-                icon={<FullscreenOutlined />}
-            >
-                <FloatButton icon={<NotificationOutlined />} tooltip={<div>{t('notifications')}</div>} />
-                <FloatButton icon={<SettingOutlined />} tooltip={<div>{t('settings')}</div>} onClick={showDrawer} />
-            </FloatButton.Group>
 
             {/* Settings Drawer */}
             <Drawer title={t('settings')} onClose={onClose} open={open} className={`${mode}-mode`}>

@@ -1,7 +1,7 @@
 // src/resources/views/components/CardList.tsx
-import React, { useState } from "react";
-import { Row, Button, Modal, InputNumber, Slider } from "antd"; // Import các component Ant Design cần thiết
-import IotCard from "./IotCard"; // Import component IotCard mới
+import React from "react";
+import { Row } from "antd"; // Chỉ giữ lại Row từ Ant Design
+import IotCard from "./IotCard"; // Import component IotCard
 
 interface DataIotsProps {
     dataIots: any[];
@@ -9,98 +9,17 @@ interface DataIotsProps {
 }
 
 const CardList: React.FC<DataIotsProps> = ({ dataIots }) => {
-    const [cardCount, setCardCount] = useState<number>(5);
-    const [colsPerRow, setColsPerRow] = useState<number>(1);
-    const [titleFontSize, setTitleFontSize] = useState<number>(17);
-    const [contentFontSize, setContentFontSize] = useState<number>(14);
-    const [maxHeightSettings, setMaxHeightSettings] = useState<number>(500);
-    const [minHeightSettings, setMinHeightSettings] = useState<number>(260);
-    const [isSettingMode] = useState<boolean>(true);
-    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
-    const handleOk = () => {
-        setIsModalVisible(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
-
-    const toggleFullscreen = () => {
-        setIsFullscreen(!isFullscreen);
-    };
+    // Giá trị cố định hoặc có thể truyền từ component cha nếu cần tùy chỉnh
+    const cardCount: number = 5; // Số lượng card hiển thị cố định
+    const colsPerRow: number = 1; // Số card trên mỗi dòng cố định
+    const titleFontSize: number = 17; // Cỡ chữ tiêu đề cố định
+    const contentFontSize: number = 14; // Cỡ chữ nội dung cố định
+    const maxHeightSettings: number = 500; // Chiều cao tối đa của thẻ cố định
+    const minHeightSettings: number = 260; // Chiều cao tối thiểu của thẻ cố định
+    const isSettingMode: boolean = true; // Chế độ cài đặt cố định (true nếu bạn muốn IotCard hiển thị các tùy chọn cài đặt)
 
     return (
-        <div
-            style={{
-                padding: 20,
-                transition: "transform 0.3s",
-                transform: isFullscreen ? "scale(1)" : "scale(1.0)",
-                height: isFullscreen ? "100vh" : "auto",
-                overflow: isFullscreen ? "hidden" : "auto",
-            }}
-        >
-            {!isFullscreen && (
-                <>
-                    <Button
-                        type="primary"
-                        onClick={() => setIsModalVisible(true)}
-                        style={{ marginBottom: 20 }}
-                    >
-                        Mở Cài Đặt
-                    </Button>
-                    {/*<Button*/}
-                    {/*    type="default"*/}
-                    {/*    onClick={() => setIsSettingMode(!isSettingMode)}*/}
-                    {/*    style={{ marginBottom: 20, marginLeft: 10 }}*/}
-                    {/*>*/}
-                    {/*    {isSettingMode ? "Chuyển sang Hiển Thị" : "Chuyển sang Cài Đặt"}*/}
-                    {/*</Button>*/}
-                    <Button
-                        type="default"
-                        onClick={toggleFullscreen}
-                        style={{ marginBottom: 20, marginLeft: 10 }}
-                    >
-                        {isFullscreen ? "Thoát Phóng to" : "Phóng to Màn hình"}
-                    </Button>
-                </>
-            )}
-
-            {/* Modal Cài Đặt Layout (giữ nguyên) */}
-            <Modal
-                title="Cài Đặt Giao Diện"
-                open={isModalVisible}
-                onOk={handleOk}
-                onCancel={handleCancel}
-                width={400}
-            >
-                <div style={{ marginBottom: 10 }}>
-                    <label>Số lượng Card:</label>
-                    <InputNumber min={1} max={20} value={cardCount} onChange={(value) => setCardCount(value ?? 1)} style={{ marginLeft: 10, width: 100 }} />
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Số card trên 1 dòng:</label>
-                    <Slider min={1} max={6} value={colsPerRow} onChange={setColsPerRow} style={{ width: 200, marginLeft: 10 }} />
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Font Size Title:</label>
-                    <Slider min={10} max={24} value={titleFontSize} onChange={setTitleFontSize} style={{ width: 200, marginLeft: 10 }} />
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Font Size Nội Dung:</label>
-                    <Slider min={10} max={24} value={contentFontSize} onChange={setContentFontSize} style={{ width: 200, marginLeft: 10 }} />
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Độ Dài Max Của Thẻ:</label>
-                    <Slider min={0} max={600} value={maxHeightSettings} onChange={setMaxHeightSettings} style={{ width: 200, marginLeft: 10 }} />
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Độ Dài Min Của Thẻ:</label>
-                    <Slider min={0} max={600} value={minHeightSettings} onChange={setMinHeightSettings} style={{ width: 200, marginLeft: 10 }} />
-                </div>
-            </Modal>
-
+        <div>
             <Row gutter={[16, 16]}>
                 {dataIots && dataIots.length > 0 && dataIots.slice(0, cardCount).map((item: any, index: number) => (
                     <IotCard

@@ -65,7 +65,6 @@ const NavLeftLayout: React.FC<ChildProps> = ({ collapsed, mode }) => {
         backgroundColor: '#e0f2f7', // Màu nền nhẹ
         color: '#007bff',           // Màu chữ xanh
         fontWeight: 'bold',         // Chữ đậm
-        borderLeft: '4px solid #007bff' // Thanh màu bên trái
     };
 
     // Style cho icon khi active (nếu icon là SVG hoặc cần thay đổi màu)

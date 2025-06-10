@@ -7,6 +7,7 @@ import { Button, Input, Table, Flex, Modal, Form, Radio, message, Popconfirm, Se
 import { PacketInterface } from '../../../interface/SettingInterface';
 import PacketService from '../../../services/PacketService';
 import LoadingTable from '../components/LoadingTable';
+import CustomerService from "../../../services/CustomerService.ts";
 
 type ContextType =
     {
@@ -22,7 +23,7 @@ const SettingsCustomer: React.FC = () => {
     const [formSearch] = Form.useForm();
     const defautForm: PacketInterface = {};
     const [formData] = useState<PacketInterface>(defautForm);
-    const [formDataSearch, setformDataSearch] = useState<PacketInterface>(defautForm);
+    const [formDataSearch] = useState<PacketInterface>(defautForm);
     const [modal2Open, setModal2Open] = useState(false);
     const { changePageName } = useOutletContext<ContextType>();
     React.useEffect(() => {
@@ -81,7 +82,7 @@ const SettingsCustomer: React.FC = () => {
                                 <Button color="primary" variant="solid" icon={<EditOutlined />} onClick={() => showModal(record._id ?? 0)}>
                                     {t('edit')}
                                 </Button>
-                                <Popconfirm title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')}  ?`} onConfirm={() => handleLoockUnLoock(record.id ?? 0)}>
+                                <Popconfirm title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')}  ?`} onConfirm={() => handleLoockUnLoock(record._id ?? 0)}>
                                     <Button color={!record.isdelete ? 'danger' : 'default'} variant="solid" icon={<DeleteOutlined />}>
                                         {record.isdelete ? t('un_loock') : t('lock')}
                                     </Button>
@@ -160,7 +161,7 @@ const SettingsCustomer: React.FC = () => {
             }
             const response: any = await CustomerService.LookCustomers(dataPost);
             const newData = [...data];
-            const index = newData.findIndex((item) => key === item.id);
+            const index = newData.findIndex((item) => key === item._id);
             const item = newData[index];
             const itemNew = item;
             itemNew.isdelete = !(newData[index].isdelete);
