@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import moment from "moment";
 
 interface DataPoint {
     time: string; // Key cho XAxis, định dạng "HH:mm:ss.SSS"
@@ -12,10 +11,10 @@ interface ConfigIotsProps {
     dataIotsDetail: {
         data: any[]; // Mảng chứa các điểm dữ liệu
     };
-    settings: boolean;
+    settings?: boolean;
 }
 
-// Hàm định dạng số lớn nhỏ (giữ nguyên)
+// Hàm định dạng số lớn nhỏ
 const formatNumber = (num: number | null | undefined): string => {
     if (num === null || num === undefined) {
         return '';
@@ -41,56 +40,71 @@ const formatNumber = (num: number | null | undefined): string => {
 };
 
 // Màu mặc định khi không tìm thấy màu tùy chỉnh hoặc tĩnh
-const DEFAULT_COLOR = "#8884d8"; // Màu tím nhạt
+const DEFAULT_COLOR = "#8884d8";
 
-// --- ĐÂY LÀ PHẦN ĐỔI MÀU ---
 // Định nghĩa các màu tùy chỉnh cho từng kênh dữ liệu cụ thể
 const CUSTOM_COLOR_MAP: { [key: string]: string } = {
     "ADC1_Value (V)": "#1A73E8",      // Google Blue - Xanh dương đậm
     "ADC2_Value (mA)": "#D93025",     // Google Red - Đỏ đậm
-    "ADC3_Value (pH)": "#F9AB00",     // Google Yellow - Vàng cam (ví dụ nếu có thêm kênh)
+    "ADC3_Value (pH)": "#F9AB00",     // Google Yellow - Vàng cam
     "Temperature (C)": "#00A693",     // Teal - Xanh ngọc
     "Humidity (%)": "#8F44AD",        // Amethyst - Tím
-    // Thêm các ánh xạ khác nếu bạn có thêm kênh dữ liệu muốn tùy chỉnh màu
 };
 
-// Mảng màu dự phòng, sẽ dùng nếu CUSTOM_COLOR_MAP không có key tương ứng
+// Mảng màu dự phòng
 const FALLBACK_COLOR_PALETTE: string[] = [
-    "#4285F4", // Blue
-    "#EA4335", // Red
-    "#FBBC05", // Yellow
-    "#34A853", // Green
-    "#9C27B0", // Purple
-    "#00BCD4", // Cyan
-    "#FF9800", // Orange
-    "#607D8B", // Blue Grey
-    "#E91E63", // Pink
-    "#03A9F4", // Light Blue
+    "#4285F4", "#EA4335", "#FBBC05", "#34A853", "#9C27B0",
+    "#00BCD4", "#FF9800", "#607D8B", "#E91E63", "#03A9F4",
 ];
-// --- KẾT THÚC PHẦN ĐỔI MÀU ---
 
+// Helper function để xử lý thời gian linh hoạt
+const normalizeTime = (time: string | number): string => {
+    if (typeof time === 'number') {
+        // Detect nếu là seconds (< 1e10) hoặc milliseconds (>= 1e10)
+        const timestamp = time > 1e10 ? time : time * 1000;
+        const date = new Date(timestamp);
+        return date.toTimeString().split(' ')[0] + '.' + date.getMilliseconds().toString().padStart(3, '0');
+    }
+    return time;
+};
 
-// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian (giữ nguyên)
+// Parse time helper để convert về milliseconds
+const parseTime = (time: string | number): number => {
+    if (typeof time === 'number') {
+        return time > 1e10 ? time : time * 1000;
+    } else {
+        // Parse "HH:mm:ss.SSS" format
+        const [timePart, msPart = '0'] = time.split('.');
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+        // Tạo timestamp cho hôm nay với thời gian này
+        const today = new Date();
+        today.setHours(hours, minutes, seconds, parseInt(msPart));
+        return today.getTime();
+    }
+};
+
+// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian
 const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
     if (data.length < 2) return data;
 
     const result: DataPoint[] = [];
-    const sortedData = [...data].sort((a, b) =>
-        moment(a.time, "HH:mm:ss.SSS").valueOf() - moment(b.time, "HH:mm:ss.SSS").valueOf()
-    );
+    const sortedData = [...data].sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
     for (let i = 0; i < sortedData.length; i++) {
         result.push(sortedData[i]);
 
         if (i < sortedData.length - 1) {
-            const currentTime = moment(sortedData[i].time, "HH:mm:ss.SSS");
-            const nextTime = moment(sortedData[i + 1].time, "HH:mm:ss.SSS");
-            const timeDiff = nextTime.diff(currentTime);
+            const currentTime = parseTime(sortedData[i].time);
+            const nextTime = parseTime(sortedData[i + 1].time);
+            const timeDiff = nextTime - currentTime;
 
-            if (timeDiff > 5000) {
-                const midTime = moment(currentTime.valueOf() + timeDiff / 2);
+            if (timeDiff > 5000) { // 5 seconds
+                const midTime = currentTime + timeDiff / 2;
+                const midTimeString = normalizeTime(midTime);
+
                 const midPoint: DataPoint = {
-                    time: midTime.format("HH:mm:ss.SSS")
+                    time: midTimeString
                 };
 
                 keys.forEach(key => {
@@ -115,7 +129,7 @@ const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
     return result;
 };
 
-// Hàm làm mượt dữ liệu bằng moving average (giữ nguyên)
+// Hàm làm mượt dữ liệu bằng moving average
 const smoothData = (data: DataPoint[], keys: string[], windowSize: number = 3): DataPoint[] => {
     if (data.length < windowSize) return data;
 
@@ -183,7 +197,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             processedRecordsRef.current.add(recordKey);
         });
 
-        console.log(`📊 Chart Update: Processing ${newValidRecords.length} new ADC records with unique time`);
+        console.log(`📊 Chart Update: Processing ${newValidRecords.length} new ADC records`);
 
         const newPoints: DataPoint[] = [];
         const currentBatchKeys = new Set<string>();
@@ -206,7 +220,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             }
 
             const newPoint: DataPoint = {
-                time: record.time,
+                time: normalizeTime(record.time), // Normalize time here
                 [dataKey]: value
             };
             newPoints.push(newPoint);
@@ -219,10 +233,10 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
         setChartData((prevChartData) => {
             let combinedData = [...prevChartData, ...newPoints];
 
-            combinedData.sort((a, b) =>
-                moment(a.time, "HH:mm:ss.SSS").valueOf() - moment(b.time, "HH:mm:ss.SSS").valueOf()
-            );
+            // Sort by time using the parseTime helper
+            combinedData.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
+            // Merge data points with same timestamp
             const mergedDataMap = new Map<string, DataPoint>();
             combinedData.forEach(point => {
                 if (mergedDataMap.has(point.time)) {
@@ -241,19 +255,19 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
             const allKeys = Array.from(new Set([...chartDataKeys, ...Array.from(currentBatchKeys)]));
 
+            // Apply interpolation and smoothing
             finalChartData = interpolateData(finalChartData, allKeys);
-
             finalChartData = smoothData(finalChartData, allKeys, 3);
 
+            // Limit data points for performance
             const MAX_DATA_POINTS = 300;
             if (finalChartData.length > MAX_DATA_POINTS) {
                 finalChartData = finalChartData.slice(-MAX_DATA_POINTS);
             }
 
-            const currentTime = moment().format("HH:mm:ss");
+            const currentTime = new Date().toLocaleTimeString();
             setLastUpdateTime(currentTime);
-            console.log(`✅ Chart Updated at ${currentTime}: ${finalChartData.length} total points, latest values:`,
-                finalChartData.slice(-2));
+            console.log(`✅ Chart Updated at ${currentTime}: ${finalChartData.length} total points`);
 
             return finalChartData;
         });
@@ -263,6 +277,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return Array.from(combinedSet);
         });
 
+        // Clean up processed records cache
         if (processedRecordsRef.current.size > 1000) {
             const recordsArray = Array.from(processedRecordsRef.current);
             const toKeep = recordsArray.slice(-500);
@@ -277,65 +292,85 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     }, []);
 
     const tooltipLabelFormatter = useCallback((label: string) => {
-        return `Thời gian: ${moment(label, "HH:mm:ss.SSS").format("HH:mm:ss")}`;
+        const timeOnly = label.split('.')[0]; // Remove milliseconds for display
+        return `Thời gian: ${timeOnly}`;
     }, []);
 
     const xAxisTickFormatter = useCallback((value: string) => {
-        const time = moment(value, "HH:mm:ss.SSS");
-        return time.format("HH:mm:ss");
+        return value.split('.')[0]; // Remove milliseconds for X-axis display
     }, []);
 
     const yAxisTickFormatter = useCallback((value: number) => formatNumber(value), []);
-
+//FIXME: có lẽ sẽ cần fix ở height ở 3 dòng dưới
     return (
-        <>
-            <ResponsiveContainer width="100%" height={720}>
-                <LineChart data={chartData}>
-                    <CartesianGrid stroke="#ccc" strokeDasharray="4 4" vertical={false} />
+        <div className="w-full h-full bg-white p-4 rounded-lg shadow-sm">
+            <ResponsiveContainer width="100%" height={600}>
+                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid stroke="#e0e0e0" strokeDasharray="3 3" vertical={false} />
                     <XAxis
                         dataKey="time"
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: '#666' }}
                         tickFormatter={xAxisTickFormatter}
                         interval="preserveStartEnd"
                         height={60}
+                        angle={-45}
+                        textAnchor="end"
                     />
                     <YAxis
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: '#666' }}
                         tickFormatter={yAxisTickFormatter}
                         width={80}
                         domain={['auto', 'auto']}
                     />
                     <Tooltip
                         contentStyle={{
-                            fontSize: 11,
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                            fontSize: 12,
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                         }}
-                        labelStyle={{ fontWeight: 'bold', fontSize: 11, marginBottom: '5px' }}
+                        labelStyle={{ fontWeight: 'bold', fontSize: 12, marginBottom: '8px', color: '#333' }}
                         formatter={tooltipFormatter}
                         labelFormatter={tooltipLabelFormatter}
                     />
                     <Legend
-                        wrapperStyle={{ fontSize: 13, textAlign: 'center', paddingTop: '10px' }}
+                        wrapperStyle={{
+                            fontSize: '13px',
+                            textAlign: 'center',
+                            paddingTop: '15px',
+                            color: '#555'
+                        }}
                     />
                     {chartDataKeys.map((dataKey, index) => (
                         <Line
                             type="monotone"
                             key={dataKey}
                             dataKey={dataKey}
-                            // Sử dụng CUSTOM_COLOR_MAP trước, sau đó fallback tới FALLBACK_COLOR_PALETTE, cuối cùng là DEFAULT_COLOR
                             stroke={CUSTOM_COLOR_MAP[dataKey] || FALLBACK_COLOR_PALETTE[index % FALLBACK_COLOR_PALETTE.length] || DEFAULT_COLOR}
-                            strokeWidth={2}
+                            strokeWidth={2.5}
                             dot={false}
-                            activeDot={{ r: 4, strokeWidth: 0 }}
+                            activeDot={{
+                                r: 5,
+                                strokeWidth: 2,
+                                stroke: '#fff',
+                                fill: CUSTOM_COLOR_MAP[dataKey] || FALLBACK_COLOR_PALETTE[index % FALLBACK_COLOR_PALETTE.length] || DEFAULT_COLOR
+                            }}
                             connectNulls={true}
                         />
                     ))}
                 </LineChart>
             </ResponsiveContainer>
-        </>
+
+            {chartData.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                    <div className="text-center">
+                        <div className="text-xl mb-2">📊</div>
+                        <div>Đang chờ dữ liệu...</div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 

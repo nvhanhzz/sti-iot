@@ -381,6 +381,27 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
         return { serialBatch, modbusBatch };
     }, [ALL_RECEIVE_CMDS_SET, MODBUS_RECEIVE_CMDS_SET]);
 
+    // const updateDataState = useCallback((
+    //     prevData: IoTProcessedData[],
+    //     newBatch: Map<string, IoTProcessedData>
+    // ): IoTProcessedData[] => {
+    //     if (newBatch.size === 0) return prevData;
+    //
+    //     const updatedData = [...prevData];
+    //     // const existingMap = new Map(updatedData.map(d => [d.key, d]));
+    //
+    //     newBatch.forEach(newItem => {
+    //         // if (existingMap.has(newItem.key)) {
+    //         //     Object.assign(existingMap.get(newItem.key)!, newItem);
+    //         // } else {
+    //         //     updatedData.unshift(newItem);
+    //         // }
+    //
+    //         updatedData.unshift(newItem);
+    //     });
+    //     return updatedData.sort(sortByTime).slice(0, MAX_STORED_RECORDS);
+    // }, []);
+
     const updateDataState = useCallback((
         prevData: IoTProcessedData[],
         newBatch: Map<string, IoTProcessedData>
@@ -388,15 +409,20 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
         if (newBatch.size === 0) return prevData;
 
         const updatedData = [...prevData];
-        const existingMap = new Map(updatedData.map(d => [d.key, d]));
 
         newBatch.forEach(newItem => {
-            if (existingMap.has(newItem.key)) {
-                Object.assign(existingMap.get(newItem.key)!, newItem);
-            } else {
+            const existingIndex = updatedData.findIndex(existing =>
+                JSON.stringify(existing) === JSON.stringify(newItem)
+            );
+
+            if (existingIndex === -1) {
                 updatedData.unshift(newItem);
+            } else {
+                // Có thể cập nhật hoặc bỏ qua
+                updatedData[existingIndex] = newItem;
             }
         });
+
         return updatedData.sort(sortByTime).slice(0, MAX_STORED_RECORDS);
     }, []);
 
@@ -883,8 +909,8 @@ const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSucce
                     </Row>
                 </Form>
             ) : (
-                <div style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>
-                    Vui lòng chọn một lệnh Serial từ danh sách trên để hiển thị form điều khiển.
+                <div style={{ textAlign: 'center', color: '#888', padding: '0' }}>
+                    Chọn lệnh
                 </div>
             )}
         </Card>
@@ -1069,8 +1095,8 @@ const ModbusControl: React.FC<ModbusControlProps> = ({ deviceMac, onControlSucce
                     </Row>
                 </Form>
             ) : (
-                <div style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>
-                    Vui lòng chọn một lệnh Modbus từ danh sách trên để hiển thị form điều khiển.
+                <div style={{ textAlign: 'center', color: '#888', padding: '0' }}>
+                    Chọn lệnh
                 </div>
             )}
         </Card>

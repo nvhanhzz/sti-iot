@@ -93,7 +93,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         } finally {
             setLoading(prev => ({ ...prev, [loadingKey]: false }));
         }
-    }, [sendDeviceCommand, deviceMac]);
+    }, [sendDeviceCommand, deviceMac, isConnected]);
 
     useEffect(() => {
         let processedData = [...defaultButtons];
@@ -174,7 +174,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                                     boxShadow: `0 1px 6px ${isOn && isConnected ? 'rgba(82, 196, 26, 0.2)' : 'rgba(255, 77, 79, 0.2)'}`,
                                 }}
                             >
-                                {isOn ? <CheckOutlined /> : <CloseOutlined />}
+                                {isConnected && isOn ? <CheckOutlined /> : <CloseOutlined />}
                             </Button>
                         </Flex>
                     </Card>

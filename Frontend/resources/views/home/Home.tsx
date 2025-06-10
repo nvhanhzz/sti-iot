@@ -55,6 +55,7 @@ const Home: React.FC = () => {
     }, []);
 
     const handleSocketEventStatus = useCallback((eventData: any) => {
+        debugger;
         setDataIots((prevData) => {
             const newData = [...prevData];
             eventData.forEach((e: any) => {

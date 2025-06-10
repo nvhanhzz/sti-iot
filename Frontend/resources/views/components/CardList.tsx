@@ -14,9 +14,6 @@ const CardList: React.FC<DataIotsProps> = ({ dataIots }) => {
     const colsPerRow: number = 1; // Số card trên mỗi dòng cố định
     const titleFontSize: number = 17; // Cỡ chữ tiêu đề cố định
     const contentFontSize: number = 14; // Cỡ chữ nội dung cố định
-    const maxHeightSettings: number = 500; // Chiều cao tối đa của thẻ cố định
-    const minHeightSettings: number = 260; // Chiều cao tối thiểu của thẻ cố định
-    const isSettingMode: boolean = true; // Chế độ cài đặt cố định (true nếu bạn muốn IotCard hiển thị các tùy chọn cài đặt)
 
     return (
         <div>
@@ -28,9 +25,6 @@ const CardList: React.FC<DataIotsProps> = ({ dataIots }) => {
                         colsPerRow={colsPerRow}
                         titleFontSize={titleFontSize}
                         contentFontSize={contentFontSize}
-                        maxHeightSettings={maxHeightSettings}
-                        minHeightSettings={minHeightSettings}
-                        isSettingMode={isSettingMode}
                     />
                 ))}
             </Row>

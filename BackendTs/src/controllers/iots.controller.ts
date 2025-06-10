@@ -201,8 +201,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     const seconds = String(dateObject.getMinutes()).padStart(2, '0');
                     const milliseconds = String(dateObject.getMilliseconds()).padStart(3, '0');
 
-                    dataJson.time = `${hours}:${minutes}:${seconds}.${milliseconds}`;
-                    // dataJson.time = payload.timestamp;
+                    // dataJson.time = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+                    dataJson.time = payload.timestamp;
                 } else {
                     const dataMsgDetail = {
                         device_id: dataIot.id,
@@ -571,12 +571,10 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
         try {
             if (typeof data === 'number') {
                 dataPayloadType = checkFloatOrU16(data); // Suy luận kiểu số
-            } else if (typeof data === 'string' && data.length === 1) {
-                dataPayloadType = 'char'; // Ký tự đơn
-            } else if (typeof data === 'string') {
-                dataPayloadType = 'string'; // Chuỗi
             } else if (typeof data === 'boolean') {
                 dataPayloadType = 'bool'; // Boolean
+            } else if (typeof data === 'string' && (serialType === "CMD_WRITE_IO_RS232" || serialType === "CMD_WRITE_IO_RS485")) {
+                dataPayloadType = 'string'; // Chuỗi
             } else {
                 res.status(400).send({ message: `Unsupported data type for 'data' field: ${typeof data}.` });
                 return;

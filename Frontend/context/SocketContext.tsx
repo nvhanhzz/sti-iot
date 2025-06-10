@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
-import { Button, message } from 'antd';
+import { message } from 'antd';
 // Định nghĩa interface sự kiện
 interface ServerToClientEvents {
     message: (data: string) => void;
@@ -32,7 +32,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.on("connect", () => {
             message.success('Connected Server Socket');
         });
-        socket.on("connect_error", (error) => {
+        socket.on("connect_error", () => {
             message.error('Connected Error Server Socket');
         });
         return () => {
