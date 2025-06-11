@@ -304,7 +304,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 //FIXME: có lẽ sẽ cần fix ở height ở 3 dòng dưới
     return (
         <div className="w-full h-full bg-white p-4 rounded-lg shadow-sm">
-            <ResponsiveContainer width="100%" height={600}>
+            <ResponsiveContainer width="100%" height={700}>
                 <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid stroke="#e0e0e0" strokeDasharray="3 3" vertical={false} />
                     <XAxis

@@ -648,6 +648,12 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
                 data = true;
             } else if (rawData.toLowerCase() === 'false') {
                 data = false;
+            } else if (/^\d+$/.test(rawData.trim())) {
+                // Kiểm tra xem có phải số nguyên không (chỉ chứa chữ số)
+                data = parseInt(rawData, 10);
+            } else {
+                // Giữ nguyên string nếu không parse được
+                data = rawData;
             }
         }
 

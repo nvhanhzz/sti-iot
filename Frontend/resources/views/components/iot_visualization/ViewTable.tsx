@@ -26,6 +26,8 @@ const SERIAL_RECEIVE_CMDS: ReceiveCommand[] = [
     { cmd: "CMD_PUSH_SERIAL_RS485", label: "SERIAL RS485", type: 'serial' },
     { cmd: "CMD_PUSH_SERIAL_RS232", label: "SERIAL RS232", type: 'serial' },
     { cmd: "CMD_PUSH_SERIAL_TCP", label: "SERIAL TCP", type: 'serial' },
+    { cmd: "CMD_PUSH_TCP", label: "PUSH TCP", type: 'serial' },
+    { cmd: "CMD_PUSH_UDP", label: "PUSH UDP", type: 'serial' },
     { cmd: "CMD_PUSH_IO_DI1", label: "IO DI1", type: 'serial' },
     { cmd: "CMD_PUSH_IO_DI2", label: "IO DI2", type: 'serial' },
     { cmd: "CMD_PUSH_IO_DI3", label: "IO DI3", type: 'serial' },
@@ -90,8 +92,8 @@ const MODBUS_CONTROL_CMDS: ControlCommand[] = [
         cmd: "CMD_REQUEST_MODBUS_RS485", label: "CMD_REQUEST_MODBUS_RS485", type: 'modbus',
         fields: [
             { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 12 },
-            { name: "address", label: "Addr", type: "number", placeholder: "Addr", required: true, min: 0, max: 65535, precision: 0, span: 12 },
-            { name: "function", label: "Func", type: "number", placeholder: "Func", required: true, min: 0, max: 255, precision: 0, span: 12 },
+            { name: "address", label: "Addr", type: "number", placeholder: "Address", required: true, min: 0, max: 65535, precision: 0, span: 12 },
+            { name: "function", label: "Func", type: "number", placeholder: "Function", required: true, min: 0, max: 255, precision: 0, span: 12 },
             { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 12 },
         ]
     },
@@ -99,8 +101,8 @@ const MODBUS_CONTROL_CMDS: ControlCommand[] = [
         cmd: "CMD_REQUEST_MODBUS_TCP", label: "CMD_REQUEST_MODBUS_TCP", type: 'modbus',
         fields: [
             { name: "id", label: "IP", type: "ip_unitid", placeholder: "IP", required: true, span: 12 },
-            { name: "address", label: "Addr", type: "number", placeholder: "Addr", required: true, min: 0, max: 65535, precision: 0, span: 12 },
-            { name: "function", label: "Func", type: "number", placeholder: "Func", required: true, min: 0, max: 255, precision: 0, span: 12 },
+            { name: "address", label: "Addr", type: "number", placeholder: "Address", required: true, min: 0, max: 65535, precision: 0, span: 12 },
+            { name: "function", label: "Func", type: "number", placeholder: "Function", required: true, min: 0, max: 255, precision: 0, span: 12 },
             { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 12 },
         ]
     }
@@ -381,27 +383,6 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
         return { serialBatch, modbusBatch };
     }, [ALL_RECEIVE_CMDS_SET, MODBUS_RECEIVE_CMDS_SET]);
 
-    // const updateDataState = useCallback((
-    //     prevData: IoTProcessedData[],
-    //     newBatch: Map<string, IoTProcessedData>
-    // ): IoTProcessedData[] => {
-    //     if (newBatch.size === 0) return prevData;
-    //
-    //     const updatedData = [...prevData];
-    //     // const existingMap = new Map(updatedData.map(d => [d.key, d]));
-    //
-    //     newBatch.forEach(newItem => {
-    //         // if (existingMap.has(newItem.key)) {
-    //         //     Object.assign(existingMap.get(newItem.key)!, newItem);
-    //         // } else {
-    //         //     updatedData.unshift(newItem);
-    //         // }
-    //
-    //         updatedData.unshift(newItem);
-    //     });
-    //     return updatedData.sort(sortByTime).slice(0, MAX_STORED_RECORDS);
-    // }, []);
-
     const updateDataState = useCallback((
         prevData: IoTProcessedData[],
         newBatch: Map<string, IoTProcessedData>
@@ -409,22 +390,43 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
         if (newBatch.size === 0) return prevData;
 
         const updatedData = [...prevData];
+        const existingMap = new Map(updatedData.map(d => [d.key, d]));
 
         newBatch.forEach(newItem => {
-            const existingIndex = updatedData.findIndex(existing =>
-                JSON.stringify(existing) === JSON.stringify(newItem)
-            );
-
-            if (existingIndex === -1) {
-                updatedData.unshift(newItem);
+            if (existingMap.has(newItem.key)) {
+                Object.assign(existingMap.get(newItem.key)!, newItem);
             } else {
-                // Có thể cập nhật hoặc bỏ qua
-                updatedData[existingIndex] = newItem;
+                updatedData.unshift(newItem);
             }
-        });
 
+            // updatedData.unshift(newItem);
+        });
         return updatedData.sort(sortByTime).slice(0, MAX_STORED_RECORDS);
     }, []);
+
+    // const updateDataState = useCallback((
+    //     prevData: IoTProcessedData[],
+    //     newBatch: Map<string, IoTProcessedData>
+    // ): IoTProcessedData[] => {
+    //     if (newBatch.size === 0) return prevData;
+    //
+    //     const updatedData = [...prevData];
+    //
+    //     newBatch.forEach(newItem => {
+    //         const existingIndex = updatedData.findIndex(existing =>
+    //             JSON.stringify(existing) === JSON.stringify(newItem)
+    //         );
+    //
+    //         if (existingIndex === -1) {
+    //             updatedData.unshift(newItem);
+    //         } else {
+    //             // Có thể cập nhật hoặc bỏ qua
+    //             updatedData[existingIndex] = newItem;
+    //         }
+    //     });
+    //
+    //     return updatedData.sort(sortByTime).slice(0, MAX_STORED_RECORDS);
+    // }, []);
 
     useEffect(() => {
         const rawData = dataIotsDetail.data;
