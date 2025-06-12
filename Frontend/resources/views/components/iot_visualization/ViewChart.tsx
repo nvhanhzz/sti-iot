@@ -39,28 +39,44 @@ const formatNumber = (num: number | null | undefined): string => {
     return isNegative ? '-' + result : result;
 };
 
-// Màu mặc định khi không tìm thấy màu tùy chỉnh hoặc tĩnh
-const DEFAULT_COLOR = "#8884d8";
-
-// Định nghĩa các màu tùy chỉnh cho từng kênh dữ liệu cụ thể
-const CUSTOM_COLOR_MAP: { [key: string]: string } = {
-    "ADC1_Value (V)": "#1A73E8",      // Google Blue - Xanh dương đậm
-    "ADC2_Value (mA)": "#D93025",     // Google Red - Đỏ đậm
-    "ADC3_Value (pH)": "#F9AB00",     // Google Yellow - Vàng cam
-    "Temperature (C)": "#00A693",     // Teal - Xanh ngọc
-    "Humidity (%)": "#8F44AD",        // Amethyst - Tím
+// Màu sắc đơn giản, dễ nhìn
+const CHANNEL_CONFIGS = {
+    "ADC1_Value (V)": {
+        color: "#ca8a04", // Blueca8a04
+        name: "ADC1 (V)",
+        unit: "V"
+    },
+    "ADC2_Value (mA)": {
+        color: "#2563eb", // Red
+        name: "ADC2 (mA)",
+        unit: "mA"
+    },
+    "ADC3_Value (pH)": {
+        color: "#ca8a04", // Yellow
+        name: "ADC3 (pH)",
+        unit: "pH"
+    },
+    "Temperature (C)": {
+        color: "#059669", // Green
+        name: "Nhiệt độ",
+        unit: "°C"
+    },
+    "Humidity (%)": {
+        color: "#7c3aed", // Purple
+        name: "Độ ẩm",
+        unit: "%"
+    },
 };
 
-// Mảng màu dự phòng
-const FALLBACK_COLOR_PALETTE: string[] = [
-    "#4285F4", "#EA4335", "#FBBC05", "#34A853", "#9C27B0",
-    "#00BCD4", "#FF9800", "#607D8B", "#E91E63", "#03A9F4",
+// Màu dự phòng đơn giản
+const FALLBACK_COLORS = [
+    "#2563eb", "#dc2626", "#ca8a04", "#059669", "#7c3aed",
+    "#0891b2", "#ea580c", "#6b7280", "#db2777", "#0284c7",
 ];
 
 // Helper function để xử lý thời gian linh hoạt
 const normalizeTime = (time: string | number): string => {
     if (typeof time === 'number') {
-        // Detect nếu là seconds (< 1e10) hoặc milliseconds (>= 1e10)
         const timestamp = time > 1e10 ? time : time * 1000;
         const date = new Date(timestamp);
         return date.toTimeString().split(' ')[0] + '.' + date.getMilliseconds().toString().padStart(3, '0');
@@ -73,94 +89,53 @@ const parseTime = (time: string | number): number => {
     if (typeof time === 'number') {
         return time > 1e10 ? time : time * 1000;
     } else {
-        // Parse "HH:mm:ss.SSS" format
         const [timePart, msPart = '0'] = time.split('.');
         const [hours, minutes, seconds] = timePart.split(':').map(Number);
-
-        // Tạo timestamp cho hôm nay với thời gian này
         const today = new Date();
         today.setHours(hours, minutes, seconds, parseInt(msPart));
         return today.getTime();
     }
 };
 
-// Hàm nội suy tuyến tính để tạo điểm dữ liệu trung gian
-const interpolateData = (data: DataPoint[], keys: string[]): DataPoint[] => {
-    if (data.length < 2) return data;
-
-    const result: DataPoint[] = [];
-    const sortedData = [...data].sort((a, b) => parseTime(a.time) - parseTime(b.time));
-
-    for (let i = 0; i < sortedData.length; i++) {
-        result.push(sortedData[i]);
-
-        if (i < sortedData.length - 1) {
-            const currentTime = parseTime(sortedData[i].time);
-            const nextTime = parseTime(sortedData[i + 1].time);
-            const timeDiff = nextTime - currentTime;
-
-            if (timeDiff > 5000) { // 5 seconds
-                const midTime = currentTime + timeDiff / 2;
-                const midTimeString = normalizeTime(midTime);
-
-                const midPoint: DataPoint = {
-                    time: midTimeString
-                };
-
-                keys.forEach(key => {
-                    const currentValue = sortedData[i][key] as number;
-                    const nextValue = sortedData[i + 1][key] as number;
-
-                    if (typeof currentValue === 'number' && typeof nextValue === 'number') {
-                        midPoint[key] = (currentValue + nextValue) / 2;
-                    } else if (typeof currentValue === 'number') {
-                        midPoint[key] = currentValue;
-                    } else if (typeof nextValue === 'number') {
-                        midPoint[key] = nextValue;
-                    } else {
-                        midPoint[key] = 0;
-                    }
-                });
-
-                result.push(midPoint);
-            }
-        }
+// Custom Tooltip Component - đơn giản
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                    {label}
+                </p>
+                {payload.map((entry: any, index: number) => {
+                    const config = CHANNEL_CONFIGS[entry.dataKey as keyof typeof CHANNEL_CONFIGS];
+                    const unit = config?.unit || '';
+                    return (
+                        <div key={index} className="flex justify-between items-center mb-1">
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: entry.color }}
+                                />
+                                <span className="text-sm text-gray-600">
+                                    {config?.name || entry.dataKey}
+                                </span>
+                            </div>
+                            <span className="text-sm font-medium text-gray-800 ml-3">
+                                {typeof entry.value === 'number' ? entry.value.toFixed(4) : entry.value} {unit}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+        );
     }
-    return result;
-};
-
-// Hàm làm mượt dữ liệu bằng moving average
-const smoothData = (data: DataPoint[], keys: string[], windowSize: number = 3): DataPoint[] => {
-    if (data.length < windowSize) return data;
-
-    return data.map((point, index) => {
-        const smoothedPoint: DataPoint = { ...point };
-
-        keys.forEach(key => {
-            const values: number[] = [];
-            const start = Math.max(0, index - Math.floor(windowSize / 2));
-            const end = Math.min(data.length - 1, index + Math.floor(windowSize / 2));
-
-            for (let i = start; i <= end; i++) {
-                const value = data[i][key];
-                if (typeof value === 'number' && !isNaN(value)) {
-                    values.push(value);
-                }
-            }
-
-            if (values.length > 0) {
-                smoothedPoint[key] = values.reduce((sum, val) => sum + val, 0) / values.length;
-            }
-        });
-
-        return smoothedPoint;
-    });
+    return null;
 };
 
 const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [chartData, setChartData] = useState<DataPoint[]>([]);
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
     const [, setLastUpdateTime] = useState<string>('');
+    const [dataStats, setDataStats] = useState<{[key: string]: {count: number, latest: number}}>({});
 
     const processedRecordsRef = useRef<Set<string>>(new Set());
 
@@ -201,6 +176,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
         const newPoints: DataPoint[] = [];
         const currentBatchKeys = new Set<string>();
+        const newStats: {[key: string]: {count: number, latest: number}} = {};
 
         newValidRecords.forEach((record: any) => {
             let dataKey: string;
@@ -214,14 +190,22 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
             currentBatchKeys.add(dataKey);
 
+            // GIỮ NGUYÊN DỮ LIỆU THÔ - KHÔNG MODIFY
             let value = parseFloat(record.data);
             if (isNaN(value)) {
                 value = 0;
             }
 
+            // Update stats
+            if (!newStats[dataKey]) {
+                newStats[dataKey] = { count: 0, latest: value };
+            }
+            newStats[dataKey].count++;
+            newStats[dataKey].latest = value;
+
             const newPoint: DataPoint = {
-                time: normalizeTime(record.time), // Normalize time here
-                [dataKey]: value
+                time: normalizeTime(record.time),
+                [dataKey]: value // DỮ LIỆU CHÍNH XÁC 100%
             };
             newPoints.push(newPoint);
         });
@@ -230,20 +214,34 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
+        // Update stats
+        setDataStats(prevStats => {
+            const updatedStats = { ...prevStats };
+            Object.keys(newStats).forEach(key => {
+                if (updatedStats[key]) {
+                    updatedStats[key].count += newStats[key].count;
+                    updatedStats[key].latest = newStats[key].latest;
+                } else {
+                    updatedStats[key] = newStats[key];
+                }
+            });
+            return updatedStats;
+        });
+
         setChartData((prevChartData) => {
             let combinedData = [...prevChartData, ...newPoints];
 
-            // Sort by time using the parseTime helper
+            // Chỉ sort theo thời gian - KHÔNG làm mịn dữ liệu
             combinedData.sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
-            // Merge data points with same timestamp
+            // Merge data points với cùng timestamp (nhưng giữ nguyên giá trị)
             const mergedDataMap = new Map<string, DataPoint>();
             combinedData.forEach(point => {
                 if (mergedDataMap.has(point.time)) {
                     const existingPoint = mergedDataMap.get(point.time)!;
                     Object.keys(point).forEach(key => {
                         if (key !== 'time' && point[key] !== null && point[key] !== undefined) {
-                            existingPoint[key] = point[key];
+                            existingPoint[key] = point[key]; // GIỮ NGUYÊN GIÁ TRỊ
                         }
                     });
                 } else {
@@ -253,21 +251,15 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
             let finalChartData = Array.from(mergedDataMap.values());
 
-            const allKeys = Array.from(new Set([...chartDataKeys, ...Array.from(currentBatchKeys)]));
-
-            // Apply interpolation and smoothing
-            finalChartData = interpolateData(finalChartData, allKeys);
-            finalChartData = smoothData(finalChartData, allKeys, 3);
-
-            // Limit data points for performance
-            const MAX_DATA_POINTS = 300;
+            // Limit data points for performance (chỉ giữ lại số lượng, không thay đổi giá trị)
+            const MAX_DATA_POINTS = 100;
             if (finalChartData.length > MAX_DATA_POINTS) {
                 finalChartData = finalChartData.slice(-MAX_DATA_POINTS);
             }
 
             const currentTime = new Date().toLocaleTimeString();
             setLastUpdateTime(currentTime);
-            console.log(`✅ Chart Updated at ${currentTime}: ${finalChartData.length} total points`);
+            console.log(`✅ Chart Updated at ${currentTime}: ${finalChartData.length} total RAW data points`);
 
             return finalChartData;
         });
@@ -286,87 +278,90 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
     }, [dataIotsDetail.data, chartDataKeys]);
 
-    const tooltipFormatter = useCallback((value: any, name: string) => {
-        if (value === null || value === undefined) return null;
-        return [formatNumber(Number(value)), name];
-    }, []);
-
-    const tooltipLabelFormatter = useCallback((label: string) => {
-        const timeOnly = label.split('.')[0]; // Remove milliseconds for display
-        return `Thời gian: ${timeOnly}`;
-    }, []);
-
     const xAxisTickFormatter = useCallback((value: string) => {
-        return value.split('.')[0]; // Remove milliseconds for X-axis display
+        return value.split('.')[0]; // Chỉ ẩn milliseconds trên trục X để gọn
     }, []);
 
     const yAxisTickFormatter = useCallback((value: number) => formatNumber(value), []);
-//FIXME: có lẽ sẽ cần fix ở height ở 3 dòng dưới
+
     return (
-        <div className="w-full h-full bg-white p-4 rounded-lg shadow-sm">
+        <div className="w-full h-full bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+
             <ResponsiveContainer width="100%" height={700}>
                 <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                    <CartesianGrid stroke="#e0e0e0" strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid
+                        stroke="#e5e7eb"
+                        strokeDasharray="2 2"
+                        vertical={false}
+                    />
+
                     <XAxis
                         dataKey="time"
-                        tick={{ fontSize: 11, fill: '#666' }}
+                        tick={{ fontSize: 11, fill: '#6b7280' }}
                         tickFormatter={xAxisTickFormatter}
                         interval="preserveStartEnd"
                         height={60}
                         angle={-45}
                         textAnchor="end"
+                        axisLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
+                        tickLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
                     />
+
                     <YAxis
-                        tick={{ fontSize: 11, fill: '#666' }}
+                        tick={{ fontSize: 11, fill: '#6b7280' }}
                         tickFormatter={yAxisTickFormatter}
                         width={80}
                         domain={['auto', 'auto']}
+                        axisLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
+                        tickLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
                     />
-                    <Tooltip
-                        contentStyle={{
-                            fontSize: 12,
-                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                            border: '1px solid #ddd',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                        }}
-                        labelStyle={{ fontWeight: 'bold', fontSize: 12, marginBottom: '8px', color: '#333' }}
-                        formatter={tooltipFormatter}
-                        labelFormatter={tooltipLabelFormatter}
-                    />
+
+                    <Tooltip content={<CustomTooltip />} />
+
                     <Legend
                         wrapperStyle={{
                             fontSize: '13px',
                             textAlign: 'center',
                             paddingTop: '15px',
-                            color: '#555'
+                            color: '#374151'
                         }}
                     />
-                    {chartDataKeys.map((dataKey, index) => (
-                        <Line
-                            type="monotone"
-                            key={dataKey}
-                            dataKey={dataKey}
-                            stroke={CUSTOM_COLOR_MAP[dataKey] || FALLBACK_COLOR_PALETTE[index % FALLBACK_COLOR_PALETTE.length] || DEFAULT_COLOR}
-                            strokeWidth={2.5}
-                            dot={false}
-                            activeDot={{
-                                r: 5,
-                                strokeWidth: 2,
-                                stroke: '#fff',
-                                fill: CUSTOM_COLOR_MAP[dataKey] || FALLBACK_COLOR_PALETTE[index % FALLBACK_COLOR_PALETTE.length] || DEFAULT_COLOR
-                            }}
-                            connectNulls={true}
-                        />
-                    ))}
+
+                    {chartDataKeys.map((dataKey, index) => {
+                        const config = CHANNEL_CONFIGS[dataKey as keyof typeof CHANNEL_CONFIGS];
+                        const color = config?.color || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+
+                        return (
+                            <Line
+                                type="monotone"
+                                key={dataKey}
+                                dataKey={dataKey}
+                                stroke={color}
+                                strokeWidth={2}
+                                dot={{
+                                    r: 2,
+                                    fill: color
+                                }}
+                                activeDot={{
+                                    r: 4,
+                                    strokeWidth: 2,
+                                    stroke: '#fff',
+                                    fill: color
+                                }}
+                                connectNulls={false} // Không nối các điểm null - chỉ vẽ khi có dữ liệu
+                                name={config?.name || dataKey}
+                            />
+                        );
+                    })}
                 </LineChart>
             </ResponsiveContainer>
 
             {chartData.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                        <div className="text-xl mb-2">📊</div>
-                        <div>Đang chờ dữ liệu...</div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div className="text-4xl mb-3">📊</div>
+                        <div className="text-lg font-medium text-gray-600 mb-2">Đang chờ dữ liệu...</div>
+                        <div className="text-sm text-gray-500">Hệ thống sẽ hiển thị biểu đồ khi có dữ liệu ADC</div>
                     </div>
                 </div>
             )}

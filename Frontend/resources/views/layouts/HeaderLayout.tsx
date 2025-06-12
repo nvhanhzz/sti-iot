@@ -1,12 +1,10 @@
 import React from 'react';
 import logo from "../../assets/img/sti.png";
-import { useTranslation } from 'react-i18next';
 interface ChildProps {
     collapsed: boolean;
     toggleCollapsed: () => void;
 }
 const HeaderLayout: React.FC<ChildProps> = () => {
-    const { t } = useTranslation();
     return (
         <>
             <header className="navbar pcoded-header navbar-expand-lg navbar-dark header-blue">
@@ -23,8 +21,8 @@ const HeaderLayout: React.FC<ChildProps> = () => {
                     <ul className="navbar-nav ml-auto">
                         <li>
                             <div className="">
-                                <a href="https://stivietnam.com/" target="_blank">
-                                    <p style={{ fontSize: '20px' }}>{t('company')}</p>
+                                <a href="https://dientusti.com/" target="_blank">
+                                    <p style={{ fontSize: '20px' }}>CÔNG TY ĐIỆN TỬ STI</p>
                                 </a>
                             </div>
                         </li>

@@ -9,44 +9,190 @@ import { MasterIotGlobal, DataMsgGlobal } from "../global";
 import publishMessage from "../mqtt/publish";
 import client from "../mqtt";
 import moment from "moment";
-import {MasterIotInterface} from "../interface";
-import {ConvertDatatoHex} from "../global/convertData.global";
+import { MasterIotInterface } from "../interface";
+import { ConvertDatatoHex } from "../global/convertData.global";
 import logger from "../config/logger";
 import IotSettings from "../models/sql/iot_settings.models";
+import { Buffer } from 'buffer'; // Đảm bảo Buffer được import
 
-const CMD_RESPOND_TIMESTAMP = 0x14; // Trong C++ code của bạn, CMD_RESPOND_TIMESTAMP là 0x14 (decimal 20)
+const CMD_RESPOND_TIMESTAMP = 0x14;
 const CMD_NOTIFY_TCP = 0x3C;
 const CMD_NOTIFY_UDP = 0x3D;
-const PAYLOAD_I32 = 0x06;           // int32 (Timestamp là số nguyên 32-bit)
-const PAYLOAD_STRING = 0x0A;
+const PAYLOAD_I32 = 0x06;
+const PAYLOAD_STRING = 0x0A; // Vẫn giữ biến này theo code gốc, dù chưa sử dụng
 
 const CMD_SERIAL = {
-    "CMD_REQUEST_SERIAL_RS485": 0x11,
-    "CMD_REQUEST_SERIAL_RS232": 0x12,
-    "CMD_REQUEST_SERIAL_TCP": 0x13,
-    "CMD_WRITE_IO_DO1": 0x22,
-    "CMD_WRITE_IO_DO2": 0x23,
-    "CMD_WRITE_IO_DO3": 0x24,
-    "CMD_WRITE_IO_DO4": 0x25,
-    "CMD_WRITE_IO_DO5": 0x26,
-    "CMD_WRITE_IO_DO6": 0x27,
-    "CMD_WRITE_IO_DO7": 0x28,
-    "CMD_WRITE_IO_DO8": 0x29,
-    "CMD_WRITE_IO_AO1": 0x32,
-    "CMD_WRITE_IO_AO2": 0x33,
-    "CMD_WRITE_IO_AO3": 0x34,
-    "CMD_WRITE_IO_AO4": 0x35,
-    "CMD_WRITE_IO_AO5": 0x36,
-    "CMD_WRITE_IO_AO6": 0x37,
-    "CMD_WRITE_IO_AO7": 0x38,
-    "CMD_WRITE_IO_AO8": 0x39,
-    "CMD_WRITE_IO_RS232": 0x3A,
-    "CMD_WRITE_IO_RS485": 0x3B
+    "CMD_REQUEST_SERIAL_RS485": {
+        "CMD": 0x11,
+        dataType: {
+            data: ["string"] as const // 'as const' giúp TypeScript hiểu đây là một tuple
+        }
+    },
+    "CMD_REQUEST_SERIAL_RS232": {
+        "CMD": 0x12,
+        dataType: {
+            data: ["string"] as const
+        }
+    },
+    "CMD_REQUEST_SERIAL_TCP/UDP": {
+        "CMD": 0x13,
+        dataType: {
+            id: ["string"] as const,
+            data: ["string"] as const
+        }
+    },
+    // CAN Commands (vẫn giữ id)
+    "CMD_CAN": {
+        "CMD": 0x3d,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["string", "u8", "u16", "bool", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO1": {
+        "CMD": 0x22,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO2": {
+        "CMD": 0x23,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO3": {
+        "CMD": 0x24,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO4": {
+        "CMD": 0x25,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO5": {
+        "CMD": 0x26,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO6": {
+        "CMD": 0x27,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO7": {
+        "CMD": 0x28,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_DO8": {
+        "CMD": 0x29,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO1": {
+        "CMD": 0x32,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO2": {
+        "CMD": 0x33,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO3": {
+        "CMD": 0x34,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO4": {
+        "CMD": 0x35,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO5": {
+        "CMD": 0x36,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO6": {
+        "CMD": 0x37,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO7": {
+        "CMD": 0x38,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_AO8": {
+        "CMD": 0x39,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["bool", "u8", "u16", "float"] as const
+        }
+    },
+    "CMD_WRITE_IO_RS232": {
+        "CMD": 0x3A,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    },
+    "CMD_WRITE_IO_RS485": {
+        "CMD": 0x3B,
+        dataType: {
+            id: ["u32"] as const,
+            data: ["payload", "data"] as const
+        }
+    }
 } as const;
 
+
 const CMD_MODBUS_CONTROL = {
-    "CMD_REQUEST_MODBUS_RS485": 0x08,
-    "CMD_REQUEST_MODBUS_TCP": 0x10,
+    "CMD_REQUEST_MODBUS_RS485": {
+        "CMD": 0x08,
+        dataType: {
+            id: ["u8"] as const,
+            data: ["u8", "u16", "bool"] as const
+        }
+    },
+    "CMD_REQUEST_MODBUS_TCP": {
+        "CMD": 0x10,
+        dataType: {
+            id: ["string"] as const,
+            data: ["u8", "u16", "bool"] as const
+        }
+    },
 } as const;
 
 const HEX_COMMANDS = {
@@ -54,47 +200,61 @@ const HEX_COMMANDS = {
     udp: { on: '17 01 00 00 BF', off: '18 01 00 00 6D' }
 } as const;
 
+// Định nghĩa kiểu dữ liệu cho PAYLOAD_TYPES rõ ràng hơn
+type NumericPayloadDetails = {
+    hex: number;
+    size: number;
+    min: number;
+    max: number;
+};
+
+type OtherPayloadDetails = {
+    hex: number;
+    size: number; // size -1 cho biến đổi (string)
+};
+
 const PAYLOAD_TYPES = {
-    'uint8': { hex: 0x01, size: 1, min: 0, max: 255 }, // Thêm min/max cho suy luận
-    'uint16': { hex: 0x02, size: 2, min: 0, max: 65535 }, // Thêm min/max cho suy luận
-    'uint32': { hex: 0x03, size: 4, min: 0, max: 4294967295 }, // Thêm min/max cho suy luận
-    'int8': { hex: 0x04, size: 1, min: -128, max: 127 },
-    'int16': { hex: 0x05, size: 2, min: -32768, max: 32767 },
-    'int32': { hex: 0x06, size: 4, min: -2147483648, max: 2147483647 },
-    'bool': { hex: 0x07, size: 1, min: 0, max: 1 },
-    'float': { hex: 0x08, size: 4 },
-    'char': { hex: 0x09, size: 1 },
-    'string': { hex: 0x0A, size: -1 }
+    'uint8': { hex: 0x01, size: 1, min: 0, max: 255 } as NumericPayloadDetails,
+    'uint16': { hex: 0x02, size: 2, min: 0, max: 65535 } as NumericPayloadDetails,
+    'uint32': { hex: 0x03, size: 4, min: 0, max: 4294967295 } as NumericPayloadDetails,
+    'int8': { hex: 0x04, size: 1, min: -128, max: 127 } as NumericPayloadDetails,
+    'int16': { hex: 0x05, size: 2, min: -32768, max: 32767 } as NumericPayloadDetails,
+    'int32': { hex: 0x06, size: 4, min: -2147483648, max: 2147483647 } as NumericPayloadDetails,
+    'bool': { hex: 0x07, size: 1, min: 0, max: 1 } as NumericPayloadDetails, // Boolean cũng có min/max
+    'float': { hex: 0x08, size: 4 } as OtherPayloadDetails, // Float không có min/max rõ ràng cho việc suy luận range
+    'char': { hex: 0x09, size: 1 } as OtherPayloadDetails,
+    'string': { hex: 0x0A, size: -1 } as OtherPayloadDetails
 } as const;
+
+// Sử dụng keyof typeof PAYLOAD_TYPES để đảm bảo an toàn kiểu
+type PayloadTypeKey = keyof typeof PAYLOAD_TYPES;
 
 export const sendDataIots = async (req: Request, res: Response) => {
     try {
-        const dataIots: any = await AlgorithmGetIot();
+        const dataIots: any = await AlgorithmGetIot(); // Cân nhắc định nghĩa kiểu trả về của AlgorithmGetIot
         res.status(200).send(dataIots);
-    }
-    catch (error) {
-        console.error(error);
+    } catch (error) {
+        logger.error("Error in sendDataIots:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
 
 export const SendDistinctIots = async (req: Request, res: Response) => {
     try {
-        const data = await DistinctDataIot(req);
+        const data = await DistinctDataIot(req); // Cân nhắc định nghĩa kiểu trả về của DistinctDataIot
         res.status(200).send(data);
     } catch (error) {
-        console.error(error);
+        logger.error("Error in SendDistinctIots:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
 
 export const UpdateDataIots = async (req: Request, res: Response) => {
     try {
-        const dataIots: any = await UpdateDataIotsDetail(req);
+        const dataIots: any = await UpdateDataIotsDetail(req); // Cân nhắc định nghĩa kiểu trả về của UpdateDataIotsDetail
         res.status(200).send(dataIots);
-    }
-    catch (error) {
-        console.error(error);
+    } catch (error) {
+        logger.error("Error in UpdateDataIots:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
@@ -110,20 +270,20 @@ export const LockIots = async (req: Request, res: Response) => {
                 const replaced = MasterIotGlobal.replaceById(iotDataToReplace);
 
                 if (replaced) {
-                    console.log(`Successfully replaced item with ID: ${iotDataToReplace.id} in MasterIotGlobal.`);
+                    logger.info(`Successfully replaced item with ID: ${iotDataToReplace.id} in MasterIotGlobal.`);
                 } else {
-                    console.warn(`Item with ID: ${iotDataToReplace.id} was NOT replaced in MasterIotGlobal. It might not exist in the global store, or the ID was missing in the data intended for replacement.`);
+                    logger.warn(`Item with ID: ${iotDataToReplace.id} was NOT replaced in MasterIotGlobal. It might not exist in the global store, or the ID was missing in the data intended for replacement.`);
                 }
             } else {
-                console.warn("Data from AlgorithmLockIot (algorithmResult.data) is missing the 'id' property or is null/undefined. Cannot perform replacement in global store.");
+                logger.warn("Data from AlgorithmLockIot (algorithmResult.data) is missing the 'id' property or is null/undefined. Cannot perform replacement in global store.");
             }
         } else {
-            console.warn(`AlgorithmLockIot indicated an issue: status ${data.status}, message code ${data.message}.`);
+            logger.warn(`AlgorithmLockIot indicated an issue: status ${data.status}, message code ${data.message}.`);
         }
 
         res.status(200).send(data);
     } catch (error) {
-        console.error("Error in Lock IotCmd:", error);
+        logger.error("Error in LockIots:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
@@ -134,9 +294,9 @@ export const calculateCRC8 = (data: Buffer): number => {
         crc ^= data[i];
         for (let bit = 8; bit > 0; bit--) {
             if (crc & 0x80) {
-                crc = ((crc << 1) ^ 0x07) & 0xFF; // '& 0xFF' để giữ 8 bit
+                crc = ((crc << 1) ^ 0x07) & 0xFF;
             } else {
-                crc = (crc << 1) & 0xFF; // '& 0xFF' để giữ 8 bit
+                crc = (crc << 1) & 0xFF;
             }
         }
     }
@@ -145,63 +305,41 @@ export const calculateCRC8 = (data: Buffer): number => {
 
 export const deviceUpdateData = async (topic: string, message: Buffer) => {
     const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
-    if (message[0] === CMD_RESPOND_TIMESTAMP) { // Kiểm tra nếu lệnh là yêu cầu timestamp (CMD_RESPOND_TIMESTAMP có giá trị 0x14 = 20)
+    if (message[0] === CMD_RESPOND_TIMESTAMP) {
+        const currentEpochTimestamp = Math.floor(Date.now() / 1000);
 
-        // 1. Lấy Timestamp hiện tại (số giây kể từ Epoch)
-        const currentEpochTimestamp = Math.floor(Date.now() / 1000); // Ví dụ: 1717408476
+        const timestampDataHex = ConvertDatatoHex(currentEpochTimestamp, 'int32');
 
-        // 2. Chuyển đổi Timestamp thành chuỗi hex data
-        // Sử dụng PAYLOAD_I32 vì Timestamp là số nguyên 32-bit
-        // ConvertDatatoHex cần đảm bảo Big-Endian (4 bytes)
-        const timestampDataHex = ConvertDatatoHex(currentEpochTimestamp, 'int32'); // Ví dụ: "683FFA1C"
+        const cmdHex = CMD_RESPOND_TIMESTAMP.toString(16).toUpperCase().padStart(2, '0');
+        const lengthHex = '04';
+        const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0');
 
-        // 3. Xây dựng các phần của gói tin hex
-        const cmdHex = CMD_RESPOND_TIMESTAMP.toString(16).toUpperCase().padStart(2, '0'); // "14"
-        const lengthHex = '04'; // Timestamp là 4 byte (cho int32/uint32)
-        const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0'); // "06"
+        const payloadPart = `${lengthHex}${typeHex}${timestampDataHex}`;
 
-        // Ghép nối các phần payload: length | type | data
-        const payloadPart = `${lengthHex}${typeHex}${timestampDataHex}`; // Ví dụ: "0407683FFA1C"
-
-        // 4. Tính toán CRC cho phần CMD + Payload
         const dataForCrcCalculation = Buffer.from(`${cmdHex}${payloadPart}`, 'hex');
         const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
-        const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0'); // Ví dụ: "C5"
+        const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
 
-        // 5. Ghép nối để tạo gói tin hex hoàn chỉnh
-        const hexToSend = `${cmdHex}${payloadPart}${crcHex}`; // Ví dụ: "140407683FFA1CC5"
+        const hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
 
-        console.log(`Generated Timestamp Response: ${hexToSend}`);
+        logger.info(`Generated Timestamp Response for ${mac}: ${hexToSend}`);
 
-        // Gửi gói tin hex qua MQTT broker
         publishMessage(client, `device/response/${mac}`, hexToSend);
-
-        // Dừng xử lý tiếp nếu đây là lệnh yêu cầu Timestamp
         return;
     }
 
     const dataJson: any = await ConvertDataHextoJson(message);
 
-    // iotsLogger.info(dataJson);
     if (dataJson.status) {
-        dataJson.mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
+        dataJson.mac = mac;
         const dataIot = MasterIotGlobal.findByMac(dataJson.mac);
         if (dataIot) {
             dataJson.topic = topic;
             dataJson.status = 'in';
             dataJson.type = 2;
-            // dataJson.time = moment().format('YYYY-MM-DD HH:mm:ss.SSS');
+
             for (const payload of dataJson.payload) {
                 if (payload.payload_name === 'timestamp') {
-                    const dateObject = new Date(payload.timestamp * 1000);
-
-                    // const adjustedHour = (dateObject.getHours() - 7 + 24) % 24;
-                    const hours = String(dateObject.getHours()).padStart(2, '0');
-                    const minutes = String(dateObject.getMinutes()).padStart(2, '0');
-                    const seconds = String(dateObject.getMinutes()).padStart(2, '0');
-                    const milliseconds = String(dateObject.getMilliseconds()).padStart(3, '0');
-
-                    // dataJson.time = `${hours}:${minutes}:${seconds}.${milliseconds}`;
                     dataJson.time = payload.timestamp;
                 } else {
                     const dataMsgDetail = {
@@ -233,12 +371,12 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     MasterIotGlobal.update(iotDevice.toJSON());
                 }
             }
-            await sendDataRealTime(dataIot.id);
+            await sendDataRealTime(dataIot.id as number);
         }
     }
 };
 
-export const sendDataRealTime = async (id: any) => {
+export const sendDataRealTime = async (id: number) => {
     const dataIots = MasterIotGlobal.fillById(id);
     for (const data of dataIots) {
         const dataPayload = DataMsgGlobal.fillById(data.id);
@@ -246,21 +384,21 @@ export const sendDataRealTime = async (id: any) => {
             const dataMsgDetail =
                 {
                     device_id: data.id,
-                    payload: await Promise.all(dataPayload.map(async (item) => {
+                    payload: await Promise.all(dataPayload.map(async (item: any) => { // Cân nhắc kiểu item
                         const iotDevice = await IotSettings.findOne({
                             where: { id: item.device_id }
                         });
-                        if (item.CMD === "CMD_PUSH_TCP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
+                        if (item.CMD === "CMD_NOTIFY_TCP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
                             return null;
                         }
-                        if (item.CMD === "CMD_PUSH_UDP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
+                        if (item.CMD === "CMD_NOTIFY_UDP" && iotDevice && iotDevice.toJSON().udp_status !== "opened") { // Sửa thành udp_status
                             return null;
                         }
 
                         return item;
                     }))
                         .then(results => results.filter(item => item !== null))
-                }
+                };
             await EmitData("iot_send_data_" + data.id, dataMsgDetail);
         }
     }
@@ -268,21 +406,20 @@ export const sendDataRealTime = async (id: any) => {
 
 export const deviceSendData = async (req: Request, res: Response) => {
     try {
-        const dataHex = await ConvertDataJsonToHex(req.body);
-        let dataIots = await MasterIotGlobal.getAll();
-        let dataSend: any = [];
+        const dataHex: any = await ConvertDataJsonToHex(req.body);
+        let dataIots: any[] = await MasterIotGlobal.getAll();
+        const dataSend: any[] = [];
 
         if (dataHex.status) {
-            if (dataHex.mac !== '+') {
+            if (dataHex.mac && dataHex.mac !== '+') {
                 const dataFill = dataIots.filter((item: any) => {
-                    const matchMAC = dataHex.mac?.length ? dataHex.mac.includes(item.mac) : true;
-                    return matchMAC;
+                    return dataHex.mac.includes(item.mac);
                 });
                 dataIots = dataFill;
             }
             for (const dataDetail of dataIots) {
                 const topic = `${dataHex.topic}/${dataDetail.mac}`;
-                const publicData = await publishMessage(client, topic, dataHex.data);
+                await publishMessage(client, topic, dataHex.data); // publicData không cần gán vào biến
                 dataSend.push({
                     title: moment().format('YYYY-MM-DD HH:mm:ss'),
                     topic: topic,
@@ -293,7 +430,7 @@ export const deviceSendData = async (req: Request, res: Response) => {
         }
         res.status(200).send({ message: 106, data: dataSend });
     } catch (error) {
-        console.error("Error in Lock IotCmd:", error);
+        logger.error("Error in deviceSendData:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 };
@@ -337,13 +474,10 @@ export const serverPublish = async (req: Request, res: Response) => {
         }
 
         if (updateField && updateStatus) {
-            // Cập nhật trạng thái trong database
             iotDevice.set(updateField, updateStatus);
             await iotDevice.save();
             logger.info(`Updated ${updateField} for device ${mac} in DB to ${updateStatus}.`);
 
-            // <-- Cập nhật dữ liệu trong global storage sử dụng phương thức 'update' có sẵn -->
-            // Chuyển đối tượng Sequelize model thành plain object bằng .toJSON()
             MasterIotGlobal.update(iotDevice.toJSON());
             logger.info(`Updated ${updateField} for device ${mac} in global storage to ${updateStatus}.`);
         }
@@ -359,115 +493,118 @@ export const serverPublish = async (req: Request, res: Response) => {
     }
 };
 
-// Hàm kiểm tra định dạng IP v4
 const isValidIpAddress = (ip: string): boolean => {
-    // Regex cho IPv4 đơn giản
     const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipv4Regex.test(ip);
 };
 
-const inferNumericPayloadType = (value: number): keyof typeof PAYLOAD_TYPES => {
-    // Logic này hiện chỉ suy luận uint. Cần điều chỉnh nếu bạn muốn suy luận cả int.
-    // Đối với int, bạn cần kiểm tra cả min/max của int8, int16, int32.
-    // Ví dụ, để xử lý số âm:
+// --- START: HÀM SỬA LỖI TS2367 VÀ LOGIC KIỂM TRA KIỂU DỮ LIỆU ---
+
+const inferNumericPayloadType = (value: number): PayloadTypeKey => {
     if (!Number.isInteger(value)) {
-        // Nếu là số thập phân, coi là float
         return 'float';
     }
 
-    if (value >= PAYLOAD_TYPES.int8.min && value <= PAYLOAD_TYPES.int8.max) {
+    // Đảm bảo các kiểm tra range dựa trên PAYLOAD_TYPES
+    // Không dùng ! ở đây nữa, mà dùng guard để đảm bảo type an toàn
+    const int8Info = PAYLOAD_TYPES['int8'];
+    if (int8Info.min !== undefined && int8Info.max !== undefined && value >= int8Info.min && value <= int8Info.max) {
         return 'int8';
     }
-    if (value >= PAYLOAD_TYPES.uint8.min && value <= PAYLOAD_TYPES.uint8.max) {
+    const uint8Info = PAYLOAD_TYPES['uint8'];
+    if (uint8Info.min !== undefined && uint8Info.max !== undefined && value >= uint8Info.min && value <= uint8Info.max) {
         return 'uint8';
     }
-    if (value >= PAYLOAD_TYPES.int16.min && value <= PAYLOAD_TYPES.int16.max) {
+    const int16Info = PAYLOAD_TYPES['int16'];
+    if (int16Info.min !== undefined && int16Info.max !== undefined && value >= int16Info.min && value <= int16Info.max) {
         return 'int16';
     }
-    if (value >= PAYLOAD_TYPES.uint16.min && value <= PAYLOAD_TYPES.uint16.max) {
+    const uint16Info = PAYLOAD_TYPES['uint16'];
+    if (uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
         return 'uint16';
     }
-    if (value >= PAYLOAD_TYPES.int32.min && value <= PAYLOAD_TYPES.int32.max) {
+    const int32Info = PAYLOAD_TYPES['int32'];
+    if (int32Info.min !== undefined && int32Info.max !== undefined && value >= int32Info.min && value <= int32Info.max) {
         return 'int32';
     }
-    if (value >= PAYLOAD_TYPES.uint32.min && value <= PAYLOAD_TYPES.uint32.max) {
+    const uint32Info = PAYLOAD_TYPES['uint32'];
+    if (uint32Info.min !== undefined && uint32Info.max !== undefined && value >= uint32Info.min && value <= uint32Info.max) {
         return 'uint32';
     }
 
     throw new Error(`Data value ${value} is out of supported integer range.`);
 };
 
-const checkU16 = (value: number): keyof typeof PAYLOAD_TYPES => {
-    if (Number.isInteger(value) && value >= PAYLOAD_TYPES.uint16.min && value <= PAYLOAD_TYPES.uint16.max) {
+const checkU16 = (value: number): PayloadTypeKey => {
+    const uint16Info = PAYLOAD_TYPES['uint16'];
+    if (Number.isInteger(value) && uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
         return 'uint16';
     }
 
-    throw new Error(`Data value ${value} is out of supported integer range.`);
+    throw new Error(`Data value ${value} is out of supported integer range for UInt16.`);
 };
 
-const checkFloatOrU16 = (value: number): keyof typeof PAYLOAD_TYPES => {
+const checkFloatOrU16 = (value: number): PayloadTypeKey => {
     if (!Number.isInteger(value)) {
         return 'float';
     }
 
-    if (value >= PAYLOAD_TYPES.uint16.min && value <= PAYLOAD_TYPES.uint16.max) {
+    const uint16Info = PAYLOAD_TYPES['uint16'];
+    if (uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
         return 'uint16';
     }
 
-    throw new Error(`Data value ${value} is out of supported integer range.`);
+    throw new Error(`Data value ${value} is out of supported integer range for Float or UInt16.`);
 };
 
-const buildPayloadSegment = (value: any, payloadTypeKey: keyof typeof PAYLOAD_TYPES): Buffer => {
-    const typeInfo = PAYLOAD_TYPES[payloadTypeKey];
-    if (!typeInfo) {
-        throw new Error(`Unsupported payload type key: ${payloadTypeKey}`);
-    }
 
+const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer => {
+    const typeInfo = PAYLOAD_TYPES[payloadTypeKey];
+    // TypeScript sẽ phàn nàn về `min` hoặc `max` vì `typeInfo` có thể là `OtherPayloadDetails`
+    // Cách giải quyết: dùng type guards hoặc ép kiểu
     let dataBuffer: Buffer;
     let payloadLength: number;
 
     switch (payloadTypeKey) {
         case 'uint8':
-            dataBuffer = Buffer.alloc(1);
-            dataBuffer.writeUInt8(value);
-            payloadLength = 1;
-            break;
         case 'int8':
-            dataBuffer = Buffer.alloc(1);
-            dataBuffer.writeInt8(value);
-            payloadLength = 1;
-            break;
         case 'uint16':
-            dataBuffer = Buffer.alloc(2);
-            dataBuffer.writeUInt16BE(value);
-            payloadLength = 2;
-            break;
         case 'int16':
-            dataBuffer = Buffer.alloc(2);
-            dataBuffer.writeInt16BE(value);
-            payloadLength = 2;
-            break;
         case 'uint32':
-            dataBuffer = Buffer.alloc(4);
-            dataBuffer.writeUInt32BE(value);
-            payloadLength = 4;
-            break;
         case 'int32':
-            dataBuffer = Buffer.alloc(4);
-            dataBuffer.writeInt32BE(value); // <-- Sử dụng cho ID mặc định
-            payloadLength = 4;
-            break;
         case 'bool':
-            dataBuffer = Buffer.alloc(1);
-            dataBuffer.writeUInt8(value ? 1 : 0);
-            payloadLength = 1;
+            // Với các kiểu số nguyên và bool, chúng ta biết chắc chắn có min/max
+            // Cần đảm bảo `value` nằm trong phạm vi đã định nghĩa cho `typeInfo`
+            const numericInfo = typeInfo as NumericPayloadDetails; // Ép kiểu an toàn hơn
+            if (typeof value !== 'number' && typeof value !== 'boolean') {
+                throw new Error(`Value for '${payloadTypeKey}' type must be a number or boolean.`);
+            }
+            // Đối với bool, giá trị `value` có thể là true/false
+            const numValue = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+
+            if (numericInfo.min !== undefined && numericInfo.max !== undefined) {
+                if (numValue < numericInfo.min || numValue > numericInfo.max) {
+                    throw new Error(`Value ${numValue} is out of range for ${payloadTypeKey} (min: ${numericInfo.min}, max: ${numericInfo.max}).`);
+                }
+            }
+
+            dataBuffer = Buffer.alloc(numericInfo.size);
+            payloadLength = numericInfo.size;
+            if (payloadTypeKey === 'uint8') dataBuffer.writeUInt8(numValue);
+            else if (payloadTypeKey === 'int8') dataBuffer.writeInt8(numValue);
+            else if (payloadTypeKey === 'uint16') dataBuffer.writeUInt16BE(numValue);
+            else if (payloadTypeKey === 'int16') dataBuffer.writeInt16BE(numValue);
+            else if (payloadTypeKey === 'uint32') dataBuffer.writeUInt32BE(numValue);
+            else if (payloadTypeKey === 'int32') dataBuffer.writeInt32BE(numValue);
+            else if (payloadTypeKey === 'bool') dataBuffer.writeUInt8(numValue); // Giá trị bool là 0 hoặc 1
             break;
+
         case 'float':
             dataBuffer = Buffer.alloc(4);
             dataBuffer.writeFloatBE(value);
             payloadLength = 4;
             break;
-        case 'char': // Xử lý ký tự đơn
+        case 'char':
             if (typeof value !== 'string' || value.length !== 1) {
                 throw new Error("Value for 'char' type must be a single character string.");
             }
@@ -480,6 +617,8 @@ const buildPayloadSegment = (value: any, payloadTypeKey: keyof typeof PAYLOAD_TY
             payloadLength = dataBuffer.length;
             break;
         default:
+            // Bỏ qua các kiểu logic như 'payload', 'data'
+            // Nếu bạn có các kiểu này trong PAYLOAD_TYPES, bạn phải xử lý chúng hoặc loại bỏ chúng khỏi PayloadTypeKey
             throw new Error(`Unhandled payload type during buffer creation: ${payloadTypeKey}`);
     }
 
@@ -490,20 +629,21 @@ const buildPayloadSegment = (value: any, payloadTypeKey: keyof typeof PAYLOAD_TY
     return Buffer.from(`${lengthHex}${typeHex}${dataHex}`, 'hex');
 };
 
+// --- END: HÀM SỬA LỖI TS2367 VÀ LOGIC KIỂM TRA KIỂU DỮ LIỆU ---
+
 export const controlSerialCommand = async (req: Request, res: Response) => {
     try {
         const { mac, type: serialType, id, data: rawData, ipTcpSerial } = req.body;
 
-        if (!mac || !serialType || rawData === undefined) { // `data` có thể là 0, false, null, nên kiểm tra `undefined`
-            res.status(400).send({ message: "Missing required parameters: mac, type, or data." });
-            return;
+        if (!mac || !serialType || rawData === undefined) {
+            return res.status(400).send({ message: "Missing required parameters: mac, type, or data." });
         }
 
         let data: any = rawData;
 
         if (typeof rawData === 'string') {
             const numericValue = parseFloat(rawData);
-            if (!isNaN(numericValue)) {
+            if (!isNaN(numericValue) && String(numericValue) === rawData) {
                 data = numericValue;
             } else if (rawData.toLowerCase() === 'true') {
                 data = true;
@@ -512,99 +652,157 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
             }
         }
 
-        if (id === undefined && serialType !== "CMD_REQUEST_SERIAL_RS485" && serialType !== "CMD_REQUEST_SERIAL_RS232" && serialType !== "CMD_REQUEST_SERIAL_TCP") {
-            res.status(400).send({ message: "Missing required parameter: id for this serial type." });
-            return;
+        // Đảm bảo serialType là một key hợp lệ của CMD_SERIAL
+        const cmdInfo = CMD_SERIAL[serialType as keyof typeof CMD_SERIAL];
+        if (cmdInfo === undefined) {
+            return res.status(400).send({ message: `Invalid serial type: "${serialType}".` });
         }
 
-        if (serialType.toUpperCase() === 'CMD_REQUEST_SERIAL_TCP') {
-            if (!ipTcpSerial) {
-                res.status(400).send({ message: "ipTcpSerial is required for CMD_PUSH_SERIAL_TCP type." });
-                return;
+        const cmdHex = cmdInfo.CMD.toString(16).toUpperCase().padStart(2, '0');
+        let totalPayloadsBuffer = Buffer.alloc(0);
+        let idSegmentHex: string = 'N/A';
+        let ipDataSegmentHex: string = 'N/A'; // Sẽ không dùng trực tiếp nữa nếu ipTcpSerial được tích hợp vào id
+        let dataSegmentHex: string = 'N/A';
+        let inferredDataType: PayloadTypeKey | null = null;
+
+
+        // --- Bắt đầu thêm ID vào payload ---
+        // Kiểm tra nếu `id` tồn tại trong dataType của cmdInfo
+        if ('id' in cmdInfo.dataType && Array.isArray(cmdInfo.dataType.id) && cmdInfo.dataType.id.length > 0) {
+            if (id === undefined || id === null) {
+                return res.status(400).send({ message: `Missing required parameter: id for serial type "${serialType}".` });
             }
-            if (typeof ipTcpSerial !== 'string' || !isValidIpAddress(ipTcpSerial)) {
-                res.status(400).send({ message: `Invalid ipTcpSerial format. Must be a valid IPv4 address string.` });
-                return;
-            }
-        }
 
-        const cmd = CMD_SERIAL[serialType as keyof typeof CMD_SERIAL];
-        if (cmd === undefined) {
-            res.status(400).send({ message: `Invalid serial type: "${serialType}".` });
-            return;
-        }
+            const idType = cmdInfo.dataType.id[0]; // Lấy kiểu đầu tiên trong list id
 
-        const cmdHex = cmd.toString(16).toUpperCase().padStart(2, '0');
-        let totalPayloadsBuffer = Buffer.alloc(0); // Sử dụng Buffer để nối các payload
-
-        // --- Bắt đầu thêm ID vào payload (luôn là int32 nếu ID tồn tại) ---
-        if (id !== undefined && id !== null) { // Kiểm tra id không phải là null hoặc undefined
-            try {
-                // Chuyển đổi ID sang số nguyên, sau đó đóng gói là int32
-                const numericId = parseInt(id, 10);
-                if (isNaN(numericId)) {
-                    res.status(400).send({ message: "ID must be a valid number or convertible to a number for int32 payload type." });
-                    return;
+            if (idType === 'u32') { // Đây là trường hợp ID CAN
+                try {
+                    const numericId = parseInt(id, 10);
+                    if (isNaN(numericId)) {
+                        return res.status(400).send({ message: "ID must be a valid number or convertible to a number for u32 payload type." });
+                    }
+                    const idBuffer = buildPayloadSegment(numericId, "uint32"); // Sử dụng "uint32" là PayloadTypeKey
+                    totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, idBuffer]);
+                    idSegmentHex = idBuffer.toString('hex').toUpperCase();
+                } catch (error) {
+                    logger.error(`Error processing ID as u32: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    return res.status(500).send({ message: `Error processing ID as u32: ${error instanceof Error ? error.message : 'Unknown error'}` });
                 }
-                totalPayloadsBuffer = Buffer.concat([
-                    totalPayloadsBuffer,
-                    buildPayloadSegment(numericId, 'int32') // Mặc định ID là int32
-                ]);
-            } catch (error) {
-                res.status(500).send({ message: `Error processing ID as int32: ${error instanceof Error ? error.message : 'Unknown error'}` });
-                return;
+            } else if (idType === 'string') { // Đây là trường hợp ID/IP của CMD_REQUEST_SERIAL_TCP_UDP
+                if (typeof id !== 'string' || !isValidIpAddress(id)) { // Giả định ID string là IP address
+                    return res.status(400).send({ message: `Invalid ID format for string type. Must be a valid IPv4 address string.` });
+                }
+                try {
+                    const idBuffer = buildPayloadSegment(id, 'string');
+                    totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, idBuffer]);
+                    idSegmentHex = idBuffer.toString('hex').toUpperCase();
+                    // ipDataSegmentHex không còn cần thiết nếu id đã xử lý IP
+                } catch (error) {
+                    logger.error(`Error processing ID as string (IP): ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    return res.status(500).send({ message: `Error processing ID as string (IP): ${error instanceof Error ? error.message : 'Unknown error'}` });
+                }
+            } else {
+                return res.status(400).send({ message: `Unsupported ID type defined for "${serialType}": '${idType}'.` });
             }
+        } else if (id !== undefined && id !== null) {
+            // Nếu id được cung cấp nhưng định nghĩa CMD_SERIAL không yêu cầu (nghĩa là không phải lệnh CAN hoặc TCP_UDP ID), đây là lỗi
+            return res.status(400).send({ message: `ID is not expected for serial type "${serialType}".` });
         }
         // --- Kết thúc thêm ID vào payload ---
 
-        // --- Xử lý IP TCP nếu có ---
-        if (serialType.toUpperCase() === 'CMD_PUSH_SERIAL_TCP' && ipTcpSerial) {
-            totalPayloadsBuffer = Buffer.concat([
-                totalPayloadsBuffer,
-                buildPayloadSegment(ipTcpSerial, 'string')
-            ]);
+        // --- BỎ PHẦN XỬ LÝ IP TCP NÀY, VÌ NÓ ĐÃ ĐƯỢC TÍCH HỢP VÀO LOGIC XỬ LÝ ID BÊN TRÊN ---
+        // if (serialType === 'CMD_REQUEST_SERIAL_TCP') { ... }
+        // Thay vào đó, nếu bạn có lệnh TCP riêng (CMD_REQUEST_SERIAL_TCP_UDP) và muốn id là địa chỉ IP,
+        // thì logic phía trên đã xử lý. Nếu bạn muốn `ipTcpSerial` là một payload riêng biệt,
+        // bạn cần định nghĩa nó trong `dataType.data` của lệnh tương ứng.
+        // Dựa trên định nghĩa mới, CMD_REQUEST_SERIAL_TCP_UDP có ID là string (IP), nên không cần ipTcpSerial riêng nữa.
+        // Nếu `ipTcpSerial` vẫn là một tham số riêng biệt cho các lệnh TCP khác, hãy định nghĩa nó trong `dataType.data` của lệnh đó.
+        // Hiện tại, tôi sẽ giả định `ipTcpSerial` là thừa nếu `id` đã là IP.
+        // Nếu bạn muốn ipTcpSerial riêng, bạn cần thay đổi định nghĩa CMD_SERIAL.
+        if (ipTcpSerial !== undefined && ipTcpSerial !== null && serialType !== 'CMD_REQUEST_SERIAL_TCP_UDP') {
+            // Cảnh báo nếu ipTcpSerial được gửi cho lệnh không yêu cầu nó.
+            logger.warn(`ipTcpSerial provided for serial type "${serialType}" which does not expect it.`);
         }
-        // --- Kết thúc xử lý IP TCP ---
+        // --- KẾT THÚC BỎ PHẦN XỬ LÝ IP TCP ---
+
 
         // --- Xử lý Data (dữ liệu lệnh) với suy luận kiểu ---
-        let dataPayloadType: keyof typeof PAYLOAD_TYPES;
-        try {
-            if (typeof data === 'number') {
-                dataPayloadType = checkFloatOrU16(data); // Suy luận kiểu số
-            } else if (typeof data === 'boolean') {
-                dataPayloadType = 'bool'; // Boolean
-            } else if (typeof data === 'string' && (serialType === "CMD_WRITE_IO_RS232" || serialType === "CMD_WRITE_IO_RS485")) {
-                dataPayloadType = 'string'; // Chuỗi
-            } else {
-                res.status(400).send({ message: `Unsupported data type for 'data' field: ${typeof data}.` });
-                return;
+        const expectedDataTypes = cmdInfo.dataType.data;
+        if (!expectedDataTypes) { // Thêm kiểm tra length cho an toàn
+            return res.status(500).send({ message: `No data types defined for command ${serialType}.` });
+        }
+
+        let dataProcessed = false;
+        for (const expectedType of expectedDataTypes) {
+            try {
+                let currentDataPayloadType: PayloadTypeKey;
+
+                if (expectedType === 'string') {
+                    if (typeof data !== 'string') {
+                        throw new Error(`Expected string data for type '${serialType}', but got ${typeof data}.`);
+                    }
+                    currentDataPayloadType = 'string';
+                } else if (expectedType === 'bool') {
+                    if (typeof data !== 'boolean') {
+                        throw new Error(`Expected boolean data for type '${serialType}', but got ${typeof data}.`);
+                    }
+                    currentDataPayloadType = 'bool';
+                } else if (typeof data === 'number') {
+                    // Logic suy luận kiểu số như cũ
+                    if (expectedType === 'u16') {
+                        currentDataPayloadType = checkU16(data);
+                    } else if (expectedType === 'float') {
+                        currentDataPayloadType = checkFloatOrU16(data);
+                    } else {
+                        currentDataPayloadType = inferNumericPayloadType(data);
+                    }
+
+                    // Loại bỏ kiểm tra chặt chẽ gây lỗi TS2367
+                    // if (['u8', 'u16', 'u32', 'int8', 'int16', 'int32', 'float'].includes(expectedType) && expectedType !== currentDataPayloadType) {
+                    //     // Removed strict comparison that caused TS2367
+                    // }
+                } else if (expectedType === 'payload' || expectedType === 'data') {
+                    // Đây là các placeholder, suy luận từ giá trị `data` thực tế.
+                    if (typeof data === 'number') {
+                        currentDataPayloadType = inferNumericPayloadType(data);
+                    } else if (typeof data === 'boolean') {
+                        currentDataPayloadType = 'bool';
+                    } else if (typeof data === 'string') {
+                        currentDataPayloadType = 'string';
+                    } else {
+                        throw new Error(`Unsupported data type for 'data' field when expected 'payload'/'data' type: ${typeof data}.`);
+                    }
+                } else {
+                    throw new Error(`Unsupported expected data type in definition: ${expectedType}.`);
+                }
+
+                const dataBuffer = buildPayloadSegment(data, currentDataPayloadType);
+                totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, dataBuffer]);
+                dataSegmentHex = dataBuffer.toString('hex').toUpperCase();
+                inferredDataType = currentDataPayloadType;
+                dataProcessed = true;
+                break;
+            } catch (error) {
+                logger.warn(`Failed to process data as ${expectedType} for serial type "${serialType}": ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
-            totalPayloadsBuffer = Buffer.concat([
-                totalPayloadsBuffer,
-                buildPayloadSegment(data, dataPayloadType) // Sử dụng kiểu dữ liệu đã suy luận
-            ]);
-        } catch (error) {
-            res.status(400).send({ message: `Error processing data: ${error instanceof Error ? error.message : 'Unknown error'}` });
-            return;
+        }
+
+        if (!dataProcessed) {
+            return res.status(400).send({ message: `Data value "${rawData}" is not compatible with any defined types for command "${serialType}".` });
         }
         // --- Kết thúc xử lý Data ---
 
-
-        // Tính toán CRC dựa trên CMD + tất cả các segment payload
         const dataForCrcCalculation = Buffer.concat([Buffer.from(cmdHex, 'hex'), totalPayloadsBuffer]);
         const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
         const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
 
-        // Gói hex hoàn chỉnh
         const hexToSend = `${cmdHex}${totalPayloadsBuffer.toString('hex').toUpperCase()}${crcHex}`;
 
-        console.log(`[Serial Command] Type: ${serialType}, CMD: ${cmdHex}, ID: ${id || 'N/A'}, Data: ${data}, IP (as String): ${ipTcpSerial || 'N/A'}, Complete Packet: ${hexToSend}`);
+        logger.info(`[Serial Command] Type: ${serialType}, CMD: ${cmdHex}, ID: ${id || 'N/A'}, Data: ${data}, IP (as String): ${ipTcpSerial || 'N/A'}, Complete Packet: ${hexToSend}`);
 
-        // Kiểm tra kết nối MQTT và gửi tin nhắn
         if (!client || !client.connected) {
-            console.error("MQTT client not connected. Cannot publish message.");
-            res.status(500).send({ message: "MQTT client not connected. Please try again later." });
-            return;
+            logger.error("MQTT client not connected. Cannot publish message.");
+            return res.status(500).send({ message: "MQTT client not connected. Please try again later." });
         }
         publishMessage(client, `device/response/${mac}`, hexToSend);
 
@@ -613,135 +811,192 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
             data: {
                 serialType: serialType,
                 id: id || null,
-                originalCommand: data,
-                ipTcpSerial: ipTcpSerial || null,
+                originalCommand: rawData,
+                ipTcpSerial: ipTcpSerial || null, // Vẫn trả về nếu có, dù không dùng để tạo hex
                 hexCommand: hexToSend,
                 breakdown: {
                     cmd: cmdHex,
-                    idSegment: (id !== undefined && id !== null) ? buildPayloadSegment(parseInt(id, 10), 'int32').toString('hex').toUpperCase() : 'N/A', // Hiển thị segment ID
-                    ipDataSegment: (serialType.toUpperCase() === 'CMD_PUSH_SERIAL_TCP' && ipTcpSerial)
-                        ? buildPayloadSegment(ipTcpSerial, 'string').toString('hex').toUpperCase()
-                        : 'N/A',
-                    dataSegment: buildPayloadSegment(data, dataPayloadType).toString('hex').toUpperCase(), // Hiển thị segment Data
+                    idSegment: idSegmentHex,
+                    ipDataSegment: ipDataSegmentHex, // Có thể vẫn N/A nếu ID đã xử lý IP
+                    dataSegment: dataSegmentHex,
+                    inferredDataType: inferredDataType,
                     crc: crcHex
                 }
             }
         });
     } catch (error) {
-        console.error("Error in controlSerialCommand:", error);
-        if (error instanceof Error) {
-            res.status(500).send({ message: `Internal Server Error: ${error.message}` });
-        } else {
-            res.status(500).send({ message: "Internal Server Error" });
-        }
+        logger.error("Error in controlSerialCommand:", error);
+        return res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
 };
 
 export const controlModbusCommand = async (req: Request, res: Response) => {
     try {
-        const { mac, type, id, address, function: modbusFunction, data: rawData, ipAddress } = req.body;
+        const { mac, type, id, address, function: modbusFunction, data: rawData, ipAddress } = req.body; // ipAddress không dùng, giữ nguyên theo code gốc
 
         let data: any = rawData;
 
+        // Chuyển đổi rawData nếu cần
         if (typeof rawData === 'string') {
             if (rawData.toLowerCase() === 'true') {
                 data = true;
             } else if (rawData.toLowerCase() === 'false') {
                 data = false;
             } else if (/^\d+$/.test(rawData.trim())) {
-                // Kiểm tra xem có phải số nguyên không (chỉ chứa chữ số)
                 data = parseInt(rawData, 10);
             } else {
-                // Giữ nguyên string nếu không parse được
                 data = rawData;
             }
         }
 
         if (!mac || !type || address === undefined || modbusFunction === undefined || data === undefined) {
-            res.status(400).send({ message: "Missing required Modbus parameters: mac, type, address, function, or data." });
-            return;
+            return res.status(400).send({ message: "Missing required Modbus parameters: mac, type, address, function, or data." });
         }
 
-        const cmdHexValue = CMD_MODBUS_CONTROL[type as keyof typeof CMD_MODBUS_CONTROL];
-        if (cmdHexValue === undefined) {
-            res.status(400).send({ message: `Invalid Modbus command type: "${type}".` });
-            return;
+        const cmdInfo = CMD_MODBUS_CONTROL[type as keyof typeof CMD_MODBUS_CONTROL];
+        if (cmdInfo === undefined) {
+            return res.status(400).send({ message: `Invalid Modbus command type: "${type}".` });
         }
-        const cmdHex = cmdHexValue.toString(16).toUpperCase().padStart(2, '0');
+        const cmdHex = cmdInfo.CMD.toString(16).toUpperCase().padStart(2, '0');
 
         let totalPayloadsBuffer = Buffer.alloc(0);
         let finalModbusUnitId: number | string | null = null;
         let finalIpAddressForTCP: string | undefined = undefined;
 
-        if (type === "CMD_REQUEST_MODBUS_RS485") {
-            if (id === null || (typeof id === 'number' && (id < 0 || id > 255 || !Number.isInteger(id))) || (typeof id === 'string' && id.trim() === '')) {
-                res.status(400).send({ message: "Slave ID (ID) is required and must be a number 0-255 or a non-empty string for Modbus RTU." });
-                return;
-            }
-            totalPayloadsBuffer = Buffer.concat([
-                totalPayloadsBuffer,
-                buildPayloadSegment(id, 'uint8')
-            ]);
-            finalModbusUnitId = id;
-        } else if (type === "CMD_REQUEST_MODBUS_TCP") {
-            if (!id || !isValidIpAddress(id)) {
-                res.status(400).send({ message: "IP address is required and must be valid for Modbus TCP." });
-                return;
-            }
-            totalPayloadsBuffer = Buffer.concat([
-                totalPayloadsBuffer,
-                buildPayloadSegment(id, 'string')
-            ]);
-            finalIpAddressForTCP = id;
-        } else {
-            res.status(400).send({ message: `Unsupported Modbus command type: "${type}".` });
-            return;
+
+        // Xử lý ID (Unit ID hoặc IP) dựa trên định nghĩa Modbus
+        const expectedIdTypes = cmdInfo.dataType.id;
+        if (!expectedIdTypes) {
+            return res.status(500).send({ message: `No ID types defined for Modbus command ${type}.` });
         }
 
-        totalPayloadsBuffer = Buffer.concat([
-            totalPayloadsBuffer,
-            buildPayloadSegment(address, 'uint16')
-        ]);
-
-        totalPayloadsBuffer = Buffer.concat([
-            totalPayloadsBuffer,
-            buildPayloadSegment(modbusFunction, 'uint8')
-        ]);
-
-        // === ĐÂY LÀ PHẦN SỬA ĐỔI ĐỂ SUY LUẬN KIỂU DỮ LIỆU CHO 'DATA' ===
-        let dataPayloadType: keyof typeof PAYLOAD_TYPES;
-        if (typeof data === 'number') {
+        let idProcessed = false;
+        for (const expectedIdType of expectedIdTypes) {
             try {
-                dataPayloadType = checkU16(data);
+                let currentIdPayloadType: PayloadTypeKey;
+
+                if (expectedIdType === 'u8') { // Modbus RTU ID
+                    // Sửa lỗi TS2345: đảm bảo id là số nguyên hoặc chuyển đổi được
+                    const parsedId = typeof id === 'string' ? parseInt(id, 10) : id;
+                    if (parsedId === null || parsedId === undefined || !Number.isInteger(parsedId) || parsedId < PAYLOAD_TYPES.uint8.min!.valueOf() || parsedId > PAYLOAD_TYPES.uint8.max!.valueOf()) {
+                        throw new Error("Slave ID (ID) is required and must be a number 0-255 or a non-empty convertible string for Modbus RTU.");
+                    }
+                    currentIdPayloadType = 'uint8';
+                    const idBuffer = buildPayloadSegment(parsedId, currentIdPayloadType);
+                    totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, idBuffer]);
+                    finalModbusUnitId = parsedId;
+                    idProcessed = true;
+                    break;
+                } else if (expectedIdType === 'string') { // Modbus TCP IP
+                    if (!id || typeof id !== 'string' || !isValidIpAddress(id)) {
+                        throw new Error("IP address (ID) is required and must be a valid string for Modbus TCP.");
+                    }
+                    currentIdPayloadType = 'string';
+                    const idBuffer = buildPayloadSegment(id, currentIdPayloadType);
+                    totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, idBuffer]);
+                    finalIpAddressForTCP = id;
+                    idProcessed = true;
+                    break;
+                } else {
+                    throw new Error(`Unsupported expected ID type in definition: ${expectedIdType}.`);
+                }
             } catch (error) {
-                res.status(400).send({ message: `Data value ${data} is not valid for inferred unsigned integer types: ${error instanceof Error ? error.message : 'Unknown error'}` });
-                return;
+                logger.warn(`Failed to process Modbus ID as ${expectedIdType} for command "${type}": ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
-        } else if (typeof data === 'boolean') {
-            dataPayloadType = 'bool'; // Nếu bạn có thể gửi boolean
-        } else {
-            res.status(400).send({ message: `Unsupported data type for 'data' field: ${typeof data}.` });
-            return;
         }
 
-        totalPayloadsBuffer = Buffer.concat([
-            totalPayloadsBuffer,
-            buildPayloadSegment(data, dataPayloadType) // Sử dụng kiểu dữ liệu đã suy luận
-        ]);
-        // === KẾT THÚC PHẦN SỬA ĐỔI ===
+        if (!idProcessed) {
+            return res.status(400).send({ message: `ID value "${id}" is not compatible with any defined ID types for Modbus command "${type}".` });
+        }
 
+
+        // Xử lý Address (luôn là uint16)
+        try {
+            if (address === undefined || typeof address !== 'number' || !Number.isInteger(address) || address < PAYLOAD_TYPES.uint16.min!.valueOf() || address > PAYLOAD_TYPES.uint16.max!.valueOf()) {
+                return res.status(400).send({ message: "Address is required and must be a valid UInt16 number (0-65535)." });
+            }
+            const addressBuffer = buildPayloadSegment(address, 'uint16');
+            totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, addressBuffer]);
+        } catch (error) {
+            logger.error(`Error processing Modbus address: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            return res.status(400).send({ message: `Error processing address: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        }
+
+
+        // Xử lý Function (luôn là uint8)
+        try {
+            if (modbusFunction === undefined || typeof modbusFunction !== 'number' || !Number.isInteger(modbusFunction) || modbusFunction < PAYLOAD_TYPES.uint8.min!.valueOf() || modbusFunction > PAYLOAD_TYPES.uint8.max!.valueOf()) {
+                return res.status(400).send({ message: "Function code is required and must be a valid UInt8 number (0-255)." });
+            }
+            const functionBuffer = buildPayloadSegment(modbusFunction, 'uint8');
+            totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, functionBuffer]);
+        } catch (error) {
+            logger.error(`Error processing Modbus function code: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            return res.status(400).send({ message: `Error processing function: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        }
+
+
+        // Xử lý Data
+        const expectedDataTypes = cmdInfo.dataType.data;
+        if (!expectedDataTypes) {
+            return res.status(500).send({ message: `No data types defined for Modbus command ${type}.` });
+        }
+
+        let dataProcessed = false;
+        let inferredDataType: PayloadTypeKey | null = null;
+        for (const expectedType of expectedDataTypes) {
+            try {
+                let currentDataPayloadType: PayloadTypeKey;
+
+                if (typeof data === 'number') {
+                    if (expectedType === 'u8') {
+                        currentDataPayloadType = inferNumericPayloadType(data);
+                        if (currentDataPayloadType !== 'uint8') { // Chỉ chấp nhận uint8 nếu rõ ràng
+                            throw new Error(`Data ${data} is not compatible with uint8 for Modbus.`);
+                        }
+                    } else if (expectedType === 'u16') {
+                        currentDataPayloadType = checkU16(data);
+                    } else { // 'bool' hoặc các kiểu số khác
+                        currentDataPayloadType = inferNumericPayloadType(data);
+                    }
+                } else if (typeof data === 'boolean') {
+                    if (expectedType !== 'bool') { // Nếu data là bool nhưng expected không phải bool
+                        throw new Error(`Expected boolean data for Modbus type 'bool', but got ${typeof data}.`);
+                    }
+                    currentDataPayloadType = 'bool';
+                } else { // Nếu data là string
+                    // Modbus không có kiểu string trực tiếp cho data như thế này, nhưng để giữ logic ban đầu,
+                    // nếu `data` là string và `expectedType` không xử lý, nó sẽ throw lỗi.
+                    throw new Error(`Unsupported data type for 'data' field: ${typeof data}.`);
+                }
+
+                const dataBuffer = buildPayloadSegment(data, currentDataPayloadType);
+                totalPayloadsBuffer = Buffer.concat([totalPayloadsBuffer, dataBuffer]);
+                inferredDataType = currentDataPayloadType;
+                dataProcessed = true;
+                break;
+            } catch (error) {
+                logger.warn(`Failed to process Modbus data as ${expectedType} for command "${type}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+        }
+
+        if (!dataProcessed) {
+            return res.status(400).send({ message: `Modbus data value "${rawData}" is not compatible with any defined types for command "${type}".` });
+        }
+
+
+        // Tính toán CRC
         const dataForCrcCalculation = Buffer.concat([Buffer.from(cmdHex, 'hex'), totalPayloadsBuffer]);
         const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
         const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
 
         const hexToSend = `${cmdHex}${totalPayloadsBuffer.toString('hex').toUpperCase()}${crcHex}`;
 
-        console.log(`[Modbus Command] MAC: ${mac}, Type: ${type}, Complete Hex: ${hexToSend}`);
+        logger.info(`[Modbus Command] MAC: ${mac}, Type: ${type}, Complete Hex: ${hexToSend}`);
 
         if (!client || !client.connected) {
-            console.error("MQTT client not connected. Cannot publish message.");
-            res.status(500).send({ message: "MQTT client not connected. Please try again later." });
-            return;
+            logger.error("MQTT client not connected. Cannot publish message.");
+            return res.status(500).send({ message: "MQTT client not connected. Please try again later." });
         }
 
         publishMessage(client, `device/response/${mac}`, hexToSend);
@@ -756,17 +1011,14 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
                 ipAddress: finalIpAddressForTCP,
                 address: address,
                 function: modbusFunction,
-                data: data,
+                data: rawData,
+                inferredDataType: inferredDataType,
                 hexCommand: hexToSend,
             }
         });
 
     } catch (error) {
-        console.error("Error in controlModbusCommand:", error);
-        if (error instanceof Error) {
-            res.status(500).send({ message: `Internal Server Error: ${error.message}` });
-        } else {
-            res.status(500).send({ message: "Internal Server Error" });
-        }
+        logger.error("Error in controlModbusCommand:", error);
+        return res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
 };

@@ -122,138 +122,145 @@ const SERIAL_CONTROL_CMDS: ControlCommand[] = [
         ]
     },
     {
-        cmd: "CMD_REQUEST_SERIAL_TCP", label: "CMD_REQUEST_SERIAL_TCP", type: 'serial',
+        cmd: "CMD_REQUEST_SERIAL_TCP/UDP", label: "CMD_REQUEST_SERIAL_TCP/UDP", type: 'serial',
         fields: [
-            { name: "ipTcpSerial", label: "IP", type: "text", placeholder: "IP", required: true, span: 24 },
+            { name: "id", label: "IP", type: "text", placeholder: "IP", required: true, span: 24 },
             { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
         ]
     },
     {
-        cmd: "CMD_WRITE_IO_DO1", label: "CMD_WRITE_IO_DO1", type: 'serial',
+        cmd: "CMD_CAN", label: "CMD_CAN", type: 'serial',
         fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+            { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, precision: 0, span: 24 },
         ]
     },
-    {
-        cmd: "CMD_WRITE_IO_DO2", label: "CMD_WRITE_IO_DO2", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO3", label: "CMD_WRITE_IO_DO3", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO4", label: "CMD_WRITE_IO_DO4", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO5", label: "CMD_WRITE_IO_DO5", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO6", label: "CMD_WRITE_IO_DO6", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO7", label: "CMD_WRITE_IO_DO7", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_DO8", label: "CMD_WRITE_IO_DO8", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO1", label: "CMD_WRITE_IO_AO1", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO2", label: "CMD_WRITE_IO_AO2", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO3", label: "CMD_WRITE_IO_AO3", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO4", label: "CMD_WRITE_IO_AO4", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO5", label: "CMD_WRITE_IO_AO5", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO6", label: "CMD_WRITE_IO_AO6", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO7", label: "CMD_WRITE_IO_AO7", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_AO8", label: "CMD_WRITE_IO_AO8", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_RS232", label: "CMD_WRITE_IO_RS232", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
-        ]
-    },
-    {
-        cmd: "CMD_WRITE_IO_RS485", label: "CMD_WRITE_IO_RS485", type: 'serial',
-        fields: [
-            { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-            { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
-        ]
-    },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO1", label: "CMD_WRITE_IO_DO1", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO2", label: "CMD_WRITE_IO_DO2", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO3", label: "CMD_WRITE_IO_DO3", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO4", label: "CMD_WRITE_IO_DO4", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO5", label: "CMD_WRITE_IO_DO5", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO6", label: "CMD_WRITE_IO_DO6", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO7", label: "CMD_WRITE_IO_DO7", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_DO8", label: "CMD_WRITE_IO_DO8", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO1", label: "CMD_WRITE_IO_AO1", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO2", label: "CMD_WRITE_IO_AO2", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO3", label: "CMD_WRITE_IO_AO3", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO4", label: "CMD_WRITE_IO_AO4", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO5", label: "CMD_WRITE_IO_AO5", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO6", label: "CMD_WRITE_IO_AO6", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO7", label: "CMD_WRITE_IO_AO7", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_AO8", label: "CMD_WRITE_IO_AO8", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_RS232", label: "CMD_WRITE_IO_RS232", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
+    //     ]
+    // },
+    // {
+    //     cmd: "CMD_WRITE_IO_RS485", label: "CMD_WRITE_IO_RS485", type: 'serial',
+    //     fields: [
+    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
+    //         { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
+    //     ]
+    // },
 ];
 
 // Helper Maps để tra cứu nhanh thông tin CMD
