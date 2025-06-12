@@ -2,8 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface DataPoint {
-    time: string; // Key cho XAxis, định dạng "HH:mm:ss.SSS"
-    // Các keys động cho YAxis (ví dụ: "ADC1_Value (V)", "ADC2_Value (V)")
+    time: number; // time là timestamp số (milliseconds)
     [key: string]: string | number | boolean | null | undefined;
 }
 
@@ -14,7 +13,7 @@ interface ConfigIotsProps {
     settings?: boolean;
 }
 
-// Hàm định dạng số lớn nhỏ
+// Hàm định dạng số lớn nhỏ (giữ nguyên)
 const formatNumber = (num: number | null | undefined): string => {
     if (num === null || num === undefined) {
         return '';
@@ -39,71 +38,51 @@ const formatNumber = (num: number | null | undefined): string => {
     return isNegative ? '-' + result : result;
 };
 
-// Màu sắc đơn giản, dễ nhìn
+// Cấu hình kênh (giữ nguyên)
 const CHANNEL_CONFIGS = {
-    "ADC1_Value (V)": {
-        color: "#ca8a04", // Blueca8a04
-        name: "ADC1 (V)",
-        unit: "V"
-    },
-    "ADC2_Value (mA)": {
-        color: "#2563eb", // Red
-        name: "ADC2 (mA)",
-        unit: "mA"
-    },
-    "ADC3_Value (pH)": {
-        color: "#ca8a04", // Yellow
-        name: "ADC3 (pH)",
-        unit: "pH"
-    },
-    "Temperature (C)": {
-        color: "#059669", // Green
-        name: "Nhiệt độ",
-        unit: "°C"
-    },
-    "Humidity (%)": {
-        color: "#7c3aed", // Purple
-        name: "Độ ẩm",
-        unit: "%"
-    },
+    "ADC1_Value (V)": { color: "#ca8a04", name: "ADC1 (V)", unit: "V" },
+    "ADC2_Value (mA)": { color: "#2563eb", name: "ADC2 (mA)", unit: "mA" },
+    "ADC3_Value (pH)": { color: "#ca8a04", name: "ADC3 (pH)", unit: "pH" },
+    "Temperature (C)": { color: "#059669", name: "Nhiệt độ", unit: "°C" },
+    "Humidity (%)": { color: "#7c3aed", name: "Độ ẩm", unit: "%" },
 };
 
-// Màu dự phòng đơn giản
 const FALLBACK_COLORS = [
     "#2563eb", "#dc2626", "#ca8a04", "#059669", "#7c3aed",
     "#0891b2", "#ea580c", "#6b7280", "#db2777", "#0284c7",
 ];
 
-// Helper function để xử lý thời gian linh hoạt
-const normalizeTime = (time: string | number): string => {
-    if (typeof time === 'number') {
-        const timestamp = time > 1e10 ? time : time * 1000;
-        const date = new Date(timestamp);
-        return date.toTimeString().split(' ')[0] + '.' + date.getMilliseconds().toString().padStart(3, '0');
-    }
-    return time;
-};
-
-// Parse time helper để convert về milliseconds
+// parseTime helper để convert về milliseconds
 const parseTime = (time: string | number): number => {
     if (typeof time === 'number') {
         return time > 1e10 ? time : time * 1000;
     } else {
         const [timePart, msPart = '0'] = time.split('.');
         const [hours, minutes, seconds] = timePart.split(':').map(Number);
-        const today = new Date();
-        today.setHours(hours, minutes, seconds, parseInt(msPart));
-        return today.getTime();
+
+        const now = new Date(); // Get current date for consistency
+        now.setHours(hours, minutes, seconds, parseInt(msPart));
+        return now.getTime();
     }
 };
 
-// Custom Tooltip Component - đơn giản
+// Custom Tooltip Component - hiển thị thời gian đầy đủ (giữ nguyên)
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+        const date = new Date(label);
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+        const formattedLabel = `${formattedTime}.${milliseconds}`;
+
         return (
             <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
                 <p className="text-sm font-medium text-gray-700 mb-2">
-                    {label}
+                    {formattedLabel}
                 </p>
                 {payload.map((entry: any, index: number) => {
                     const config = CHANNEL_CONFIGS[entry.dataKey as keyof typeof CHANNEL_CONFIGS];
@@ -135,10 +114,17 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
     const [chartData, setChartData] = useState<DataPoint[]>([]);
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
     const [, setLastUpdateTime] = useState<string>('');
-    const [dataStats, setDataStats] = useState<{[key: string]: {count: number, latest: number}}>({});
+    const [, setDataStats] = useState<{[key: string]: {count: number, latest: number}}>({});
 
     const processedRecordsRef = useRef<Set<string>>(new Set());
 
+    // Giới hạn số điểm hiển thị trên biểu đồ
+    const MAX_DATA_POINTS = 100;
+
+    // Cố định phạm vi Y từ -5 đến 25
+    const yAxisDomain = [-5, 25];
+
+    // Hàm để xử lý dữ liệu mới và cập nhật state của biểu đồ
     useEffect(() => {
         const newRecordsFromProps = dataIotsDetail.data;
 
@@ -156,7 +142,8 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
-        const getRecordKey = (record: any) => `${record.CMD}_${record.time}`;
+        // Tạo key duy nhất cho mỗi bản ghi. Kết hợp CMD và timestamp đã parse.
+        const getRecordKey = (record: any) => `${record.CMD}_${parseTime(record.time)}`;
 
         const newValidRecords = validRecords.filter((record: any) => {
             const recordKey = getRecordKey(record);
@@ -167,6 +154,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             return;
         }
 
+        // Đánh dấu các bản ghi mới là đã xử lý
         newValidRecords.forEach((record: any) => {
             const recordKey = getRecordKey(record);
             processedRecordsRef.current.add(recordKey);
@@ -174,119 +162,109 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
         console.log(`📊 Chart Update: Processing ${newValidRecords.length} new ADC records`);
 
-        const newPoints: DataPoint[] = [];
         const currentBatchKeys = new Set<string>();
-        const newStats: {[key: string]: {count: number, latest: number}} = {};
 
-        newValidRecords.forEach((record: any) => {
-            let dataKey: string;
-            if (record.CMD === 'CMD_ADC_CHANNEL1') {
-                dataKey = `ADC1_Value (V)`;
-            } else if (record.CMD === 'CMD_ADC_CHANNEL2') {
-                dataKey = `ADC2_Value (mA)`;
-            } else {
-                return;
-            }
-
-            currentBatchKeys.add(dataKey);
-
-            // GIỮ NGUYÊN DỮ LIỆU THÔ - KHÔNG MODIFY
-            let value = parseFloat(record.data);
-            if (isNaN(value)) {
-                value = 0;
-            }
-
-            // Update stats
-            if (!newStats[dataKey]) {
-                newStats[dataKey] = { count: 0, latest: value };
-            }
-            newStats[dataKey].count++;
-            newStats[dataKey].latest = value;
-
-            const newPoint: DataPoint = {
-                time: normalizeTime(record.time),
-                [dataKey]: value // DỮ LIỆU CHÍNH XÁC 100%
-            };
-            newPoints.push(newPoint);
-        });
-
-        if (newPoints.length === 0) {
-            return;
-        }
-
-        // Update stats
+        // Cập nhật thống kê
         setDataStats(prevStats => {
             const updatedStats = { ...prevStats };
-            Object.keys(newStats).forEach(key => {
-                if (updatedStats[key]) {
-                    updatedStats[key].count += newStats[key].count;
-                    updatedStats[key].latest = newStats[key].latest;
+            newValidRecords.forEach((record: any) => {
+                let dataKey: string;
+                if (record.CMD === 'CMD_ADC_CHANNEL1') {
+                    dataKey = `ADC1_Value (V)`;
+                } else if (record.CMD === 'CMD_ADC_CHANNEL2') {
+                    dataKey = `ADC2_Value (mA)`;
                 } else {
-                    updatedStats[key] = newStats[key];
+                    return;
                 }
+                currentBatchKeys.add(dataKey);
+
+                let value = parseFloat(record.data);
+                if (isNaN(value)) value = 0;
+
+                if (!updatedStats[dataKey]) {
+                    updatedStats[dataKey] = { count: 0, latest: value };
+                }
+                updatedStats[dataKey].count++;
+                updatedStats[dataKey].latest = value;
             });
             return updatedStats;
         });
 
-        setChartData((prevChartData) => {
-            let combinedData = [...prevChartData, ...newPoints];
+        // Cập nhật dữ liệu hiển thị
+        setChartData(prevChartData => {
+            const updatedChartData = [...prevChartData];
 
-            // Chỉ sort theo thời gian - KHÔNG làm mịn dữ liệu
-            combinedData.sort((a, b) => parseTime(a.time) - parseTime(b.time));
-
-            // Merge data points với cùng timestamp (nhưng giữ nguyên giá trị)
-            const mergedDataMap = new Map<string, DataPoint>();
-            combinedData.forEach(point => {
-                if (mergedDataMap.has(point.time)) {
-                    const existingPoint = mergedDataMap.get(point.time)!;
-                    Object.keys(point).forEach(key => {
-                        if (key !== 'time' && point[key] !== null && point[key] !== undefined) {
-                            existingPoint[key] = point[key]; // GIỮ NGUYÊN GIÁ TRỊ
-                        }
-                    });
+            newValidRecords.forEach(record => {
+                const time = parseTime(record.time);
+                let dataKey: string;
+                if (record.CMD === 'CMD_ADC_CHANNEL1') {
+                    dataKey = `ADC1_Value (V)`;
+                } else if (record.CMD === 'CMD_ADC_CHANNEL2') {
+                    dataKey = `ADC2_Value (mA)`;
                 } else {
-                    mergedDataMap.set(point.time, { ...point });
+                    return;
+                }
+                let value = parseFloat(record.data);
+                if (isNaN(value)) value = 0;
+
+                let existingPoint = updatedChartData.find(p => p.time === time);
+
+                if (existingPoint) {
+                    existingPoint[dataKey] = value;
+                } else {
+                    const newPoint: DataPoint = {
+                        time: time,
+                        [dataKey]: value
+                    };
+                    updatedChartData.push(newPoint);
                 }
             });
 
-            let finalChartData = Array.from(mergedDataMap.values());
+            updatedChartData.sort((a, b) => a.time - b.time);
 
-            // Limit data points for performance (chỉ giữ lại số lượng, không thay đổi giá trị)
-            const MAX_DATA_POINTS = 100;
-            if (finalChartData.length > MAX_DATA_POINTS) {
-                finalChartData = finalChartData.slice(-MAX_DATA_POINTS);
+            // Giới hạn số lượng điểm hiển thị
+            if (updatedChartData.length > MAX_DATA_POINTS) {
+                return updatedChartData.slice(updatedChartData.length - MAX_DATA_POINTS);
             }
 
-            const currentTime = new Date().toLocaleTimeString();
-            setLastUpdateTime(currentTime);
-            console.log(`✅ Chart Updated at ${currentTime}: ${finalChartData.length} total RAW data points`);
-
-            return finalChartData;
+            return updatedChartData;
         });
 
-        setChartDataKeys((prevChartDataKeys) => {
+        // Cập nhật các key dữ liệu đang được hiển thị trên biểu đồ
+        setChartDataKeys(prevChartDataKeys => {
             const combinedSet = new Set([...prevChartDataKeys, ...Array.from(currentBatchKeys)]);
             return Array.from(combinedSet);
         });
 
-        // Clean up processed records cache
+        const currentTime = new Date().toLocaleTimeString();
+        setLastUpdateTime(currentTime);
+        console.log(`✅ Chart Updated at ${currentTime}: ${chartData.length} total display data points (after update)`);
+
+        // Dọn dẹp cache của processedRecordsRef để tránh bộ nhớ tăng quá lớn
         if (processedRecordsRef.current.size > 1000) {
             const recordsArray = Array.from(processedRecordsRef.current);
             const toKeep = recordsArray.slice(-500);
             processedRecordsRef.current = new Set(toKeep);
         }
 
-    }, [dataIotsDetail.data, chartDataKeys]);
+    }, [dataIotsDetail.data]);
 
-    const xAxisTickFormatter = useCallback((value: string) => {
-        return value.split('.')[0]; // Chỉ ẩn milliseconds trên trục X để gọn
+    // Hàm định dạng tick cho XAxis (timestamp số thành chuỗi thời gian)
+    const xAxisTickFormatter = useCallback((value: number): string => {
+        const date = new Date(value);
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
     }, []);
 
+    // Hàm định dạng tick cho YAxis
     const yAxisTickFormatter = useCallback((value: number) => formatNumber(value), []);
 
     return (
         <div className="w-full h-full bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-
             <ResponsiveContainer width="100%" height={700}>
                 <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <CartesianGrid
@@ -297,9 +275,10 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
 
                     <XAxis
                         dataKey="time"
+                        type="number"
                         tick={{ fontSize: 11, fill: '#6b7280' }}
                         tickFormatter={xAxisTickFormatter}
-                        interval="preserveStartEnd"
+                        domain={['dataMin', 'dataMax']} // Trục X vẫn tự động điều chỉnh
                         height={60}
                         angle={-45}
                         textAnchor="end"
@@ -311,7 +290,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                         tick={{ fontSize: 11, fill: '#6b7280' }}
                         tickFormatter={yAxisTickFormatter}
                         width={80}
-                        domain={['auto', 'auto']}
+                        domain={yAxisDomain} // Sử dụng phạm vi Y đã tính toán cố định
                         axisLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
                         tickLine={{ stroke: '#d1d5db', strokeWidth: 1 }}
                     />
@@ -348,7 +327,7 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
                                     stroke: '#fff',
                                     fill: color
                                 }}
-                                connectNulls={false} // Không nối các điểm null - chỉ vẽ khi có dữ liệu
+                                connectNulls={false}
                                 name={config?.name || dataKey}
                             />
                         );

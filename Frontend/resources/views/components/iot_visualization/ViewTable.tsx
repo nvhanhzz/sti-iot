@@ -122,9 +122,17 @@ const SERIAL_CONTROL_CMDS: ControlCommand[] = [
         ]
     },
     {
-        cmd: "CMD_REQUEST_SERIAL_TCP/UDP", label: "CMD_REQUEST_SERIAL_TCP/UDP", type: 'serial',
+        cmd: "CMD_REQUEST_SERIAL_TCP", label: "CMD_REQUEST_SERIAL_TCP", type: 'serial',
         fields: [
             { name: "id", label: "IP", type: "text", placeholder: "IP", required: true, span: 24 },
+            { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
+        ]
+    },
+    {
+        cmd: "CMD_REQUEST_SERIAL_UDP", label: "CMD_REQUEST_SERIAL_UDP", type: 'serial',
+        fields: [
+            { name: "id", label: "IP", type: "text", placeholder: "IP", required: true, span: 12 },
+            { name: "port", label: "Port", type: "number", placeholder: "Port", required: true, span: 12 },
             { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
         ]
     },
@@ -881,7 +889,7 @@ const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSucce
                                     inputComponent = null;
                             }
                             return (
-                                <Col key={field.name} span={24}> {/* Mỗi label + input chiếm span 12 */}
+                                <Col key={field.name} span={field.span}>
                                     <Form.Item
                                         label={<span style={{ fontSize: '12px' }}>{field.label}</span>}
                                         name={field.name}

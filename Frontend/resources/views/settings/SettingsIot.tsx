@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { EditOutlined, DeleteOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, ReloadOutlined, SearchOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import { TbPlugConnectedX, TbPlugConnected } from "react-icons/tb";
 import { LuFileOutput, LuFileInput } from "react-icons/lu";
 import type { TableColumnsType } from 'antd';
-import { Button, Input, Table, Flex, Modal, Form, Row, Col, message, Popconfirm, Popover } from 'antd';
+import { Button, Input, Table, Flex, Popconfirm, Popover, Form, message, Row, Col } from 'antd'; // Xóa Modal
 import { IotCMDInterface } from '../../../interface/SettingInterface';
 import LoadingTable from '../components/LoadingTable';
 import IotService from '../../../services/IotService';
@@ -20,40 +20,146 @@ interface ExtendedIotInterface extends IotCMDInterface {
     input?: boolean;
     output?: boolean;
     mac?: string;
+    // Thêm các trường dữ liệu khác cần thiết từ API nếu chưa có
 }
 
 const SettingsIot: React.FC = () => {
     const socket = useSocket();
     const { t } = useTranslation();
-    const [isModalVisible, setIsModalVisible] = useState(false);
     const [dataAll, setDataAll] = useState<ExtendedIotInterface[]>([]);
     const [data, setData] = useState<ExtendedIotInterface[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [editingId, setEditingId] = useState<React.Key | null>(null);
     const [searchName, setSearchName] = useState<string>('');
     const [searchMac, setSearchMac] = useState<string>('');
-    const [form] = Form.useForm();
+    const [form] = Form.useForm(); // Form cho chỉnh sửa nội tuyến
+    const [editingKey, setEditingKey] = useState<React.Key>(''); // Thêm editingKey để theo dõi hàng đang chỉnh sửa
     const { changePageName } = useOutletContext<ContextType>();
 
     useEffect(() => {
         changePageName(t('navleft.device_iot'), t('navleft.settings'));
     }, [changePageName, t]);
 
+    // --- Logic cho Inline Editing ---
+    const isEditing = (record: ExtendedIotInterface) => record.id === editingKey;
+
+    const edit = (record: ExtendedIotInterface) => {
+        form.setFieldsValue({ ...record });
+        // @ts-ignore
+        setEditingKey(record.id);
+    };
+
+    const cancel = () => {
+        setEditingKey('');
+    };
+
+    const save = async (id: React.Key) => {
+        const loadingMessage = message.loading('Loading...', 0);
+        try {
+            const row = (await form.validateFields()) as ExtendedIotInterface;
+            const updatedValues = { ...row, id: id }; // Đảm bảo ID được gửi đi
+
+            const response: any = await IotService.PostDataUpdateIots(updatedValues);
+            const resData = response?.data;
+
+            if (resData?.data) {
+                const resDataNew = resData.data;
+
+                // Cập nhật state data và dataAll
+                const newData = [...data];
+                const newAllData = [...dataAll];
+
+                const index = newData.findIndex(item => id === item.id);
+                const allIndex = newAllData.findIndex(item => id === item.id);
+
+                if (index > -1) {
+                    newData[index] = { ...newData[index], ...resDataNew };
+                    setData(newData);
+                }
+                if (allIndex > -1) {
+                    newAllData[allIndex] = { ...newAllData[allIndex], ...resDataNew };
+                    setDataAll(newAllData);
+                }
+
+                setEditingKey(''); // Kết thúc chỉnh sửa
+                message.success('Success');
+            }
+        } catch (errorInfo: any) {
+            const response = errorInfo?.response;
+            const errorMessage = response?.data?.message || 'Something went wrong';
+            message.error(errorMessage);
+        } finally {
+            loadingMessage();
+        }
+    };
+    // --- End Logic for Inline Editing ---
+
+    // @ts-ignore
     const columns: TableColumnsType<ExtendedIotInterface> = [
+        {
+            title: 'STT', // Cột số thứ tự
+            key: 'stt',
+            width: '5%',
+            render: (_text, _record, index) => index + 1,
+        },
         {
             title: t('iots.name'),
             dataIndex: 'name',
             key: 'name',
+            editable: true, // Đánh dấu là có thể chỉnh sửa
+            render: (text, record: ExtendedIotInterface) => {
+                const editable = isEditing(record);
+                return editable ? (
+                    <Form.Item
+                        name="name"
+                        rules={[{ required: true, message: `${t('please_input_your')} ${t('iots.name')} !` }]}
+                        style={{ margin: 0 }}
+                    >
+                        <Input placeholder={`${t('enter_your')} ${t('iots.name')}`} />
+                    </Form.Item>
+                ) : (
+                    text
+                );
+            },
         },
         {
             title: t('iots.mac'),
             dataIndex: 'mac',
             key: 'mac',
+            editable: true, // Đánh dấu là có thể chỉnh sửa
+            render: (text, record: ExtendedIotInterface) => {
+                const editable = isEditing(record);
+                return editable ? (
+                    <Form.Item
+                        name="mac"
+                        rules={[{ required: true, message: `${t('please_input_your')} ${t('iots.mac')} !` }]}
+                        style={{ margin: 0 }}
+                    >
+                        <Input placeholder={`${t('enter_your')} ${t('iots.mac')}`} />
+                    </Form.Item>
+                ) : (
+                    text
+                );
+            },
         },
         {
             title: t('iots.firmware'),
             dataIndex: 'firmware',
             key: 'firmware',
+            editable: true, // Đánh dấu là có thể chỉnh sửa
+            render: (text, record: ExtendedIotInterface) => {
+                const editable = isEditing(record);
+                return editable ? (
+                    <Form.Item
+                        name="firmware"
+                        // rules={[{ required: true, message: `${t('please_input_your')} ${t('iots.firmware')} !` }]} // Firmware có thể không bắt buộc
+                        style={{ margin: 0 }}
+                    >
+                        <Input placeholder={`${t('enter_your')} ${t('iots.firmware')}`} />
+                    </Form.Item>
+                ) : (
+                    text
+                );
+            },
         },
         {
             title: t('status'),
@@ -98,32 +204,53 @@ const SettingsIot: React.FC = () => {
             title: t('action'),
             dataIndex: 'operation',
             width: '15%',
-            render: (_, record: ExtendedIotInterface) => (
-                <Flex gap="small" wrap>
-                    <Button
-                        color="primary"
-                        variant="solid"
-                        icon={<EditOutlined />}
-                        onClick={() => showModal(record.id)}
-                    >
-                        {t('edit')}
-                    </Button>
-                    <Popconfirm
-                        title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')} ?`}
-                        onConfirm={() => handleLockUnlock(record.id)}
-                    >
+            render: (_, record: ExtendedIotInterface) => {
+                const editable = isEditing(record);
+                return editable ? (
+                    <Flex gap="small" wrap>
                         <Button
-                            color={record.isdelete ? 'default' : 'danger'}
-                            style={record.isdelete ? {backgroundColor: '#fff', color: '#000', border: '1px solid #ddd'} : {}}
-                            variant="solid"
-                            icon={<DeleteOutlined />}
-                            disabled={record.isdelete && !record.name}
+                            type="primary"
+                            icon={<SaveOutlined />}
+                            onClick={() => save(record.id)}
                         >
-                            {record.isdelete ? t('un_loock') : t('lock')}
+                            {t('save')}
                         </Button>
-                    </Popconfirm>
-                </Flex>
-            ),
+                        <Popconfirm title='Xác nhận hủy?' onConfirm={cancel}>
+                            <Button
+                                icon={<CloseOutlined />}
+                            >
+                                {t('cancel')}
+                            </Button>
+                        </Popconfirm>
+                    </Flex>
+                ) : (
+                    <Flex gap="small" wrap>
+                        <Button
+                            color="primary"
+                            variant="solid"
+                            icon={<EditOutlined />}
+                            onClick={() => edit(record)}
+                            disabled={editingKey !== ''} // Không cho phép sửa khi một hàng khác đang được sửa
+                        >
+                            {t('edit')}
+                        </Button>
+                        <Popconfirm
+                            title={`${t('sure_to')} ${record.isdelete ? t('un_loock') : t('lock')} ?`}
+                            onConfirm={() => handleLockUnlock(record.id)}
+                        >
+                            <Button
+                                color={record.isdelete ? 'default' : 'danger'}
+                                style={record.isdelete ? {backgroundColor: '#fff', color: '#000', border: '1px solid #ddd'} : {}}
+                                variant="solid"
+                                icon={<DeleteOutlined />}
+                                disabled={record.isdelete && !record.name}
+                            >
+                                {record.isdelete ? t('un_loock') : t('lock')}
+                            </Button>
+                        </Popconfirm>
+                    </Flex>
+                );
+            },
         },
     ];
 
@@ -145,85 +272,12 @@ const SettingsIot: React.FC = () => {
 
     const refreshData = () => {
         fetchData();
+        setEditingKey(''); // Đảm bảo hủy mọi chỉnh sửa khi refresh
     };
 
     useEffect(() => {
         fetchData();
     }, []);
-
-    const showModal = (id?: React.Key) => {
-        if (id) {
-            const item = data.find((item: ExtendedIotInterface) => id === item.id);
-            if (item) {
-                form.setFieldsValue(item);
-                setEditingId(id);
-            }
-        } else {
-            form.resetFields();
-            setEditingId(null);
-        }
-        setIsModalVisible(true);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-        setEditingId(null);
-        form.resetFields();
-    };
-
-    const handleOk = async () => {
-        const loadingMessage = message.loading('Loading...', 0);
-        try {
-            const values = await form.validateFields();
-
-            if (editingId) {
-                values.id = editingId;
-            }
-
-            const response: any = await IotService.PostDataUpdateIots(values);
-            const resData = response?.data;
-
-            if (resData?.data) {
-                const resDataNew = resData.data;
-                setData(prevData => {
-                    const newData = [...prevData];
-                    const index = newData.findIndex((item: ExtendedIotInterface) =>
-                        editingId ? item.id === editingId : item.mac === resDataNew.mac
-                    );
-
-                    if (index >= 0) {
-                        newData[index] = { ...newData[index], ...resDataNew };
-                    } else {
-                        newData.unshift(resDataNew);
-                    }
-                    return newData;
-                });
-
-                setDataAll(prevData => {
-                    const newData = [...prevData];
-                    const index = newData.findIndex((item: ExtendedIotInterface) =>
-                        editingId ? item.id === editingId : item.mac === resDataNew.mac
-                    );
-
-                    if (index >= 0) {
-                        newData[index] = { ...newData[index], ...resDataNew };
-                    } else {
-                        newData.unshift(resDataNew);
-                    }
-                    return newData;
-                });
-
-                message.success('Success');
-                handleCancel();
-            }
-        } catch (errorInfo: any) {
-            const response = errorInfo?.response;
-            const errorMessage = response?.data?.message || 'Something went wrong';
-            message.error(errorMessage);
-        } finally {
-            loadingMessage();
-        }
-    };
 
     const handleSearch = () => {
         const result = dataAll.filter((item: ExtendedIotInterface) => {
@@ -292,7 +346,9 @@ const SettingsIot: React.FC = () => {
 
     const handleSocketEventUpdateClient = useCallback((eventData: any) => {
         if (eventData) {
+            // Khi có thiết bị mới từ socket, thêm vào cả data và dataAll
             setDataAll((prevData) => [eventData, ...prevData]);
+            setData((prevData) => [eventData, ...prevData]); // Thêm vào data hiển thị để nó xuất hiện ngay
         }
     }, []);
 
@@ -309,18 +365,19 @@ const SettingsIot: React.FC = () => {
     }, [socket, handleSocketEvent, handleSocketEventUpdateClient]);
 
     useEffect(() => {
+        // Chỉ emit khi dataAll đã có dữ liệu ban đầu
         if (socket && dataAll.length > 0) {
             socket.emit("iot:iot_status");
         }
-    }, [socket, dataAll]);
+    }, [socket, dataAll]); // Dependency dataAll để đảm bảo emit sau khi fetch data
 
     return (
         <>
             <div className="card">
                 <div className="card-header">
                     <Row gutter={[16, 16]} align="middle">
-                        <Col style={{display: "flex", alignItems: "center"}}>
-                            <h4 style={{marginBottom: 0}}>Tìm kiếm: </h4>
+                        <Col style={{ display: "flex", alignItems: "center" }}>
+                            <h4 style={{ marginBottom: 0 }}>Tìm kiếm: </h4>
                         </Col>
                         <Col span={6}>
                             <Input
@@ -358,50 +415,67 @@ const SettingsIot: React.FC = () => {
                         <LoadingTable />
                     ) : (
                         <>
-                            <h3 style={{marginBottom: '30px'}}>Danh sách thiết bị</h3>
-                            <Table
-                                rowKey="id"
-                                columns={columns}
-                                dataSource={data}
-                                bordered
-                                pagination={false}
-                            />
+                            <h3 style={{ marginBottom: '30px' }}>Danh sách thiết bị</h3>
+                            <Form form={form} component={false}> {/* Form bao bọc Table */}
+                                <Table
+                                    rowKey="id"
+                                    columns={columns}
+                                    dataSource={data}
+                                    bordered
+                                    pagination={false}
+                                    // Thêm logic để hợp nhất các hàng có thể chỉnh sửa
+                                    components={{
+                                        body: {
+                                            cell: EditableCell,
+                                        },
+                                    }}
+                                    rowClassName="editable-row"
+                                />
+                            </Form>
                         </>
                     )}
                 </div>
             </div>
-
-            <Modal
-                title={editingId ? t('edit') : t('cmd.create')}
-                open={isModalVisible}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="cancel" onClick={handleCancel}>
-                        {t('cancel')}
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleOk}>
-                        {t('ok')}
-                    </Button>,
-                ]}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    name="modal_form"
-                >
-                    <Form.Item
-                        label={t('iots.name')}
-                        name='name'
-                        rules={[
-                            { required: true, message: `${t('please_input_your')} ${t('iots.name')} !` },
-                        ]}
-                    >
-                        <Input placeholder={`${t('enter_your')} ${t('iots.name')}`} />
-                    </Form.Item>
-                </Form>
-            </Modal>
         </>
     );
 };
+
+// Component helper cho Editable Cell, cần thiết cho Form.Item
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+    editing: boolean;
+    dataIndex: string;
+    title: any;
+    inputType: 'number' | 'text';
+    children: React.ReactNode;
+    rules?: any[];
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+                                                       editing,
+                                                       dataIndex,
+                                                       title,
+                                                       inputType,
+                                                       children,
+                                                       rules,
+                                                       ...restProps
+                                                   }) => {
+    const inputNode = inputType === 'number' ? <Input type="number" /> : <Input />;
+    return (
+        <td {...restProps}>
+            {editing ? (
+                <Form.Item
+                    name={dataIndex}
+                    style={{ margin: 0 }}
+                    rules={rules}
+                >
+                    {inputNode}
+                </Form.Item>
+            ) : (
+                children
+            )}
+        </td>
+    );
+};
+
 
 export default SettingsIot;
