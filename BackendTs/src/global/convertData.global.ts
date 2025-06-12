@@ -149,20 +149,64 @@ export const ConvertHextoData = (hexStr: string, dataType: string | undefined) =
                 return hexStr;
             }
 
-            const bytes = hexStr.match(/.{2}/g);
-            if (!bytes) {
-                return hexStr;
+            const bytesMatch = hexStr.match(/.{2}/g);
+            if (!bytesMatch) {
+                return ""; // Chuỗi rỗng nếu không có byte nào
             }
 
-            const byteArray = Uint8Array.from(bytes.map(byte => parseInt(byte, 16)));
+            const byteArray = Uint8Array.from(bytesMatch.map(byte => parseInt(byte, 16)));
 
-            const decodedString = new TextDecoder('utf-8', { fatal: false }).decode(byteArray);
+            // 1. Thử giải mã bằng UTF-8
+            const decodedUtf8 = new TextDecoder('utf-8', { fatal: false }).decode(byteArray);
 
-            if (decodedString.includes('\ufffd')) {
-                return hexStr;
+            // Kiểm tra xem UTF-8 có chứa ký tự thay thế không
+            if (!decodedUtf8.includes('\ufffd')) {
+                // Nếu UTF-8 giải mã hoàn toàn sạch (không có ký tự thay thế), trả về kết quả UTF-8
+                return decodedUtf8;
             }
 
-            return decodedString;
+            // 2. Nếu UTF-8 có ký tự thay thế, thử giải mã bằng ISO-8859-1 (hoặc Windows-1252)
+            // ISO-8859-1 ánh xạ mỗi byte thành một ký tự.
+            // Điều này đảm bảo không có \ufffd từ bộ giải mã, nhưng vẫn có thể có ký tự không in được.
+            const decodedIso = new TextDecoder('iso-8859-1', { fatal: false }).decode(byteArray);
+
+            // Kiểm tra xem chuỗi ISO-8859-1 có vẻ "hợp lý" không.
+            // "Hợp lý" ở đây có thể có nghĩa là không chứa quá nhiều ký tự điều khiển.
+            // Đây là phần định nghĩa "hợp lý" theo yêu cầu của bạn.
+            // Đối với '62E16E' -> 'bán', chúng ta chấp nhận 'E6' là 'á'.
+            // Đối với '919293' -> '‘’”', chúng ta muốn trả về thô.
+
+            // Một cách để kiểm tra: Có quá nhiều ký tự không in được (control characters) không?
+            // Ký tự điều khiển (control characters) thường nằm trong khoảng 0x00-0x1F và 0x7F.
+            // Các ký tự từ 0x80-0x9F trong ISO-8859-1 là các ký tự điều khiển C1,
+            // nhưng thường được ánh xạ thành các ký tự in được trong Windows-1252 (ví dụ: ‘, ”, €).
+            // Nếu bạn muốn loại trừ các ký tự như '‘’”' (từ 91, 92, 93),
+            // bạn cần kiểm tra cụ thể các byte này hoặc các khoảng giá trị này.
+
+            // --- Logic mới để phân biệt ---
+            // Kiểm tra xem chuỗi ISO-8859-1 có chứa các ký tự điều khiển C1 (0x80-0x9F) hay không
+            // Đây là các ký tự mà thường được coi là không in được trong ISO-8859-1 gốc
+            // nhưng được ánh xạ thành ký tự in được trong Windows-1252.
+            // Ký tự '91', '92', '93' rơi vào khoảng này.
+            const isControlCharRange = (byte: number) => byte >= 0x80 && byte <= 0x9F;
+            const containsProblematicIsoChars = byteArray.some(isControlCharRange);
+
+            // Kiểm tra xem có ký tự điều khiển ASCII (0x00-0x1F và 0x7F) không
+            const isAsciiControlChar = (byte: number) => (byte >= 0x00 && byte <= 0x1F) || byte === 0x7F;
+            const containsAsciiControlChars = byteArray.some(isAsciiControlChar);
+
+            // '62E16E': 62 (b), E1 (á), 6E (n) -> 62, 225, 110. E1 (225) không phải control char. 62, 110 cũng không.
+            // '919293': 91 (145), 92 (146), 93 (147). Cả ba đều là control char C1.
+
+            if (containsAsciiControlChars || containsProblematicIsoChars) {
+                // Nếu có ký tự điều khiển ASCII hoặc các ký tự "problematic" trong ISO-8859-1 (như 91, 92, 93),
+                // thì trả về dữ liệu thô.
+                return hexStr;
+            } else {
+                // Nếu không có vấn đề gì đáng kể với ISO-8859-1 (và UTF-8 đã thất bại),
+                // thì trả về chuỗi đã giải mã bằng ISO.
+                return decodedIso;
+            }
 
         case "boolean":
             // Boolean thường là 1 byte = 2 ký tự hex (00 hoặc 01)
