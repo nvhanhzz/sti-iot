@@ -3,6 +3,7 @@ import { config } from "./index";
 import { queryLogger } from "../config/logger/query.logger";
 import mongoose from "mongoose";
 import IotSettings from "../models/sql/iot_settings.models";
+import {FirmwareVersion} from "../models/sql/iot_firmware_version.models";
 
 export const sequelize = new Sequelize(
     config.db.database,
@@ -21,6 +22,7 @@ export const connectDatabases = async () => {
         try {
             await sequelize.authenticate();
             queryLogger.info("MySQL Database connected");
+            FirmwareVersion.initialize(sequelize);
 
             console.log('Updating all IoT device statuses to "closed" on startup...');
             await IotSettings.update(

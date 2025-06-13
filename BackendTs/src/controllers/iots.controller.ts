@@ -1,37 +1,36 @@
 // controllers/iots.controller.ts
 
-import { Request, Response } from "express";
-import { UpdateDataIotsDetail, AlgorithmLockIot, AlgorithmGetIot } from "../algorithms/iots.algorithms";
-import { ConvertDataHextoJson, ConvertDataJsonToHex } from "../algorithms/data.algorithms";
-import { EmitData } from "../sockets/emit";
-import { DistinctDataIot } from "../services/iot.services";
-import { MasterIotGlobal, DataMsgGlobal } from "../global";
+import {Request, Response} from "express";
+import {AlgorithmGetIot, AlgorithmLockIot, UpdateDataIotsDetail} from "../algorithms/iots.algorithms";
+import {ConvertDataHextoJson, ConvertDataJsonToHex} from "../algorithms/data.algorithms";
+import {EmitData} from "../sockets/emit";
+import {DistinctDataIot} from "../services/iot.services";
+import {DataMsgGlobal, MasterIotGlobal} from "../global";
 import publishMessage from "../mqtt/publish";
 import client from "../mqtt";
 import moment from "moment";
-import { MasterIotInterface } from "../interface";
-import { ConvertDatatoHex } from "../global/convertData.global";
+import {MasterIotInterface} from "../interface";
+import {ConvertDatatoHex} from "../global/convertData.global";
 import logger from "../config/logger";
 import IotSettings from "../models/sql/iot_settings.models";
-import { Buffer } from 'buffer';
+import {Buffer} from 'buffer';
 
 const CMD_RESPOND_TIMESTAMP = 0x14;
 const CMD_NOTIFY_TCP = 0x3C;
 const CMD_NOTIFY_UDP = 0x3D;
 const PAYLOAD_I32 = 0x06;
-const PAYLOAD_STRING = 0x0A;
 
 const CMD_SERIAL = {
     "CMD_REQUEST_SERIAL_RS485": {
         "CMD": 0x11,
         dataType: {
-            data: ["string"] as const
+            data: ["string"] as const // Chỉ chấp nhận string
         }
     },
     "CMD_REQUEST_SERIAL_RS232": {
         "CMD": 0x12,
         dataType: {
-            data: ["string"] as const
+            data: ["string"] as const // Chỉ chấp nhận string
         }
     },
     "CMD_REQUEST_SERIAL_TCP": {
@@ -45,141 +44,147 @@ const CMD_SERIAL = {
         "CMD": 0x3c,
         dataType: {
             id: ["string"] as const,
-            port: ["u16"] as const,
+            port: ["uint16"] as const, // Cần là unsigned 16-bit integer
             data: ["string"] as const
         }
     },
     "CMD_CAN": {
         "CMD": 0x3d,
         dataType: {
-            id: ["u32"] as const,
-            data: ["string", "u8", "u16", "bool", "float"] as const
+            // Thứ tự ưu tiên: uint8 -> uint16 -> uint32
+            id: ["uint32"] as const,
+            // Thứ tự ưu tiên: string -> uint8 -> uint16 -> bool -> float
+            data: ["bool", "uint16", "float", "string"] as const
         }
     },
     "CMD_WRITE_IO_DO1": {
         "CMD": 0x22,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            // Ví dụ: DO có thể nhận boolean (0/1) hoặc 1 byte giá trị (uint8)
+            data: ["bool", "uint8"] as const // Ưu tiên bool, sau đó uint8
         }
     },
     "CMD_WRITE_IO_DO2": {
         "CMD": 0x23,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO3": {
         "CMD": 0x24,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO4": {
         "CMD": 0x25,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO5": {
         "CMD": 0x26,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO6": {
         "CMD": 0x27,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO7": {
         "CMD": 0x28,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_DO8": {
         "CMD": 0x29,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            data: ["bool", "uint8"] as const
         }
     },
     "CMD_WRITE_IO_AO1": {
         "CMD": 0x32,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            // Ưu tiên float, sau đó uint16, uint8, bool
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO2": {
         "CMD": 0x33,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO3": {
         "CMD": 0x34,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO4": {
         "CMD": 0x35,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO5": {
         "CMD": 0x36,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO6": {
         "CMD": 0x37,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO7": {
         "CMD": 0x38,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_AO8": {
         "CMD": 0x39,
         dataType: {
-            id: ["u32"] as const,
-            data: ["bool", "u8", "u16", "float"] as const
+            id: ["uint32"] as const,
+            data: ["float", "uint16", "uint8", "bool"] as const
         }
     },
     "CMD_WRITE_IO_RS232": {
         "CMD": 0x3A,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            // Thay thế bằng kiểu cụ thể mà RS232 có thể nhận
+            data: ["string"] as const // Ví dụ: RS232 chỉ nhận string
         }
     },
     "CMD_WRITE_IO_RS485": {
         "CMD": 0x3B,
         dataType: {
-            id: ["u32"] as const,
-            data: ["payload", "data"] as const
+            id: ["uint32"] as const,
+            // Thay thế bằng kiểu cụ thể mà RS485 có thể nhận
+            data: ["string"] as const // Ví dụ: RS485 chỉ nhận string
         }
     }
 } as const;
@@ -189,19 +194,20 @@ const CMD_MODBUS_CONTROL = {
     "CMD_REQUEST_MODBUS_RS485": {
         "CMD": 0x08,
         dataType: {
-            id: ["u8"] as const, // Modbus Unit ID
-            address: ["u16"] as const, // Modbus Register Address
-            function: ["u8"] as const, // Modbus Function Code
-            data: ["u8", "u16", "bool"] as const // Data to write
+            id: ["uint8"] as const, // Modbus Unit ID (unsigned 8-bit integer)
+            address: ["uint16"] as const, // Modbus Register Address (unsigned 16-bit integer)
+            function: ["uint8"] as const, // Modbus Function Code (unsigned 8-bit integer)
+            // Thứ tự ưu tiên: uint16 -> uint8 -> bool
+            data: ["bool", "uint16"] as const // Data to write (unsigned 16-bit, unsigned 8-bit, boolean)
         }
     },
     "CMD_REQUEST_MODBUS_TCP": {
         "CMD": 0x10,
         dataType: {
-            id: ["string"] as const, // IP Address for Modbus TCP
-            address: ["u16"] as const,
-            function: ["u8"] as const,
-            data: ["u8", "u16", "bool"] as const
+            id: ["string"] as const, // IP Address for Modbus TCP (string)
+            address: ["uint16"] as const,
+            function: ["uint8"] as const,
+            data: ["bool", "uint16"] as const
         }
     },
 } as const;
@@ -230,7 +236,7 @@ const PAYLOAD_TYPES = {
     'int8': { hex: 0x04, size: 1, min: -128, max: 127 } as NumericPayloadDetails,
     'int16': { hex: 0x05, size: 2, min: -32768, max: 32767 } as NumericPayloadDetails,
     'int32': { hex: 0x06, size: 4, min: -2147483648, max: 2147483647 } as NumericPayloadDetails,
-    'bool': { hex: 0x07, size: 1, min: 0, max: 1 } as NumericPayloadDetails,
+    'bool': { hex: 0x07, size: 1, min: 0, max: 1 } as NumericPayloadDetails, // Min/Max cho bool (0/1)
     'float': { hex: 0x08, size: 4 } as OtherPayloadDetails,
     'char': { hex: 0x09, size: 1 } as OtherPayloadDetails,
     'string': { hex: 0x0A, size: -1 } as OtherPayloadDetails
@@ -416,19 +422,18 @@ export const sendDataRealTime = async (id: number) => {
 export const deviceSendData = async (req: Request, res: Response) => {
     try {
         const dataHex: any = await ConvertDataJsonToHex(req.body);
-        let dataIots: any[] = await MasterIotGlobal.getAll();
+        let dataIots: any[] = MasterIotGlobal.getAll();
         const dataSend: any[] = [];
 
         if (dataHex.status) {
             if (dataHex.mac && dataHex.mac !== '+') {
-                const dataFill = dataIots.filter((item: any) => {
+                dataIots = dataIots.filter((item: any) => {
                     return dataHex.mac.includes(item.mac);
                 });
-                dataIots = dataFill;
             }
             for (const dataDetail of dataIots) {
                 const topic = `${dataHex.topic}/${dataDetail.mac}`;
-                await publishMessage(client, topic, dataHex.data);
+                publishMessage(client, topic, dataHex.data);
                 dataSend.push({
                     title: moment().format('YYYY-MM-DD HH:mm:ss'),
                     topic: topic,
@@ -502,67 +507,125 @@ export const serverPublish = async (req: Request, res: Response) => {
     }
 };
 
-const isValidIpAddress = (ip: string): boolean => {
-    const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    return ipv4Regex.test(ip);
+// --- Bắt đầu các hàm kiểm tra và xây dựng payload mới ---
+
+/**
+ * Checks if a given value can be cast to and strictly conforms to a specified payload type,
+ * including range checks, type conversions, and strict string format validation for numbers.
+ * @param value The raw value from the request body.
+ * @param expectedType The specific payload type to check against (e.g., 'uint8', 'string', 'bool').
+ * @param fieldName The name of the field for clearer error messages.
+ * @returns The converted/validated value if it matches the type, throws an error otherwise.
+ */
+const checkPayloadType = (value: any, expectedType: PayloadTypeKey, fieldName: string): any => {
+    const typeInfo = PAYLOAD_TYPES[expectedType];
+    let convertedValue: any;
+
+    // Regex cho số nguyên: chỉ chấp nhận số nguyên, có thể có dấu âm, không có dấu thập phân.
+    const integerRegex = /^-?\d+$/;
+    // Regex cho số thực: chấp nhận số nguyên hoặc số thập phân, có thể có dấu âm.
+    // Kiểm tra thêm để không có dấu chấm thập phân nếu không có chữ số sau nó (vd: "123.")
+    const floatRegex = /^-?\d+(\.\d+)?$/;
+
+
+    switch (expectedType) {
+        case 'string':
+            // Giá trị phải là string. Không cố gắng chuyển đổi từ các kiểu khác sang string một cách tự động.
+            if (typeof value !== 'string') {
+                throw new Error(`Expected 'string' for field '${fieldName}', but got ${typeof value}.`);
+            }
+            convertedValue = value;
+            break;
+
+        case 'bool':
+            // Chấp nhận boolean, hoặc "true"/"false" string, hoặc số 0/1
+            if (typeof value === 'boolean') {
+                convertedValue = value ? 1 : 0;
+            } else if (typeof value === 'string') {
+                const lowerValue = value.toLowerCase(); // Chắc chắn value là string ở đây
+                if (lowerValue === 'true') {
+                    convertedValue = 1;
+                } else if (lowerValue === 'false') {
+                    convertedValue = 0;
+                } else {
+                    throw new Error(`Expected 'boolean' (true/false, "true"/"false", 0/1, "0"/"1") for field '${fieldName}', but got string "${value}".`);
+                }
+            } else {
+                throw new Error(`Expected 'boolean' (true/false, 0/1) for field '${fieldName}', but got ${typeof value}.`);
+            }
+            break;
+
+        case 'uint8':
+        case 'int8':
+        case 'uint16':
+        case 'int16':
+        case 'uint32':
+        case 'int32':
+            // Kiểm tra số nguyên
+            if (typeof value === 'string') {
+                if (!integerRegex.test(value)) {
+                    throw new Error(`Expected 'integer' for field '${fieldName}' (${expectedType}), but string "${value}" is not a valid integer format.`);
+                }
+            } else if (typeof value !== 'number') {
+                throw new Error(`Expected 'number' for field '${fieldName}' (${expectedType}), but got ${typeof value}.`);
+            }
+
+            // Nếu là chuỗi số nguyên hợp lệ hoặc đã là number, tiến hành parse và kiểm tra phạm vi
+            const intValue = Number(value); // Dùng Number() để nghiêm ngặt hơn parseFloat/parseInt
+            if (isNaN(intValue) || !Number.isInteger(intValue)) { // Kiểm tra nếu nó vẫn không phải số nguyên
+                throw new Error(`Value "${value}" for field '${fieldName}' is not a valid integer or cannot be converted.`);
+            }
+            convertedValue = intValue;
+
+            // Kiểm tra phạm vi cho các kiểu số nguyên
+            const numericInfoInt = typeInfo as NumericPayloadDetails;
+            if (convertedValue < numericInfoInt.min || convertedValue > numericInfoInt.max) {
+                throw new Error(`Value ${convertedValue} for field '${fieldName}' is out of range for '${expectedType}' (min: ${numericInfoInt.min}, max: ${numericInfoInt.max}).`);
+            }
+            break;
+
+        case 'float':
+            // Kiểm tra số thực (float)
+            if (typeof value === 'string') {
+                if (!floatRegex.test(value)) {
+                    throw new Error(`Expected 'float' for field '${fieldName}' (${expectedType}), but string "${value}" is not a valid float format.`);
+                }
+            } else if (typeof value !== 'number') {
+                throw new Error(`Expected 'number' for field '${fieldName}' (${expectedType}), but got ${typeof value}.`);
+            }
+
+            // Nếu là chuỗi số thực hợp lệ hoặc đã là number, tiến hành parse
+            const floatValue = Number(value); // Dùng Number() để nghiêm ngặt hơn parseFloat
+            if (isNaN(floatValue)) {
+                throw new Error(`Value "${value}" for field '${fieldName}' is not a valid float or cannot be converted.`);
+            }
+            convertedValue = floatValue;
+            // Không cần kiểm tra min/max cho float trừ khi bạn có yêu cầu cụ thể về IEEE 754
+
+            break;
+
+        case 'char':
+            // 'char' phải là một chuỗi có độ dài đúng 1 ký tự
+            if (typeof value !== 'string' || value.length !== 1) {
+                throw new Error(`Expected a single character string for field '${fieldName}' ('char'), but got ${typeof value} or length ${value?.length}.`);
+            }
+            convertedValue = value;
+            break;
+
+        default:
+            throw new Error(`Unsupported payload type '${expectedType}' for field '${fieldName}' during strict checking.`);
+    }
+    return convertedValue; // Trả về giá trị đã được chuyển đổi và xác thực
 };
 
-const inferNumericPayloadType = (value: number): PayloadTypeKey => {
-    if (!Number.isInteger(value)) {
-        return 'float';
-    }
-
-    const int8Info = PAYLOAD_TYPES['int8'];
-    if (int8Info.min !== undefined && int8Info.max !== undefined && value >= int8Info.min && value <= int8Info.max) {
-        return 'int8';
-    }
-    const uint8Info = PAYLOAD_TYPES['uint8'];
-    if (uint8Info.min !== undefined && uint8Info.max !== undefined && value >= uint8Info.min && value <= uint8Info.max) {
-        return 'uint8';
-    }
-    const int16Info = PAYLOAD_TYPES['int16'];
-    if (int16Info.min !== undefined && int16Info.max !== undefined && value >= int16Info.min && value <= int16Info.max) {
-        return 'int16';
-    }
-    const uint16Info = PAYLOAD_TYPES['uint16'];
-    if (uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
-        return 'uint16';
-    }
-    const int32Info = PAYLOAD_TYPES['int32'];
-    if (int32Info.min !== undefined && int32Info.max !== undefined && value >= int32Info.min && value <= int32Info.max) {
-        return 'int32';
-    }
-    const uint32Info = PAYLOAD_TYPES['uint32'];
-    if (uint32Info.min !== undefined && uint32Info.max !== undefined && value >= uint32Info.min && value <= uint32Info.max) {
-        return 'uint32';
-    }
-
-    throw new Error(`Data value ${value} is out of supported integer range.`);
-};
-
-const checkU16 = (value: number): PayloadTypeKey => {
-    const uint16Info = PAYLOAD_TYPES['uint16'];
-    if (Number.isInteger(value) && uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
-        return 'uint16';
-    }
-
-    throw new Error(`Data value ${value} is out of supported integer range for UInt16.`);
-};
-
-const checkFloatOrU16 = (value: number): PayloadTypeKey => {
-    if (!Number.isInteger(value)) {
-        return 'float';
-    }
-
-    const uint16Info = PAYLOAD_TYPES['uint16'];
-    if (uint16Info.min !== undefined && uint16Info.max !== undefined && value >= uint16Info.min && value <= uint16Info.max) {
-        return 'uint16';
-    }
-
-    throw new Error(`Data value ${value} is out of supported integer range for Float or UInt16.`);
-};
-
-
+/**
+ * Builds a binary Buffer segment for a payload based on the specified type and value.
+ * Assumes the value has already been validated against the payloadTypeKey.
+ * @param value The value to convert into a Buffer.
+ * @param payloadTypeKey The specific payload type (e.g., 'uint8', 'string').
+ * @returns A Buffer representing the payload segment.
+ * @throws Error if an unhandled payload type is encountered (should not happen if validation is correct).
+ */
 const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer => {
     const typeInfo = PAYLOAD_TYPES[payloadTypeKey];
     let dataBuffer: Buffer;
@@ -576,20 +639,10 @@ const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer
         case 'uint32':
         case 'int32':
         case 'bool':
-            const numericInfo = typeInfo as NumericPayloadDetails;
-            if (typeof value !== 'number' && typeof value !== 'boolean') {
-                throw new Error(`Value for '${payloadTypeKey}' type must be a number or boolean.`);
-            }
+            // Giá trị đã được chuẩn hóa và xác thực bởi checkPayloadType
             const numValue = typeof value === 'boolean' ? (value ? 1 : 0) : value;
-
-            if (numericInfo.min !== undefined && numericInfo.max !== undefined) {
-                if (numValue < numericInfo.min || numValue > numericInfo.max) {
-                    throw new Error(`Value ${numValue} is out of range for ${payloadTypeKey} (min: ${numericInfo.min}, max: ${numericInfo.max}).`);
-                }
-            }
-
-            dataBuffer = Buffer.alloc(numericInfo.size);
-            payloadLength = numericInfo.size;
+            dataBuffer = Buffer.alloc(typeInfo.size);
+            payloadLength = typeInfo.size;
             if (payloadTypeKey === 'uint8') dataBuffer.writeUInt8(numValue);
             else if (payloadTypeKey === 'int8') dataBuffer.writeInt8(numValue);
             else if (payloadTypeKey === 'uint16') dataBuffer.writeUInt16BE(numValue);
@@ -605,9 +658,6 @@ const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer
             payloadLength = 4;
             break;
         case 'char':
-            if (typeof value !== 'string' || value.length !== 1) {
-                throw new Error("Value for 'char' type must be a single character string.");
-            }
             dataBuffer = Buffer.alloc(1);
             dataBuffer.writeUInt8(value.charCodeAt(0));
             payloadLength = 1;
@@ -617,7 +667,8 @@ const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer
             payloadLength = dataBuffer.length;
             break;
         default:
-            throw new Error(`Unhandled payload type during buffer creation: ${payloadTypeKey}`);
+            // Lỗi này lẽ ra không xảy ra nếu checkPayloadType đã hoạt động đúng
+            throw new Error(`Internal error: Unhandled payload type '${payloadTypeKey}' during buffer creation.`);
     }
 
     const lengthHex = payloadLength.toString(16).toUpperCase().padStart(2, '0');
@@ -628,111 +679,46 @@ const buildPayloadSegment = (value: any, payloadTypeKey: PayloadTypeKey): Buffer
 };
 
 /**
- * Dynamically processes and builds a payload segment based on expected types.
+ * Processes and builds a payload segment by strictly checking against expected types in order.
+ * It passes the raw value to the checker function, which handles type conversion and validation.
  * @param value The raw value from the request body.
- * @param expectedTypes An array of expected payload types (e.g., ["string", "u16"]).
+ * @param expectedTypes An array of specific payload types to check against, in order of preference.
  * @param fieldName The name of the field being processed (for error messages).
- * @returns An object containing the built buffer, its hex representation, and the inferred payload type.
+ * @returns An object containing the built buffer, its hex representation, and the matched payload type.
+ * @throws Error if the value does not match any of the expected types.
  */
 const processAndBuildPayload = (value: any, expectedTypes: readonly string[], fieldName: string) => {
-    let processedValue = value;
+    // Không còn bước chuyển đổi processedValue ở đây.
+    // Giá trị 'value' gốc sẽ được truyền thẳng vào checkPayloadType.
 
-    // Attempt to convert string "true"/"false" or numeric strings to their actual types
-    if (typeof value === 'string') {
-        if (value.toLowerCase() === 'true') {
-            processedValue = true;
-        } else if (value.toLowerCase() === 'false') {
-            processedValue = false;
-        } else if (!isNaN(parseFloat(value)) && String(parseFloat(value)) === value) { // Check if it's a numeric string
-            processedValue = parseFloat(value);
-        }
-    }
-
-    let builtBuffer: Buffer | null = null;
-    let inferredType: PayloadTypeKey | null = null;
+    let lastError: Error | null = null; // Lưu lỗi của lần thử gần nhất
 
     for (const expectedType of expectedTypes) {
+        const currentPayloadType = expectedType as PayloadTypeKey;
         try {
-            let currentPayloadType: PayloadTypeKey;
+            // Bước 1: Kiểm tra và chuyển đổi giá trị.
+            // checkPayloadType giờ đây trả về giá trị đã được chuyển đổi và xác thực.
+            const validatedValue = checkPayloadType(value, currentPayloadType, fieldName);
 
-            switch (expectedType) {
-                case 'string':
-                    if (typeof processedValue !== 'string') {
-                        throw new Error(`Expected string for ${fieldName}, but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = 'string';
-                    break;
-                case 'bool':
-                    if (typeof processedValue !== 'boolean') {
-                        throw new Error(`Expected boolean for ${fieldName}, but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = 'bool';
-                    break;
-                case 'u8':
-                    if (typeof processedValue !== 'number' || !Number.isInteger(processedValue)) {
-                        throw new Error(`Expected integer for ${fieldName} (u8), but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = inferNumericPayloadType(processedValue);
-                    if (currentPayloadType !== 'uint8' && currentPayloadType !== 'int8') {
-                        throw new Error(`Value ${processedValue} is out of range for u8 for ${fieldName}.`);
-                    }
-                    break;
-                case 'u16':
-                    if (typeof processedValue !== 'number' || !Number.isInteger(processedValue)) {
-                        throw new Error(`Expected integer for ${fieldName} (u16), but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = checkU16(processedValue);
-                    break;
-                case 'u32':
-                    if (typeof processedValue !== 'number' || !Number.isInteger(processedValue)) {
-                        throw new Error(`Expected integer for ${fieldName} (u32), but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = inferNumericPayloadType(processedValue);
-                    if (currentPayloadType !== 'uint32') {
-                        throw new Error(`Value ${processedValue} is out of range for u32 for ${fieldName}.`);
-                    }
-                    break;
-                case 'float':
-                    if (typeof processedValue !== 'number') {
-                        throw new Error(`Expected number for ${fieldName} (float), but got ${typeof processedValue}.`);
-                    }
-                    currentPayloadType = 'float';
-                    break;
-                case 'payload': // Generic numeric/boolean/string
-                case 'data': // Generic numeric/boolean/string
-                    if (typeof processedValue === 'number') {
-                        currentPayloadType = inferNumericPayloadType(processedValue);
-                    } else if (typeof processedValue === 'boolean') {
-                        currentPayloadType = 'bool';
-                    } else if (typeof processedValue === 'string') {
-                        currentPayloadType = 'string';
-                    } else {
-                        throw new Error(`Unsupported data type for generic '${fieldName}' field: ${typeof processedValue}.`);
-                    }
-                    break;
-                default:
-                    throw new Error(`Unsupported expected data type in definition for ${fieldName}: ${expectedType}.`);
-            }
-
-            builtBuffer = buildPayloadSegment(processedValue, currentPayloadType);
-            inferredType = currentPayloadType;
-            break; // Successfully processed, exit loop
+            // Bước 2: Nếu khớp và chuyển đổi thành công, xây dựng buffer với giá trị đã được validate.
+            const builtBuffer = buildPayloadSegment(validatedValue, currentPayloadType);
+             // Loại này không còn là "suy luận" mà là "khớp đầu tiên"
+            return {
+                buffer: builtBuffer,
+                hex: builtBuffer.toString('hex').toUpperCase(),
+                inferredType: currentPayloadType
+            }; // Thành công, thoát khỏi vòng lặp và trả về
         } catch (error) {
-            logger.warn(`Failed to process ${fieldName} as ${expectedType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            // Continue to try other expected types if available
+            lastError = error instanceof Error ? error : new Error(String(error));
+            logger.warn(`Value for '${fieldName}' failed type check for '${expectedType}': ${lastError.message}`);
+            // Tiếp tục thử kiểu tiếp theo trong mảng expectedTypes
         }
     }
 
-    if (!builtBuffer) {
-        throw new Error(`Value "${value}" is not compatible with any defined types for ${fieldName}.`);
-    }
-
-    return {
-        buffer: builtBuffer,
-        hex: builtBuffer.toString('hex').toUpperCase(),
-        inferredType: inferredType
-    };
+    // Nếu vòng lặp kết thúc mà không có kiểu nào match
+    throw new Error(`Value "${value}" for field '${fieldName}' is not compatible with any of the defined types ${expectedTypes.join(', ')}. Last error: ${lastError?.message || 'None'}`);
 };
+
 
 export const controlSerialCommand = async (req: Request, res: Response) => {
     try {
@@ -823,6 +809,7 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
         const breakdown: { [key: string]: string | PayloadTypeKey | null } = { cmd: cmdHex };
 
         // Process fields in the order defined in cmdInfo.dataType
+        // CHÚ Ý: Đảm bảo các key trong orderedKeys khớp với các key trong dataType của CMD_MODBUS_CONTROL
         const orderedKeys: (keyof typeof cmdInfo.dataType)[] = ['id', 'address', 'function', 'data']; // Define explicit order
 
         for (const key of orderedKeys) {

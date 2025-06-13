@@ -46,6 +46,21 @@ services:
       - mysql
     restart: always
 
+  nginx:
+    image: nginx:stable-alpine # Sử dụng image Nginx
+    container_name: firmware_nginx
+    ports:
+      - "80:80" # Map cổng 80 của host vào cổng 80 của container Nginx
+    volumes:
+      # Mount file cấu hình Nginx
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount thư mục chứa file firmware từ host vào trong Nginx container
+      # Thay đổi `./src/uploads` thành đường dẫn THỰC TẾ trên máy host của bạn
+      - ./src/uploads:/usr/share/nginx/html/firmware_files:ro
+    depends_on:
+      - mysql_db # Nginx không phụ thuộc vào Node.js trong DockerCompose này
+    restart: always
+
 volumes:
   mysql_data:
   emqx_data:

@@ -59,6 +59,16 @@
             "date": 1749575588819,
             "name": "logs/iots/iots-2025-06-11.log",
             "hash": "3be42120d4c591c2e79c4382b44f8dc7e6d782ab84e61ed32f2ab96aaaec1f8b"
+        },
+        {
+            "date": 1749690390789,
+            "name": "logs/iots/iots-2025-06-12.log",
+            "hash": "7435160d2076a102e04c3004dc146aa26b9ada48cb60fe993e181bd31de90684"
+        },
+        {
+            "date": 1749775755044,
+            "name": "logs/iots/iots-2025-06-13.log",
+            "hash": "6875dd251201d31a97ccf65ac4bc2dcef0fff21cc034a64ef7cd4513fde7622c"
         }
     ],
     "hashType": "sha256"
