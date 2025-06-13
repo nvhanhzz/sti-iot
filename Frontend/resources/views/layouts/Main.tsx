@@ -54,12 +54,12 @@ const Main: React.FC = () => {
         // Wrapper for the entire layout
         <div className="admin-dashboard-layout">
             {/* Left Navigation (Sidebar) */}
-            <NavLeftLayout collapsed={collapsed} mode={mode}></NavLeftLayout>
+            <NavLeftLayout collapsed={true} mode={mode}></NavLeftLayout>
 
             {/* Main Content Area (Header + Content */}
-            <div className={`main-content-wrapper ${collapsed ? 'sidebar-collapsed' : ''}`}>
+            <div className={`main-content-wrapper ${true ? 'sidebar-collapsed' : ''}`}>
                 {/* Header */}
-                <HeaderLayout collapsed={collapsed} toggleCollapsed={toggleCollapsed}></HeaderLayout>
+                <HeaderLayout collapsed={true} toggleCollapsed={toggleCollapsed}></HeaderLayout>
 
                 {/* Page Content Area */}
                 <div className={`pcoded-main-container ${mode}-mode`}>
