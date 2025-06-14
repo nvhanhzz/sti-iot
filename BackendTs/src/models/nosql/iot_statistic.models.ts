@@ -26,7 +26,6 @@ const deviceDataSchema = new Schema<IIotStatistic>({
     },
     timestamp: { // Định nghĩa trường timestamp
         type: Number,
-        required: true,
     }
     // Các trường khác không cần định nghĩa ở đây nhờ 'strict: false'
     // và thuộc tính [key: string]: any; trong interface
