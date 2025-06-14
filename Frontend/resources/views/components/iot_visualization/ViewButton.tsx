@@ -1,28 +1,29 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Button, Card, Typography, Flex, Divider, message } from "antd";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { Button, Card, Typography, Flex, Divider, message, Spin, Tooltip } from "antd";
+import { PoweroffOutlined } from "@ant-design/icons";
+import { useSocket } from "../../../../context/SocketContext.tsx";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 // Chỉ giữ lại các HEX_COMMANDS được sử dụng
 const HEX_COMMANDS = {
     tcp: { on: '15 01 00 00 93', off: '16 01 00 00 A9' },
     udp: { on: '17 01 00 00 BF', off: '18 01 00 00 6D' },
-    input1_control: { on: '03 01 07 01 EC', off: '03 01 07 00 EB' }, // LƯU Ý: Thay bằng lệnh HEX thực tế cho INPUT 1
-    input2_control: { on: '04 01 07 01 8E', off: '04 01 07 00 89' }, // LƯU Ý: Thay bằng lệnh HEX thực tế cho INPUT 2
-    input3_control: { on: '05 01 07 01 98', off: '05 01 07 00 9F' }, // LƯU Ý: Thay bằng lệnh HEX thực tế cho INPUT 3
-    input4_control: { on: '06 01 07 01 A2', off: '06 01 07 00 A5' }, // LƯU Ý: Thay bằng lệnh HEX thực tế cho INPUT 4
+    input1_control: { on: '03 01 07 01 EC', off: '03 01 07 00 EB' },
+    input2_control: { on: '04 01 07 01 8E', off: '04 01 07 00 89' },
+    input3_control: { on: '05 01 07 01 98', off: '05 01 07 00 9F' },
+    input4_control: { on: '06 01 07 01 A2', off: '06 01 07 00 A5' },
 } as const;
 
 interface ConfigIotsProps {
-    dataIotsDetail: any;
-    deviceMac: string;
+    dataIotsDetail: any; // dataIotsDetail bây giờ chứa deviceId
+    deviceMac: string; // Vẫn truyền deviceMac để nhất quán
     onControlSuccess: () => void;
     isConnected: boolean;
 }
 
 const titleButton: { [key: string]: string } = {
-    "CMD_INPUT_CHANNEL1": "INPUT 1", // Rút gọn tiêu đề
+    "CMD_INPUT_CHANNEL1": "INPUT 1",
     "CMD_INPUT_CHANNEL2": "INPUT 2",
     "CMD_INPUT_CHANNEL3": "INPUT 3",
     "CMD_INPUT_CHANNEL4": "INPUT 4",
@@ -39,9 +40,33 @@ const defaultButtons = [
     { CMD: "CMD_NOTIFY_UDP", dataName: "CMD_NOTIFY_UDP", data: false, hexType: "udp" as keyof typeof HEX_COMMANDS }
 ];
 
+// Định nghĩa kiểu dữ liệu cho một entry thống kê (không có deviceId)
+interface CmdStats {
+    missed: number;
+    realTime: number;
+}
+// Đây là kiểu dữ liệu cho state cmdStatistics của component (chỉ chứa stats của device hiện tại)
+type StatisticsData = { [cmd: string]: CmdStats };
+
+/**
+ * Helper function to format large numbers (e.g., 1200000 -> 1.2M)
+ */
+const formatCount = (num: number): string => {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+};
+
+
 const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onControlSuccess, isConnected }) => {
     const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState<{[key: string]: boolean}>({});
+    const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+    const [cmdStatistics, setCmdStatistics] = useState<StatisticsData>({}); // State sẽ lưu stats cho deviceMac hiện tại
+    const socket = useSocket();
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
         try {
@@ -55,7 +80,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                 throw new Error(`HTTP error! status: ${response.status}. Message: ${errorData.message || response.statusText}`);
             }
             onControlSuccess();
-            message.success("Gửi yêu cầu thành công"); // Sửa message
+            message.success("Gửi yêu cầu thành công");
         } catch (error) {
             console.error('Error sending command:', error);
             if (error instanceof Error) {
@@ -65,10 +90,13 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             }
             throw error;
         }
-    }, []);
+    }, [onControlSuccess]);
 
     const handleCommand = useCallback(async (item: any) => {
-        if (!isConnected) return;
+        if (!isConnected) {
+            message.warning("Thiết bị không kết nối.");
+            return;
+        }
         const currentStatus = item.data;
         const newStatus = !currentStatus;
         const hexCommandKey = newStatus ? 'on' : 'off';
@@ -87,7 +115,6 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         try {
             setLoading(prev => ({ ...prev, [loadingKey]: true }));
             await sendDeviceCommand(deviceMac, hexCommand);
-            // BỎ DÒNG NÀY: setData(prevData => prevData.map(dItem => dItem.CMD === item.CMD ? { ...dItem, data: newStatus } : dItem));
         } catch (error) {
             // Error handled in sendDeviceCommand
         } finally {
@@ -115,13 +142,61 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         setData(processedData);
     }, [dataIotsDetail]);
 
+    // --- Hàm để tải thống kê ban đầu từ API Backend ---
+    const fetchInitialStatistics = useCallback(async (id: string) => {
+        if (!id) return;
+        try {
+            const response = await fetch(`http://localhost:3335/api/iots/statistics/${id}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data: { deviceId: string } & { [cmd: string]: CmdStats } = await response.json();
+            const { deviceId: _, ...cmdLevelStats } = data;
+            // Cập nhật state một cách an toàn
+            setCmdStatistics(cmdLevelStats);
+            console.log(`Initial statistics loaded for device ${id}:`, cmdLevelStats);
+        } catch (error) {
+            console.error("Error fetching initial statistics:", error);
+            message.error("Lỗi khi tải thống kê ban đầu.");
+        }
+    }, []);
+
+    useEffect(() => {
+        if (dataIotsDetail.id) {
+            fetchInitialStatistics(dataIotsDetail.id);
+        }
+    }, [dataIotsDetail.id, fetchInitialStatistics]); // Đã sửa dependency: chỉ cần dataIotsDetail.id
+
+    // Socket listener cho cập nhật thống kê thời gian thực
+    const handleSocketEventStatistics = useCallback((eventData: Record<string, Record<string, CmdStats>>) => {
+        if (dataIotsDetail.id === eventData.deviceId) {
+            // @ts-ignore
+            setCmdStatistics(eventData);
+        }
+    }, [deviceMac]);
+
+    useEffect(() => {
+        if (socket) {
+            // console.log("Registering socket listener for server_emit_statistics");
+            socket.on("server_emit_statistics", handleSocketEventStatistics);
+        }
+
+        return () => {
+            if (socket) {
+                // console.log("Cleaning up socket listener: server_emit_statistics");
+                socket.off("server_emit_statistics", handleSocketEventStatistics);
+            }
+        };
+    }, [socket, handleSocketEventStatistics]); // Dependencies vẫn như cũ
+
+
     return (
         <Flex
             wrap="wrap"
-            gap="8px" // Giảm khoảng cách giữa các card để vừa 6 nút trên 1 hàng
-            justify="space-around" // Căn đều các nút trong hàng
+            gap="12px"
+            justify="space-around"
             align="flex-start"
-            style={{ padding: '5px', height: '350px', overflowY: 'auto' }} // Giảm padding tổng thể và chiều cao nếu cần
+            style={{ padding: '8px', height: 'auto', maxHeight: '450px', overflowY: 'auto' }}
         >
             {data.map((item: any) => {
                 const isOn = item.data;
@@ -129,53 +204,75 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                 const loadingKeyOff = `${item.hexType}-off`;
                 const isCurrentlyLoading = loading[loadingKeyOn] || loading[loadingKeyOff];
 
+                // Lấy số liệu thống kê cho CMD hiện tại từ state của component
+                const currentCmdStats = cmdStatistics[item.CMD] || { missed: 0, realTime: 0 };
+
+
                 return (
                     <Card
                         key={item.CMD}
                         hoverable
                         style={{
-                            width: "100px", // Giảm chiều rộng card để vừa 6 nút
-                            minHeight: "85px", // Giảm chiều cao card
+                            width: "140px",
+                            minHeight: "135px",
                             textAlign: "center",
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "space-between",
-                            boxShadow: "0 1px 4px rgba(0,0,0,0.06)", // Shadow nhẹ hơn nữa
-                            borderRadius: "4px", // Bo tròn ít hơn
-                            transition: "all 0.1s ease",
-                            borderColor: isOn && isConnected ? '#86efac' : '#fca5a5',
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
+                            borderRadius: "8px",
+                            transition: "all 0.2s ease-in-out",
+                            borderColor: isOn && isConnected ? '#86efac' : (isConnected ? '#fca5a5' : '#e2e8f0'),
                             borderWidth: '1px',
+                            opacity: isConnected ? 1 : 0.7,
+                            cursor: isConnected ? 'pointer' : 'not-allowed',
+                            backgroundColor: '#fff',
                         }}
-                        bodyStyle={{ padding: '8px' }} // Giảm padding bên trong card
+                        bodyStyle={{ padding: '10px' }}
                     >
                         <div>
-                            <Title level={5} style={{ marginBottom: '4px', fontSize: '12px', color: '#334155', lineHeight: '1.2' }}>
+                            <Title level={5} style={{ marginBottom: '6px', fontSize: '13px', color: '#334155', lineHeight: '1.2' }}>
                                 {titleButton[item.dataName] || item.dataName}
                             </Title>
-                            <Divider style={{ margin: '4px 0' }} />
+                            <Divider style={{ margin: '6px 0' }} />
                         </div>
                         <Flex justify="center" align="center" style={{ flexGrow: 1 }}>
                             <Button
                                 type="primary"
-                                size="small" // Giảm kích thước button xuống "small"
+                                size="large"
                                 loading={isCurrentlyLoading}
                                 onClick={() => handleCommand(item)}
+                                disabled={!isConnected || isCurrentlyLoading}
                                 style={{
-                                    backgroundColor: isOn && isConnected ? "#52c41a" : "#ff4d4f",
-                                    borderColor: isOn && isConnected ? "#52c41a" : "#ff4d4f",
+                                    backgroundColor: isOn && isConnected ? "#34d399" : "#f472b6",
+                                    borderColor: isOn && isConnected ? "#34d399" : "#f472b6",
                                     color: "white",
-                                    width: "36px", // Chiều rộng cố định nhỏ hơn
-                                    height: "36px", // Chiều cao cố định nhỏ hơn
+                                    width: "48px",
+                                    height: "48px",
                                     borderRadius: "50%",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    fontSize: '16px', // Kích thước icon nhỏ hơn
-                                    boxShadow: `0 1px 6px ${isOn && isConnected ? 'rgba(82, 196, 26, 0.2)' : 'rgba(255, 77, 79, 0.2)'}`,
+                                    fontSize: '20px',
+                                    boxShadow: `0 4px 12px ${isOn && isConnected ? 'rgba(52, 211, 153, 0.3)' : 'rgba(244, 114, 182, 0.3)'}`,
+                                    transition: "background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
                                 }}
                             >
-                                {isConnected && isOn ? <CheckOutlined /> : <CloseOutlined />}
+                                {isCurrentlyLoading ? <Spin size="small" /> : <PoweroffOutlined />}
                             </Button>
+                        </Flex>
+                        {/* Phần hiển thị thống kê tin nhắn với Tooltip */}
+                        <Flex justify="space-between" align="center" style={{ marginTop: '8px', padding: '0 4px' }}>
+                            <Tooltip title={`Số bản tin đã nhận theo thời gian thực: ${currentCmdStats.realTime.toString()}`}>
+                                <Text style={{ fontSize: '11px', color: '#34d399', fontWeight: 'bold', minWidth: '40px' }}>
+                                    RT: {formatCount(currentCmdStats.realTime)}
+                                </Text>
+                            </Tooltip>
+                            <Tooltip title={`Số bản tin đã nhận sau khi thiết bị gửi lại: ${currentCmdStats.missed.toString()}`}>
+                                <Text style={{ fontSize: '11px', color: '#f87171', fontWeight: 'bold', minWidth: '40px' }}>
+                                    MS: {formatCount(currentCmdStats.missed)}
+                                </Text>
+                            </Tooltip>
                         </Flex>
                     </Card>
                 );

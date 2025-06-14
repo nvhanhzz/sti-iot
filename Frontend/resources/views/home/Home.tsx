@@ -40,7 +40,6 @@ const Home: React.FC = () => {
     }, []);
 
     const handleSocketEvent = useCallback((eventData: any) => {
-        console.log("Event data", eventData);
         setDataIots((prevData) => {
             return prevData.map((item) => {
                 if (item.id === eventData.device_id) {

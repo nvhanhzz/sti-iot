@@ -14,11 +14,14 @@ import {ConvertDatatoHex} from "../global/convertData.global";
 import logger from "../config/logger";
 import IotSettings from "../models/sql/iot_settings.models";
 import {Buffer} from 'buffer';
+import IotStatistic from "../models/nosql/iot_statistic.models";
+import {getCmdStatistics, incrementCmdStat} from "../services/iot_statistics.services";
 
 const CMD_RESPOND_TIMESTAMP = 0x14;
 const CMD_NOTIFY_TCP = 0x3C;
 const CMD_NOTIFY_UDP = 0x3D;
 const PAYLOAD_I32 = 0x06;
+const MISSED_PACKET = 0xFE;
 
 const CMD_SERIAL = {
     "CMD_REQUEST_SERIAL_RS485": {
@@ -244,6 +247,24 @@ const PAYLOAD_TYPES = {
 
 type PayloadTypeKey = keyof typeof PAYLOAD_TYPES;
 
+export const getStatistics = (req: Request, res: Response) => {
+    try {
+        const deviceId: string = req.params.id;
+
+        if (!deviceId) {
+            res.status(400).send({ message: "Device ID is required." });
+            return;
+        }
+
+        const statistics = getCmdStatistics(deviceId);
+
+        res.status(200).json(statistics);
+    } catch (error) {
+        logger.error("Error in getStatistics:", error); // Sửa tên hàm trong log
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
 export const sendDataIots = async (req: Request, res: Response) => {
     try {
         const dataIots: any = await AlgorithmGetIot();
@@ -319,6 +340,14 @@ export const calculateCRC8 = (data: Buffer): number => {
 };
 
 export const deviceUpdateData = async (topic: string, message: Buffer) => {
+    const mergedPayloads: any = {
+        isMissed: false
+    };
+    if (message[0] === MISSED_PACKET) {
+        mergedPayloads.isMissed = true;
+        message = message.slice(1);
+    }
+
     const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
     if (message[0] === CMD_RESPOND_TIMESTAMP) {
         const currentEpochTimestamp = Math.floor(Date.now() / 1000);
@@ -370,6 +399,29 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     DataMsgGlobal.replaceByMultipleKeys(dataMsgDetail, ['device_id', 'dataName']);
                 }
             }
+            DataMsgGlobal.replaceByMultipleKeys({
+                device_id: dataIot.id,
+                CMD: dataJson.CMD,
+                CMD_Decriptions: dataJson.CMD_Decriptions,
+                dataName: `${dataJson.CMD_Decriptions} : isMissed`,
+                payload_name: 'isMissed',
+                data: mergedPayloads.isMissed,
+                time: dataJson.time
+            }, ['device_id', 'dataName']);
+
+            mergedPayloads.cmd = dataJson.CMD;
+            mergedPayloads.deviceId = dataIot.id;
+            for (const payload of dataJson.payload) {
+                if (payload.payload_name === 'timestamp') {
+                    mergedPayloads.timestamp = payload.timestamp;
+                } else {
+                    mergedPayloads[payload.payload_name] = payload[payload.payload_name];
+                }
+            }
+            const iotStatistic = new IotStatistic(mergedPayloads);
+            await iotStatistic.save();
+            incrementCmdStat(mergedPayloads.deviceId, mergedPayloads.cmd, mergedPayloads.isMissed);
+            await sendStatistics(mergedPayloads.deviceId);
 
             if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
                 const iotDevice = await IotSettings.findOne({
@@ -389,6 +441,11 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
             await sendDataRealTime(dataIot.id as number);
         }
     }
+};
+
+export const sendStatistics = async (deviceId: string) => {
+    const statistics = getCmdStatistics(deviceId);
+    await EmitData("server_emit_statistics", statistics);
 };
 
 export const sendDataRealTime = async (id: number) => {
@@ -726,12 +783,14 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
         const requestBody = req.body; // Keep the whole body for dynamic access
 
         if (!mac || !serialType) {
-            return res.status(400).send({ message: "Missing required parameters: mac or type." });
+            res.status(400).send({ message: "Missing required parameters: mac or type." });
+            return;
         }
 
         const cmdInfo = CMD_SERIAL[serialType as keyof typeof CMD_SERIAL];
         if (cmdInfo === undefined) {
-            return res.status(400).send({ message: `Invalid serial type: "${serialType}".` });
+            res.status(400).send({ message: `Invalid serial type: "${serialType}".` });
+            return;
         }
 
         const cmdHex = cmdInfo.CMD.toString(16).toUpperCase().padStart(2, '0');
@@ -746,7 +805,8 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
                 const value = requestBody[key]; // Get the value from the request body dynamically
 
                 if (value === undefined || value === null) {
-                    return res.status(400).send({ message: `Missing required parameter: "${key}" for serial type "${serialType}".` });
+                    res.status(400).send({ message: `Missing required parameter: "${key}" for serial type "${serialType}".` });
+                    return;
                 }
 
                 try {
@@ -757,7 +817,8 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
                     responseData[key] = value; // Store the original value in response
                 } catch (error) {
                     logger.error(`Error processing field '${key}' for serial command: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                    return res.status(400).send({ message: `Invalid value for field '${key}': ${error instanceof Error ? error.message : 'Unknown error'}` });
+                    res.status(400).send({ message: `Invalid value for field '${key}': ${error instanceof Error ? error.message : 'Unknown error'}` });
+                    return;
                 }
             }
         }
@@ -775,7 +836,8 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
 
         if (!client || !client.connected) {
             logger.error("MQTT client not connected. Cannot publish message.");
-            return res.status(500).send({ message: "MQTT client not connected. Please try again later." });
+            res.status(500).send({ message: "MQTT client not connected. Please try again later." });
+            return;
         }
         publishMessage(client, `device/response/${mac}`, hexToSend);
 
@@ -785,7 +847,8 @@ export const controlSerialCommand = async (req: Request, res: Response) => {
         });
     } catch (error) {
         logger.error("Error in controlSerialCommand:", error);
-        return res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        return;
     }
 };
 
@@ -795,12 +858,14 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
         const requestBody = req.body;
 
         if (!mac || !modbusType) {
-            return res.status(400).send({ message: "Missing required parameters: mac or type." });
+            res.status(400).send({ message: "Missing required parameters: mac or type." });
+            return;
         }
 
         const cmdInfo = CMD_MODBUS_CONTROL[modbusType as keyof typeof CMD_MODBUS_CONTROL];
         if (cmdInfo === undefined) {
-            return res.status(400).send({ message: `Invalid Modbus command type: "${modbusType}".` });
+            res.status(400).send({ message: `Invalid Modbus command type: "${modbusType}".` });
+            return;
         }
         const cmdHex = cmdInfo.CMD.toString(16).toUpperCase().padStart(2, '0');
 
@@ -817,7 +882,8 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
             const value = requestBody[key];
 
             if (value === undefined || value === null) {
-                return res.status(400).send({ message: `Missing required Modbus parameter: "${key}" for command "${modbusType}".` });
+                res.status(400).send({ message: `Missing required Modbus parameter: "${key}" for command "${modbusType}".` });
+                return;
             }
 
             try {
@@ -828,7 +894,8 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
                 responseData[key] = value; // Store the original value in response
             } catch (error) {
                 logger.error(`Error processing field '${key}' for Modbus command: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                return res.status(400).send({ message: `Invalid value for Modbus field '${key}': ${error instanceof Error ? error.message : 'Unknown error'}` });
+                res.status(400).send({ message: `Invalid value for Modbus field '${key}': ${error instanceof Error ? error.message : 'Unknown error'}` });
+                return;
             }
         }
 
@@ -846,7 +913,8 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
 
         if (!client || !client.connected) {
             logger.error("MQTT client not connected. Cannot publish message.");
-            return res.status(500).send({ message: "MQTT client not connected. Please try again later." });
+            res.status(500).send({ message: "MQTT client not connected. Please try again later." });
+            return;
         }
 
         publishMessage(client, `device/response/${mac}`, hexToSend);
@@ -858,6 +926,7 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
 
     } catch (error) {
         logger.error("Error in controlModbusCommand:", error);
-        return res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
+        return;
     }
 };

@@ -12,6 +12,7 @@ import { initJobs } from "../src/jobs";
 import { initWatcher } from "./watcher";
 import initMqtt from "./mqtt";
 import subscribeToTopics from "./mqtt/subcribe";
+import {updateCmdStatisticsFromDB} from "./services/iot_statistics.services";
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +48,12 @@ const startServer = async () => {
             initJobs(),
             initWatcher(),
         ]);
+
+        // --- Nạp dữ liệu thống kê ban đầu sau khi kết nối DB thành công ---
+        logger.info("Initial loading of CMD statistics...");
+        await updateCmdStatisticsFromDB();
+        logger.info("CMD statistics loaded successfully.");
+        // ------------------------------------------------------------------
 
         // MQTT and Socket setup
         subscribeToTopics(initMqtt); // Subscribe to topics after MQTT is initialized

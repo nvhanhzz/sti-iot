@@ -7,7 +7,8 @@ import {
     deviceSendData,
     serverPublish,
     controlSerialCommand,
-    controlModbusCommand
+    controlModbusCommand,
+    getStatistics
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
@@ -33,5 +34,7 @@ router.post("/setting-iot-command-field", SettingIotCmdField);
 
 router.post("/lock-iot-command", LockIotCmd);
 router.get("/get-distinct-iot-command", SendDistinctIotCmd);
+
+router.get("/statistics/:id", getStatistics);
 
 export default router;

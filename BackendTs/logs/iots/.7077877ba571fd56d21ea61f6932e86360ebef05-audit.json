@@ -69,6 +69,11 @@
             "date": 1749775755044,
             "name": "logs/iots/iots-2025-06-13.log",
             "hash": "6875dd251201d31a97ccf65ac4bc2dcef0fff21cc034a64ef7cd4513fde7622c"
+        },
+        {
+            "date": 1749862941087,
+            "name": "logs/iots/iots-2025-06-14.log",
+            "hash": "2b5522990596e5878b4cf338094b93c996ace34f3022c7194ccd5ccfde36c8a7"
         }
     ],
     "hashType": "sha256"

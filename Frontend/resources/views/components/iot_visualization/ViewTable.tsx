@@ -308,6 +308,7 @@ interface IoTProcessedData {
     unit?: string;
     time: string;
     [payloadName: string]: any;
+    isMissed?: boolean;
 }
 
 interface TableColumn {
@@ -505,8 +506,9 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
     ): TableColumn[] => {
         const payloadNames = new Set<string>();
         tableData.forEach((row) => {
+            // Lọc bỏ 'isMissed' khỏi danh sách payloadNames để không tạo cột cho nó
             Object.keys(row).forEach(key => {
-                if (!['key', 'CMD', 'CMD_Decriptions', 'unit', 'time'].includes(key)) {
+                if (!['key', 'CMD', 'CMD_Decriptions', 'unit', 'time', 'isMissed'].includes(key)) {
                     payloadNames.add(key);
                 }
             });
@@ -674,9 +676,17 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
                     displayedData.map((row, rowIndex) => {
                         const isInputChannel = row.CMD?.startsWith('CMD_PUSH_IO_DI');
                         const isBooleanData = typeof row.data === 'boolean';
-                        const rowBgColor = (isInputChannel && isBooleanData) ?
-                            (row.data ? '#e6ffe6' : '#ffe6e6') :
-                            (rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9');
+
+                        // Xác định màu nền dựa trên isMissed
+                        let rowBgColor;
+                        if (row.isMissed) {
+                            rowBgColor = '#fbbf66'; // Màu cam nhạt (dễ nhìn hơn màu đỏ đậm)
+                        } else if (isInputChannel && isBooleanData) {
+                            rowBgColor = row.data ? '#e6ffe6' : '#ffe6e6'; // Màu xanh lá/đỏ nhạt cho IO DI
+                        } else {
+                            rowBgColor = rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9'; // Mặc định xen kẽ
+                        }
+
 
                         return (
                             <tr key={row.key} style={{ backgroundColor: rowBgColor }}>
