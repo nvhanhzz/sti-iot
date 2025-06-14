@@ -143,132 +143,6 @@ const SERIAL_CONTROL_CMDS: ControlCommand[] = [
             { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, precision: 0, span: 24 },
         ]
     },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO1", label: "CMD_WRITE_IO_DO1", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO2", label: "CMD_WRITE_IO_DO2", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO3", label: "CMD_WRITE_IO_DO3", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO4", label: "CMD_WRITE_IO_DO4", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO5", label: "CMD_WRITE_IO_DO5", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO6", label: "CMD_WRITE_IO_DO6", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO7", label: "CMD_WRITE_IO_DO7", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_DO8", label: "CMD_WRITE_IO_DO8", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "text", placeholder: "Data", required: true, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO1", label: "CMD_WRITE_IO_AO1", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO2", label: "CMD_WRITE_IO_AO2", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO3", label: "CMD_WRITE_IO_AO3", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO4", label: "CMD_WRITE_IO_AO4", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO5", label: "CMD_WRITE_IO_AO5", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO6", label: "CMD_WRITE_IO_AO6", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO7", label: "CMD_WRITE_IO_AO7", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_AO8", label: "CMD_WRITE_IO_AO8", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "number", placeholder: "Data", required: true, min: 0, max: 4294967295, precision: 0, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_RS232", label: "CMD_WRITE_IO_RS232", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
-    //     ]
-    // },
-    // {
-    //     cmd: "CMD_WRITE_IO_RS485", label: "CMD_WRITE_IO_RS485", type: 'serial',
-    //     fields: [
-    //         { name: "id", label: "ID", type: "number", placeholder: "ID", required: true, min: 0, max: 255, precision: 0, span: 24 },
-    //         { name: "data", label: "Data", type: "textarea", placeholder: "Data", required: true, rows: 1, span: 24 },
-    //     ]
-    // },
 ];
 
 // Helper Maps để tra cứu nhanh thông tin CMD
@@ -281,6 +155,12 @@ const ALL_CONTROL_CMDS_MAP = new Map<string, ControlCommand>();
 [...MODBUS_CONTROL_CMDS, ...SERIAL_CONTROL_CMDS].forEach(cmdInfo => {
     ALL_CONTROL_CMDS_MAP.set(cmdInfo.cmd, cmdInfo);
 });
+
+// Danh sách tất cả các CMD nhận được (đã sắp xếp)
+const SORTED_ALL_RECEIVE_CMDS = [...MODBUS_RECEIVE_CMDS, ...SERIAL_RECEIVE_CMDS].sort((a, b) => a.label.localeCompare(b.label));
+const SORTED_MODBUS_RECEIVE_CMDS = MODBUS_RECEIVE_CMDS.sort((a, b) => a.label.localeCompare(b.label));
+const SORTED_SERIAL_RECEIVE_CMDS = SERIAL_RECEIVE_CMDS.sort((a, b) => a.label.localeCompare(b.label));
+
 
 // --- INTERFACES ---
 interface ConfigIotsProps {
@@ -412,7 +292,6 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
         prevData: IoTProcessedData[],
         newItems: any[]
     ): IoTProcessedData[] => {
-        console.log("new item ---------------", newItems);
         if (newItems.length === 0) return prevData;
 
         const existingKeys = new Set(prevData.map(d => d.key));
@@ -445,7 +324,7 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
 
         setSerialData(prev => updateDataState(prev, serialItems));
         setModbusData(prev => updateDataState(prev, modbusItems));
-    }, [dataIotsDetail.data, processIncomingData, updateDataState]);
+    }, [dataIotsDetail.data, processIncomingData, updateDataState, MODBUS_RECEIVE_CMDS_SET]);
 
     return { serialData, modbusData };
 };
@@ -453,7 +332,6 @@ const useIoTDataProcessor = (dataIotsDetail: ConfigIotsProps['dataIotsDetail']) 
 // --- TABLE COMPONENT (FOR DISPLAY ONLY) ---
 interface DataTableViewProps {
     data: IoTProcessedData[];
-    title?: string; // Tiêu đề có thể không cần nếu đã có tiêu đề chung
     isSerialCommands: boolean;
 }
 
@@ -474,9 +352,10 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
                 setFilterOpen(false);
             }
         };
-        document.addEventListener('mousedown', handleClickOutside);
+        // Sử dụng capture phase để bắt sự kiện sớm hơn, trước khi Select xử lý
+        document.addEventListener('mousedown', handleClickOutside, true);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside, true);
         };
     }, []);
 
@@ -502,11 +381,11 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
         onCmdFilterChange: (value: string | undefined) => void,
         filterOpen: boolean,
         setFilterState: (open: boolean) => void,
-        selectElemRef: React.RefObject<any>
+        selectElemRef: React.RefObject<any>,
+        sortedCmds: ReceiveCommand[]
     ): TableColumn[] => {
         const payloadNames = new Set<string>();
         tableData.forEach((row) => {
-            // Lọc bỏ 'isMissed' khỏi danh sách payloadNames để không tạo cột cho nó
             Object.keys(row).forEach(key => {
                 if (!['key', 'CMD', 'CMD_Decriptions', 'unit', 'time', 'isMissed'].includes(key)) {
                     payloadNames.add(key);
@@ -514,7 +393,9 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
             });
         });
 
-        const uniqueCMDs = Array.from(new Set(tableData.map(row => row.CMD)));
+        const availableUniqueCMDs = sortedCmds.filter(cmdInfo =>
+            tableData.some(row => row.CMD === cmdInfo.cmd)
+        );
 
         const columns: TableColumn[] = [
             {
@@ -533,26 +414,33 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
                     >
                         <span
                             style={{ cursor: 'pointer', flexGrow: 1, textAlign: 'left' }}
-                            onClick={() => setFilterState(true)}
+                            // Khi click vào label, đảo ngược trạng thái mở/đóng
+                            onClick={(e) => {
+                                e.stopPropagation(); // Ngăn sự kiện nổi bọt, tránh ảnh hưởng Select nếu đang mở
+                                setFilterState(!filterOpen);
+                            }}
                         >
                             {cmdFilter ? getCmdLabel(cmdFilter) : 'CMD'}
                         </span>
 
+                        {/* Thay đổi logic của biểu tượng */}
                         {cmdFilter ? (
+                            // Nếu có filter, nút này để xóa filter và đóng
                             <CloseCircleOutlined
                                 style={{ cursor: 'pointer', fontSize: '12px' }}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onCmdFilterChange(undefined);
-                                    setFilterState(false);
+                                    onCmdFilterChange(undefined); // Xóa bộ lọc
+                                    setFilterState(false); // Đóng dropdown
                                 }}
                             />
                         ) : (
+                            // Nếu không có filter, nút này để mở/đóng dropdown
                             <FilterOutlined
                                 style={{ cursor: 'pointer', fontSize: '12px' }}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setFilterState(true);
+                                    setFilterState(!filterOpen); // Đảo ngược trạng thái mở/đóng
                                 }}
                             />
                         )}
@@ -577,19 +465,22 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
                                 value={cmdFilter}
                                 onChange={(value: string | undefined) => {
                                     onCmdFilterChange(value);
-                                    setFilterState(false);
+                                    setFilterState(false); // Đóng sau khi chọn
                                 }}
                                 onDropdownVisibleChange={(open) => {
+                                    // Khi Ant Design Select đóng, chúng ta cũng cập nhật state của mình
                                     if (!open) {
                                         setFilterState(false);
                                     }
                                 }}
                                 autoFocus
                                 dropdownMatchSelectWidth={false}
+                                // Rất quan trọng: Prop này điều khiển việc mở/đóng dropdown của Select
+                                open={filterOpen} // Đồng bộ với state filterOpen của bạn
                             >
-                                {uniqueCMDs.map(cmd => (
-                                    <Option key={cmd} value={cmd}>
-                                        {getCmdLabel(cmd)}
+                                {availableUniqueCMDs.map(cmdInfo => (
+                                    <Option key={cmdInfo.cmd} value={cmdInfo.cmd}>
+                                        {cmdInfo.label}
                                     </Option>
                                 ))}
                             </Select>
@@ -626,19 +517,21 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
             },
         ];
         return columns;
-    }, [isSerialCommands]);
+    }, []);
 
-    const columns = useMemo(() =>
-            generateTableColumns(
-                data,
-                selectedCmdFilter,
-                setSelectedCmdFilter,
-                isFilterOpen,
-                setFilterOpen,
-                selectRef
-            ),
-        [data, selectedCmdFilter, isFilterOpen, isSerialCommands, generateTableColumns]
-    );
+    const columns = useMemo(() => {
+        const sortedCmdsForTable = isSerialCommands ? SORTED_SERIAL_RECEIVE_CMDS : SORTED_MODBUS_RECEIVE_CMDS;
+
+        return generateTableColumns(
+            data,
+            selectedCmdFilter,
+            setSelectedCmdFilter,
+            isFilterOpen,
+            setFilterOpen,
+            selectRef,
+            sortedCmdsForTable
+        );
+    }, [data, selectedCmdFilter, isFilterOpen, isSerialCommands, generateTableColumns]);
 
     return (
         <>
@@ -677,14 +570,13 @@ const DataTableView: React.FC<DataTableViewProps> = ({ data, isSerialCommands })
                         const isInputChannel = row.CMD?.startsWith('CMD_PUSH_IO_DI');
                         const isBooleanData = typeof row.data === 'boolean';
 
-                        // Xác định màu nền dựa trên isMissed
                         let rowBgColor;
                         if (row.isMissed) {
-                            rowBgColor = '#fbbf66'; // Màu cam nhạt (dễ nhìn hơn màu đỏ đậm)
+                            rowBgColor = '#fbbf66';
                         } else if (isInputChannel && isBooleanData) {
-                            rowBgColor = row.data ? '#e6ffe6' : '#ffe6e6'; // Màu xanh lá/đỏ nhạt cho IO DI
+                            rowBgColor = row.data ? '#e6ffe6' : '#ffe6e6';
                         } else {
-                            rowBgColor = rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9'; // Mặc định xen kẽ
+                            rowBgColor = rowIndex % 2 === 0 ? '#ffffff' : '#f9f9f9';
                         }
 
 
@@ -741,8 +633,8 @@ interface SerialControlProps {
     deviceMac: string;
     onControlSuccess: () => void;
     isConnected: boolean;
-    selectedControlCmd: string | undefined; // Lệnh được chọn từ component cha
-    onSelectControlCmd: (cmd: string | undefined) => void; // Callback để cập nhật lệnh được chọn ở cha
+    selectedControlCmd: string | undefined;
+    onSelectControlCmd: (cmd: string | undefined) => void;
 }
 
 const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSuccess, isConnected, selectedControlCmd, onSelectControlCmd }) => {
@@ -903,9 +795,9 @@ const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSucce
                                     <Form.Item
                                         label={<span style={{ fontSize: '12px' }}>{field.label}</span>}
                                         name={field.name}
-                                        rules={[{ required: field.required, message: '' }]} // Bỏ message để gọn hơn
+                                        rules={[{ required: field.required, message: '' }]}
                                         initialValue={formValues[field.name]}
-                                        style={{ marginBottom: '0' }} // Giảm khoảng cách dưới Form.Item
+                                        style={{ marginBottom: '0' }}
                                     >
                                         {inputComponent}
                                     </Form.Item>
@@ -941,8 +833,8 @@ interface ModbusControlProps {
     deviceMac: string;
     onControlSuccess: () => void;
     isConnected: boolean;
-    selectedControlCmd: string | undefined; // Lệnh được chọn từ component cha
-    onSelectControlCmd: (cmd: string | undefined) => void; // Callback để cập nhật lệnh được chọn ở cha
+    selectedControlCmd: string | undefined;
+    onSelectControlCmd: (cmd: string | undefined) => void;
 }
 
 const ModbusControl: React.FC<ModbusControlProps> = ({ deviceMac, onControlSuccess, isConnected, selectedControlCmd, onSelectControlCmd }) => {
@@ -1085,13 +977,13 @@ const ModbusControl: React.FC<ModbusControlProps> = ({ deviceMac, onControlSucce
                                     inputComponent = null;
                             }
                             return (
-                                <Col key={field.name} span={12}> {/* Mỗi label + input chiếm span 12 */}
+                                <Col key={field.name} span={12}>
                                     <Form.Item
                                         label={<span style={{ fontSize: '12px' }}>{field.label}</span>}
                                         name={field.name}
-                                        rules={[{ required: field.required, message: '' }]} // Bỏ message để gọn hơn
+                                        rules={[{ required: field.required, message: '' }]}
                                         initialValue={formValues[field.name]}
-                                        style={{ marginBottom: '8px' }} // Giảm khoảng cách dưới Form.Item
+                                        style={{ marginBottom: '8px' }}
                                     >
                                         {inputComponent}
                                     </Form.Item>
