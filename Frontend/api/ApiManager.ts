@@ -71,6 +71,35 @@ class ApiManager {
     ApiDeviceSendData() {
         return `${API_URLMASTERDATA}/api/iots/device-send-data`;
     }
+
+    // --- NEW API ENDPOINTS FOR SECTION-SPECIFIC IoT SETTINGS ---
+    ApiUpdateIotBasicInfo(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/basic-info`;
+    }
+    ApiUpdateIotWifiSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/wifi-settings`;
+    }
+    ApiUpdateIotEthernetSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/ethernet-settings`;
+    }
+    ApiUpdateIotMqttSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/mqtt-settings`;
+    }
+    ApiUpdateIotRs485Settings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/rs485-settings`;
+    }
+    ApiUpdateIotRs232Settings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/rs232-settings`;
+    }
+    ApiUpdateIotCanSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/can-settings`;
+    }
+    ApiUpdateIotFirmwareVersion(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/firmware-version`;
+    }
+    // --- END NEW API ENDPOINTS ---
+
+
     // Api Cài đặt payload
     // ApiGetDataPayloadType() {
     //     return `${API_URLMASTERDATA}/api/iots/payload-type/get-data-payload-type`;

@@ -6,16 +6,18 @@ import {ConvertDataHextoJson, ConvertDataJsonToHex} from "../algorithms/data.alg
 import {EmitData} from "../sockets/emit";
 import {DistinctDataIot} from "../services/iot.services";
 import {DataMsgGlobal, MasterIotGlobal} from "../global";
-import publishMessage from "../mqtt/publish";
+import publishMessage, {publishJson} from "../mqtt/publish";
 import client from "../mqtt";
 import moment from "moment";
 import {MasterIotInterface} from "../interface";
 import {ConvertDatatoHex} from "../global/convertData.global";
 import logger from "../config/logger";
-import IotSettings from "../models/sql/iot_settings.models";
+import models from "../models/sql";
 import {Buffer} from 'buffer';
 import IotStatistic from "../models/nosql/iot_statistic.models";
 import {getCmdStatistics, incrementCmdStat} from "../services/iot_statistics.services";
+import {pendingDeviceRequests} from "../mqtt/subcribe";
+import { v4 as uuidv4 } from 'uuid';
 
 const CMD_RESPOND_TIMESTAMP = 0x14;
 const CMD_NOTIFY_TCP = 0x3C;
@@ -424,7 +426,7 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
             await sendStatistics(mergedPayloads.deviceId);
 
             if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
-                const iotDevice = await IotSettings.findOne({
+                const iotDevice = await models.IotSettings.findOne({
                     where: { mac: mac }
                 });
 
@@ -457,7 +459,7 @@ export const sendDataRealTime = async (id: number) => {
                 {
                     device_id: data.id,
                     payload: await Promise.all(dataPayload.map(async (item: any) => {
-                        const iotDevice = await IotSettings.findOne({
+                        const iotDevice = await models.IotSettings.findOne({
                             where: { id: item.device_id }
                         });
                         if (item.CMD === "CMD_NOTIFY_TCP" && iotDevice && iotDevice.toJSON().tcp_status !== "opened") {
@@ -516,7 +518,7 @@ export const serverPublish = async (req: Request, res: Response) => {
             return;
         }
 
-        const iotDevice = await IotSettings.findOne({
+        const iotDevice = await models.IotSettings.findOne({
             where: { mac: mac }
         });
 
@@ -928,5 +930,232 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
         logger.error("Error in controlModbusCommand:", error);
         res.status(500).send({ message: `Internal Server Error: ${error instanceof Error ? error.message : 'Unknown error'}` });
         return;
+    }
+};
+
+// --- NEW CONTROLLERS FOR SECTION-SPECIFIC UPDATES ---
+
+// Helper function for common update logic
+
+interface DeviceConfigPayload {
+    transactionId: string;
+    [key: string]: any;
+}
+
+export async function updateIotSection(
+    req: Request,
+    res: Response,
+    sectionName: string
+) {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: `ID là bắt buộc để cập nhật ${sectionName}.` });
+        }
+
+        const iot = await models.IotSettings.findByPk(id);
+        if (!iot) {
+            return res.status(404).json({ message: "Thiết bị IoT không tìm thấy." });
+        }
+
+        const deviceMAC = iot.mac;
+        const updateData = req.body;
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: "Không có dữ liệu để cập nhật." });
+        }
+
+        let finalUpdatedIotRecord: any; // Biến để lưu trữ bản ghi IoT sau khi cập nhật DB
+
+        if (sectionName === 'basic') {
+            // Trường hợp 'basic': Cập nhật database trực tiếp và phản hồi ngay
+            console.log(`[${sectionName}] Cập nhật trực tiếp database cho thiết bị ${deviceMAC}.`);
+            const updatedIot = await iot.update(updateData);
+            MasterIotGlobal.replaceById(updatedIot);
+
+            finalUpdatedIotRecord = updatedIot;
+            res.status(200).json({
+                message: `${sectionName} đã cập nhật thành công (không qua MQTT).`,
+                data: finalUpdatedIotRecord,
+            });
+
+        } else {
+            const configTopic = `device/config/${deviceMAC}`;
+
+            const transactionId = uuidv4();
+            const configPromise = new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    pendingDeviceRequests.delete(transactionId);
+                    console.error(`[${sectionName}] Cấu hình thiết bị ${deviceMAC} hết thời gian chờ (ID: ${transactionId}).`);
+                    reject(new Error(`Thiết bị ${deviceMAC} không phản hồi trong thời gian quy định.`));
+                }, 30000);
+
+                pendingDeviceRequests.set(transactionId, {
+                    resolve,
+                    reject,
+                    timeout,
+                    deviceMAC,
+                    updateData,
+                    sectionName,
+                });
+
+                // --- BẮT ĐẦU PHẦN SỬA ĐỔI ĐỂ CHỈ KIỂM TRA NULL ---
+                const filteredAndTransformedData: { [key: string]: any } = {};
+                const prefix = `${sectionName}_`;
+
+                for (const key in updateData) {
+                    if (updateData.hasOwnProperty(key)) {
+                        const value = updateData[key];
+                        // Only include non-null/non-undefined values
+                        if (value !== null && typeof value !== 'undefined') {
+                            let transformedKey = key;
+                            // Check if the key starts with the sectionName_ prefix
+                            if (key.startsWith(prefix)) {
+                                // Remove the prefix from the key
+                                transformedKey = key.substring(prefix.length);
+                            }
+                            filteredAndTransformedData[transformedKey] = value;
+                        }
+                    }
+                }
+
+                if (Object.keys(filteredAndTransformedData).length === 0) {
+                    clearTimeout(timeout);
+                    pendingDeviceRequests.delete(transactionId);
+                    return reject(new Error(`No valid data (not null/undefined) to send for ${sectionName}.`));
+                }
+
+                const payload: DeviceConfigPayload = {
+                    transactionId: transactionId
+                };
+                payload[sectionName] = filteredAndTransformedData; // Gán dữ liệu đã lọc vào payload
+
+                // --- KẾT THÚC PHẦN SỬA ĐỔI ---
+
+                const publishSuccess = publishJson(client, configTopic, payload);
+
+                if (!publishSuccess) {
+                    console.error(`Lỗi khi gửi cấu hình MQTT đến ${deviceMAC} bằng publishJson.`);
+                    clearTimeout(timeout);
+                    pendingDeviceRequests.delete(transactionId);
+                    reject(new Error(`Không thể gửi lệnh cấu hình qua MQTT: Lỗi nội bộ khi publish JSON.`));
+                } else {
+                    console.log(`[${sectionName}] Đã gửi lệnh cấu hình đến ${deviceMAC} với transaction ID: ${transactionId}`);
+                }
+            });
+            await configPromise;
+            console.log(`[${sectionName}] Thiết bị ${deviceMAC} đã xác nhận cấu hình. Cập nhật database.`);
+            const updatedIot = await iot.update(updateData);
+            MasterIotGlobal.replaceById(updatedIot);
+
+            finalUpdatedIotRecord = updatedIot;
+            res.status(200).json({
+                message: `${sectionName} đã cập nhật thành công sau xác nhận từ thiết bị.`,
+                data: finalUpdatedIotRecord,
+            });
+        }
+
+    } catch (error: any) {
+        console.error(`Lỗi khi cập nhật ${sectionName}:`, error);
+        let statusCode = 500;
+        let errorMessage: string;
+
+        if (error.message.includes('không phản hồi')) {
+            statusCode = 504;
+            errorMessage = error.message;
+        } else if (error.message.includes('Không thể gửi lệnh')) {
+            statusCode = 502;
+            errorMessage = error.message;
+        } else {
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({
+            message: errorMessage,
+            error: error.message,
+        });
+    }
+}
+
+// 1. Thông tin cơ bản (name, mac)
+export const updateBasicInfo = async (req: Request, res: Response) => {
+    // FE đã gửi { name: "New Name", mac: "AA:BB:CC..." } trực tiếp
+    await updateIotSection(req, res, "basic");
+};
+
+// 2. Cài đặt WiFi
+export const updateWifiSettings = async (req: Request, res: Response) => {
+    // FE đã gửi { wifi_ssid: "MyWifi", wifi_password: "password", ... } trực tiếp
+    await updateIotSection(req, res, "wifi");
+};
+
+// 3. Cài đặt Ethernet
+export const updateEthernetSettings = async (req: Request, res: Response) => {
+    // FE đã gửi { ethernet_ip: "...", ethernet_gateway: "...", ... } trực tiếp
+    await updateIotSection(req, res, "ethernet");
+};
+
+// 4. Cài đặt MQTT
+export const updateMqttSettings = async (req: Request, res: Response) => {
+    // FE đã gửi { mqtt_mac: "...", mqtt_ip: "...", ... } trực tiếp
+    await updateIotSection(req, res, "mqtt");
+};
+
+// 5. Cài đặt RS485
+export const updateRs485Settings = async (req: Request, res: Response) => {
+    // FE đã gửi { rs485_id: ..., rs485_addresses: "...", ... } trực tiếp
+    await updateIotSection(req, res, "rs485");
+};
+
+// 6. Cài đặt RS232
+export const updateRs232Settings = async (req: Request, res: Response) => {
+    // FE đã gửi { rs232_baudrate: ..., rs232_serial_config: "..." } trực tiếp
+    await updateIotSection(req, res, "rs232");
+};
+
+// 7. Cài đặt CAN
+export const updateCanSettings = async (req: Request, res: Response) => {
+    // FE đã gửi { can_baudrate: ... } trực tiếp
+    await updateIotSection(req, res, "can");
+};
+
+// 8. Phiên bản Firmware
+export const updateFirmwareVersion = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ message: `ID là bắt buộc để cập nhật Phiên bản Firmware.` });
+            return;
+        }
+
+        const iot = await models.IotSettings.findByPk(id);
+        if (!iot) {
+            res.status(404).json({ message: "Thiết bị IoT không tìm thấy." });
+            return;
+        }
+
+        const { version } = req.body; // Lấy version string từ FE
+        if (typeof version === 'number') { // Giả định FE đã gửi ID số
+            await iot.update({ firmware_version_id: version });
+        } else {
+            const parsedId = parseInt(version);
+            if (!isNaN(parsedId)) {
+                await iot.update({ firmware_version_id: parsedId });
+            } else {
+                res.status(400).json({ message: "Phiên bản firmware gửi từ FE không hợp lệ. Vui lòng gửi ID hoặc thực hiện tra cứu." });
+                return;
+            }
+        }
+
+        res.status(200).json({
+            message: `Phiên bản Firmware đã cập nhật thành công.`,
+            data: iot, // Trả về bản ghi đã cập nhật
+        });
+    } catch (error: any) {
+        console.error(`Lỗi khi cập nhật Phiên bản Firmware:`, error);
+        res.status(500).json({
+            message: `Có lỗi xảy ra khi cập nhật Phiên bản Firmware.`,
+            error: error.message,
+        });
     }
 };

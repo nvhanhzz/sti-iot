@@ -7,7 +7,7 @@ export function initializeIotConfiguration(sequelizeInstance: any) {
     IotConfiguration.init(
         {
             id: { type: BIGINT, autoIncrement: true, primaryKey: true, },
-            iot_id: { type: INTEGER, allowNull: true, },
+            iot_id: { type: BIGINT, allowNull: true, },
             layout: { type: INTEGER, allowNull: true, },
             cmd_data: { type: STRING, allowNull: true, },
             settings: { type: STRING, allowNull: true, },

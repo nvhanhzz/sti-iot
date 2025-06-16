@@ -8,7 +8,12 @@ import {
     serverPublish,
     controlSerialCommand,
     controlModbusCommand,
-    getStatistics
+    getStatistics, updateBasicInfo, updateEthernetSettings,
+    updateMqttSettings,
+    updateRs485Settings,
+    updateCanSettings, updateWifiSettings,
+    updateRs232Settings,
+    updateFirmwareVersion
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
@@ -36,5 +41,14 @@ router.post("/lock-iot-command", LockIotCmd);
 router.get("/get-distinct-iot-command", SendDistinctIotCmd);
 
 router.get("/statistics/:id", getStatistics);
+
+router.put("/:id/basic-info", updateBasicInfo);
+router.put("/:id/wifi-settings", updateWifiSettings);
+router.put("/:id/ethernet-settings", updateEthernetSettings);
+router.put("/:id/mqtt-settings", updateMqttSettings);
+router.put("/:id/rs485-settings", updateRs485Settings);
+router.put("/:id/rs232-settings", updateRs232Settings);
+router.put("/:id/can-settings", updateCanSettings);
+router.put("/:id/firmware-version", updateFirmwareVersion);
 
 export default router;
