@@ -1,15 +1,14 @@
-import IotCmd from "../models/sql/iot_cmd.models";
 import { Request } from "express";
 import { Op, Sequelize } from "sequelize";
-import IotCmdField from "../models/sql/iot_cmd_field.model";
+import models from "../models/sql";
 
 export const GetDataIotCmdWithParams = async (params: any) => {
     try {
-        const iot_cmd = await IotCmd.findAll({
+        const iot_cmd = await models.IotCmd.findAll({ // Sử dụng models.IotCmd
             where: params,
             include: [
                 {
-                    association: 'iot_cmd_field',
+                    association: 'iot_cmd_field', // Tên association vẫn giữ nguyên
                     required: false,
                     where: {
                         isdelete: '0'
@@ -34,7 +33,7 @@ export const GetDataIotCmdWithParams = async (params: any) => {
 
 export const FindOneDataIotCmd = async (condition: any) => {
     try {
-        let findOne: any = await IotCmd.findOne(condition);
+        let findOne: any = await models.IotCmd.findOne(condition); // Sử dụng models.IotCmd
         return findOne;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -44,7 +43,7 @@ export const FindOneDataIotCmd = async (condition: any) => {
 
 export const CreateDataIotCmd = async (data: any) => {
     try {
-        const dataNew = await IotCmd.create(data);
+        const dataNew = await models.IotCmd.create(data); // Sử dụng models.IotCmd
         return dataNew;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -54,7 +53,7 @@ export const CreateDataIotCmd = async (data: any) => {
 
 export const UpdateDataIotCmd = async (data: any, condition: any) => {
     try {
-        await IotCmd.update(
+        await models.IotCmd.update( // Sử dụng models.IotCmd
             data,
             condition
         )
@@ -64,7 +63,6 @@ export const UpdateDataIotCmd = async (data: any, condition: any) => {
     }
 };
 
-// new 
 export const GetDataIotCmd = async (req: Request) => {
     try {
         const { page, limit_page, name, hex_symbols, type } = req.method === 'GET' ? req.query : req.body;
@@ -75,7 +73,7 @@ export const GetDataIotCmd = async (req: Request) => {
         const hex_symbolsFilter = hex_symbols ? (Array.isArray(hex_symbols) ? hex_symbols : [hex_symbols]) : [];
         const typeFilter = type ? (Array.isArray(type) ? type : [type]) : [];
 
-        const { count, rows } = await IotCmd.findAndCountAll({
+        const { count, rows } = await models.IotCmd.findAndCountAll({ // Sử dụng models.IotCmd
             limit: limit,
             offset: offset,
             order: [["time_updated", "DESC"]],
@@ -105,7 +103,7 @@ export const DistinctDataIotCmd = async (req: any) => {
             }));
         }
         const attributes: any[] = ['id', ...columns.map((col: string) => [Sequelize.col(col), 'column_name'])];
-        const { count, rows } = await IotCmd.findAndCountAll({
+        const { count, rows } = await models.IotCmd.findAndCountAll({ // Sử dụng models.IotCmd
             limit: limit_page,
             offset: offset,
             order: [['time_updated', 'DESC']],
@@ -134,7 +132,7 @@ export const GetDataIotCmdField = async (req: Request) => {
         const limit = limit_page ? parseInt(limit_page as string, 10) : 10;
         const offset = (pageNumber - 1) * limit;
 
-        const { count, rows } = await IotCmdField.findAndCountAll({
+        const { count, rows } = await models.IotCmdField.findAndCountAll({ // Sử dụng models.IotCmdField
             limit: limit,
             offset: offset,
             where: {
@@ -152,7 +150,7 @@ export const GetDataIotCmdField = async (req: Request) => {
 
 export const UpdateDataIotCmdField = async (data: any, condition: any) => {
     try {
-        await IotCmdField.update(
+        await models.IotCmdField.update( // Sử dụng models.IotCmdField
             data,
             condition
         )
@@ -164,7 +162,7 @@ export const UpdateDataIotCmdField = async (data: any, condition: any) => {
 
 export const BulkCreateIotCmdFile = async (data: any) => {
     try {
-        await IotCmdField.bulkCreate(data);
+        await models.IotCmdField.bulkCreate(data); // Sử dụng models.IotCmdField
         return true;
     } catch (error) {
         console.error("Error fetching distinct data:", error);

@@ -1,6 +1,6 @@
-import IotSettings from "../models/sql/iot_settings.models";
 import { Op, Sequelize } from "sequelize";
 import { Request } from "express";
+import models from "../models/sql";
 
 export const GetDataIot = async (req: Request) => {
     try {
@@ -12,7 +12,7 @@ export const GetDataIot = async (req: Request) => {
         const hex_symbolsFilter = hex_symbols ? (Array.isArray(hex_symbols) ? hex_symbols : [hex_symbols]) : [];
         const typeFilter = type ? (Array.isArray(type) ? type : [type]) : [];
 
-        const { count, rows } = await IotSettings.findAndCountAll({
+        const { count, rows } = await models.IotSettings.findAndCountAll({ // Sử dụng models.IotSettings
             limit: limit,
             offset: offset,
             order: [["time_updated", "DESC"]],
@@ -42,7 +42,7 @@ export const DistinctDataIot = async (req: any) => {
             }));
         }
         const attributes: any[] = ['id', ...columns.map((col: string) => [Sequelize.col(col), 'column_name'])];
-        const { count, rows } = await IotSettings.findAndCountAll({
+        const { count, rows } = await models.IotSettings.findAndCountAll({ // Sử dụng models.IotSettings
             limit: limit_page,
             offset: offset,
             order: [['time_updated', 'DESC']],
@@ -66,7 +66,7 @@ export const DistinctDataIot = async (req: any) => {
 
 export const GetDataIotWithParams = async (params: any) => {
     try {
-        const iots = await IotSettings.findAll({
+        const iots = await models.IotSettings.findAll({ // Sử dụng models.IotSettings
             where: params,
         });
         return {
@@ -83,7 +83,7 @@ export const GetDataIotWithParams = async (params: any) => {
 
 export const FindOneData = async (condition: any) => {
     try {
-        let findOne = await IotSettings.findOne({
+        let findOne = await models.IotSettings.findOne({ // Sử dụng models.IotSettings
             where: condition
         });
         return findOne;
@@ -95,7 +95,7 @@ export const FindOneData = async (condition: any) => {
 
 export const CreateData = async (data: any) => {
     try {
-        const dataNew = await IotSettings.create(data);
+        const dataNew = await models.IotSettings.create(data); // Sử dụng models.IotSettings
         return dataNew;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -105,7 +105,7 @@ export const CreateData = async (data: any) => {
 
 export const UpdateData = async (data: any, condition: any) => {
     try {
-        const dataNew = await IotSettings.update(
+        const dataNew = await models.IotSettings.update( // Sử dụng models.IotSettings
             data,
             {
                 where: condition

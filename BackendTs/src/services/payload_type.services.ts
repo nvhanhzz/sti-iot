@@ -1,10 +1,10 @@
-import PayloadType from "../models/sql/payload_type.models";
 import { Request } from "express";
 import { Op, Sequelize } from "sequelize";
+import models from "../models/sql";
 
 export const GetDataPayloadTypeWithParams = async (params: any) => {
     try {
-        const payload_type = await PayloadType.findAll({
+        const payload_type = await models.PayloadType.findAll({ // Sử dụng models.PayloadType
             where: params
         });
 
@@ -22,10 +22,7 @@ export const GetDataPayloadTypeWithParams = async (params: any) => {
 
 export const FindOneDataPayloadType = async (condition: any) => {
     try {
-        // let findOne = await PayloadType.findOne({
-        //     where: condition
-        // });
-        let findOne = await PayloadType.findOne(condition);
+        let findOne = await models.PayloadType.findOne(condition); // Sử dụng models.PayloadType
         return findOne;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -35,7 +32,7 @@ export const FindOneDataPayloadType = async (condition: any) => {
 
 export const CreateDataPayloadType = async (data: any) => {
     try {
-        const dataNew = await PayloadType.create(data);
+        const dataNew = await models.PayloadType.create(data); // Sử dụng models.PayloadType
         return dataNew;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -45,11 +42,8 @@ export const CreateDataPayloadType = async (data: any) => {
 
 export const UpdateDataPayloadType = async (data: any, condition: any) => {
     try {
-        return await PayloadType.update(
+        return await models.PayloadType.update( // Sử dụng models.PayloadType
             data,
-            // {
-            //     where: condition
-            // }
             condition
         )
     } catch (error) {
@@ -61,7 +55,6 @@ export const UpdateDataPayloadType = async (data: any, condition: any) => {
 export const GetDataPayloadType = async (req: Request) => {
     try {
         const { page, limit_page, name, js_type, hex_symbols } = req.method === 'GET' ? req.query : req.body;
-        // console.log(req.method);
         const pageNumber = page ? parseInt(page as string, 10) : 1;
         const limit = limit_page ? parseInt(limit_page as string, 10) : 999999;
         const offset = (pageNumber - 1) * limit;
@@ -69,26 +62,15 @@ export const GetDataPayloadType = async (req: Request) => {
         const js_typeFilter = js_type ? (Array.isArray(js_type) ? js_type : [js_type]) : [];
         const hex_symbolsFilter = hex_symbols ? (Array.isArray(hex_symbols) ? hex_symbols : [hex_symbols]) : [];
 
-        const { count, rows } = await PayloadType.findAndCountAll({
+        const { count, rows } = await models.PayloadType.findAndCountAll({ // Sử dụng models.PayloadType
             limit: limit,
             offset: offset,
             order: [["time_updated", "DESC"]],
             where: {
-                // isdelete: false,
                 ...(nameFilter.length > 0 && { name: { [Op.in]: nameFilter } }),
                 ...(hex_symbolsFilter.length > 0 && { hex_symbols: { [Op.in]: hex_symbolsFilter } }),
                 ...(js_typeFilter.length > 0 && { js_type: { [Op.in]: js_typeFilter } }),
             },
-            // include: [
-            //     {
-            //         association: "user_create",
-            //         attributes: ["id", "username"],
-            //     },
-            //     {
-            //         association: "user_update",
-            //         attributes: ["id", "username"],
-            //     },
-            // ],
         });
         return {
             listPayloadType: rows,
@@ -110,7 +92,7 @@ export const DistinctDataPayloadType = async (req: any) => {
             }));
         }
         const attributes: any[] = ['id', ...columns.map((col: string) => [Sequelize.col(col), 'column_name'])];
-        const { count, rows } = await PayloadType.findAndCountAll({
+        const { count, rows } = await models.PayloadType.findAndCountAll({ // Sử dụng models.PayloadType
             limit: limit_page,
             offset: offset,
             order: [['time_updated', 'DESC']],

@@ -1,9 +1,8 @@
-// src/controllers/firmwareController.ts
 import { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import { FirmwareVersion } from '../models/sql/iot_firmware_version.models'; // Import db để truy cập FirmwareVersion model
+import { models } from '../config/db.config'; // Import đối tượng 'models'
 
 // Lấy đường dẫn thư mục upload từ biến môi trường
 const UPLOAD_DIR = process.env.FIRMWARE_UPLOAD_DIR || path.join(__dirname, '..', 'uploads');
@@ -19,7 +18,6 @@ const storage = multer.diskStorage({
         cb(null, UPLOAD_DIR);
     },
     filename: (req, file, cb) => {
-        // Multer sẽ tạo tên tạm thời. Chúng ta sẽ đổi tên sau khi xử lý logic.
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
@@ -41,7 +39,7 @@ export const upload = multer({
 // Lấy tất cả các phiên bản Firmware
 export const getAllFirmwareVersions = async (req: Request, res: Response) => {
     try {
-        const firmwareVersions = await FirmwareVersion.findAll();
+        const firmwareVersions = await models.FirmwareVersion.findAll(); // Sử dụng models.FirmwareVersion
         res.status(200).json(firmwareVersions);
     } catch (error: any) {
         console.error('Error fetching firmware versions:', error);
@@ -53,7 +51,7 @@ export const getAllFirmwareVersions = async (req: Request, res: Response) => {
 export const getFirmwareVersionById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const firmwareVersion = await FirmwareVersion.findByPk(id);
+        const firmwareVersion = await models.FirmwareVersion.findByPk(id); // Sử dụng models.FirmwareVersion
 
         if (!firmwareVersion) {
             res.status(404).json({ message: 'Không tìm thấy phiên bản firmware.' });
@@ -68,37 +66,32 @@ export const getFirmwareVersionById = async (req: Request, res: Response) => {
 
 // Tạo một phiên bản Firmware mới (với upload file)
 export const createFirmwareVersion = async (req: Request, res: Response) => {
-    const file = req.file; // File đã được Multer xử lý và đính kèm vào req
+    const file = req.file;
 
     try {
         const { versionNumber, releaseDate, description } = req.body;
 
         if (!versionNumber || !releaseDate || !file) {
-            // Nếu không có file hoặc thông tin bắt buộc, xóa file đã upload
             if (file) fs.unlinkSync(file.path);
             res.status(400).json({ message: 'Vui lòng cung cấp số phiên bản, ngày phát hành và file firmware.' });
             return;
         }
 
-        // Kiểm tra xem versionNumber đã tồn tại chưa
-        const existingFirmware = await FirmwareVersion.findOne({ where: { versionNumber } });
+        const existingFirmware = await models.FirmwareVersion.findOne({ where: { versionNumber } }); // Sử dụng models.FirmwareVersion
         if (existingFirmware) {
-            if (file) fs.unlinkSync(file.path); // Xóa file nếu versionNumber đã tồn tại
+            if (file) fs.unlinkSync(file.path);
             res.status(409).json({ message: 'Số phiên bản firmware đã tồn tại.' });
             return;
         }
 
-        // Tạo tên file cuối cùng dựa trên versionNumber và timestamp
         const firmwareFileName = `${versionNumber}_${Date.now()}${path.extname(file.originalname)}`;
         const newFilePath = path.join(UPLOAD_DIR, firmwareFileName);
 
-        // Đổi tên file tạm thời của Multer thành tên file theo versionNumber
         fs.renameSync(file.path, newFilePath);
 
-        // Tạo URL để truy cập file (dựa trên cách Nginx hoặc Express sẽ phục vụ)
-        const downloadUrl = `/firmware_files/${firmwareFileName}`; // URL tương đối
+        const downloadUrl = `/firmware_files/${firmwareFileName}`;
 
-        const newFirmware = await FirmwareVersion.create({
+        const newFirmware = await models.FirmwareVersion.create({ // Sử dụng models.FirmwareVersion
             versionNumber,
             releaseDate: new Date(releaseDate),
             description,
@@ -109,7 +102,6 @@ export const createFirmwareVersion = async (req: Request, res: Response) => {
 
     } catch (error: any) {
         console.error('Error creating firmware version:', error);
-        // Nếu có lỗi, cố gắng xóa file đã upload nếu nó tồn tại
         if (file && fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
         }
@@ -125,18 +117,16 @@ export const updateFirmwareVersion = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { versionNumber, releaseDate, description } = req.body;
 
-        const firmwareVersion = await FirmwareVersion.findByPk(id);
+        const firmwareVersion = await models.FirmwareVersion.findByPk(id); // Sử dụng models.FirmwareVersion
         if (!firmwareVersion) {
-            if (file) fs.unlinkSync(file.path); // Xóa file nếu không tìm thấy bản ghi
+            if (file) fs.unlinkSync(file.path);
             res.status(404).json({ message: 'Không tìm thấy phiên bản firmware để cập nhật.' });
             return;
         }
 
-        let newDownloadUrl = firmwareVersion.downloadUrl; // Giữ nguyên URL cũ nếu không có file mới
+        let newDownloadUrl = firmwareVersion.downloadUrl;
 
-        // Nếu có file mới được upload
         if (file) {
-            // Xóa file cũ nếu nó tồn tại và có đường dẫn
             if (firmwareVersion.downloadUrl) {
                 const oldFileName = path.basename(firmwareVersion.downloadUrl);
                 const oldFilePath = path.join(UPLOAD_DIR, oldFileName);
@@ -146,15 +136,13 @@ export const updateFirmwareVersion = async (req: Request, res: Response) => {
                 }
             }
 
-            // Tạo tên file mới và đường dẫn mới
-            const newVersionNum = versionNumber || firmwareVersion.versionNumber; // Dùng version mới nếu có
+            const newVersionNum = versionNumber || firmwareVersion.versionNumber;
             const firmwareFileName = `${newVersionNum}_${Date.now()}${path.extname(file.originalname)}`;
             const newFilePath = path.join(UPLOAD_DIR, firmwareFileName);
             fs.renameSync(file.path, newFilePath);
             newDownloadUrl = `/firmware_files/${firmwareFileName}`;
         }
 
-        // Cập nhật thông tin trong DB
         await firmwareVersion.update({
             versionNumber: versionNumber || firmwareVersion.versionNumber,
             releaseDate: releaseDate ? new Date(releaseDate) : firmwareVersion.releaseDate,
@@ -167,7 +155,7 @@ export const updateFirmwareVersion = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error(`Error updating firmware version with ID ${req.params.id}:`, error);
         if (file && fs.existsSync(file.path)) {
-            fs.unlinkSync(file.path); // Xóa file đã upload nếu có lỗi
+            fs.unlinkSync(file.path);
         }
         res.status(500).json({ message: 'Lỗi khi cập nhật phiên bản firmware.', error: error.message });
     }
@@ -177,14 +165,13 @@ export const updateFirmwareVersion = async (req: Request, res: Response) => {
 export const deleteFirmwareVersion = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const firmwareVersion = await FirmwareVersion.findByPk(id);
+        const firmwareVersion = await models.FirmwareVersion.findByPk(id); // Sử dụng models.FirmwareVersion
 
         if (!firmwareVersion) {
             res.status(404).json({ message: 'Không tìm thấy phiên bản firmware để xóa.' });
             return;
         }
 
-        // Xóa file firmware khỏi hệ thống file
         if (firmwareVersion.downloadUrl) {
             const fileName = path.basename(firmwareVersion.downloadUrl);
             const filePath = path.join(UPLOAD_DIR, fileName);
@@ -194,7 +181,6 @@ export const deleteFirmwareVersion = async (req: Request, res: Response) => {
             }
         }
 
-        // Xóa bản ghi khỏi database
         await firmwareVersion.destroy();
 
         res.status(200).json({ message: 'Xóa phiên bản firmware thành công!' });

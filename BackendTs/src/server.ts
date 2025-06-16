@@ -6,7 +6,11 @@ import logger from "./config/logger";
 import routes from "./routes/index.routes";
 import { initSocket } from "./sockets";
 import { config } from "./config";
+// Import connectDatabases từ db.config
 import { connectDatabases } from "./config/db.config";
+// Import models từ file models/sql/index.ts (nơi nó được export default)
+import models from "./models/sql"; // <-- Dòng này đã được sửa
+
 import { initQueue } from "./queue";
 import { initJobs } from "../src/jobs";
 import { initWatcher } from "./watcher";
@@ -42,6 +46,22 @@ const startServer = async () => {
         await connectDatabases();
         logger.info("Connect DB Success");
 
+        // --- Logic cập nhật trạng thái thiết bị sau khi DB kết nối ---
+        // models đã được khởi tạo thông qua import từ ./models/sql
+        logger.info('Updating all IoT device statuses to "closed" on startup...');
+        await models.IotSettings.update(
+            {
+                tcp_status: 'closed',
+                udp_status: 'closed'
+            },
+            {
+                where: {},
+                silent: true
+            }
+        );
+        logger.info('All IoT device statuses successfully set to "closed".');
+        // ------------------------------------------------------------------
+
         // Run non-blocking tasks in parallel
         await Promise.all([
             initQueue(),
@@ -49,11 +69,10 @@ const startServer = async () => {
             initWatcher(),
         ]);
 
-        // --- Nạp dữ liệu thống kê ban đầu sau khi kết nối DB thành công ---
+        // Nạp dữ liệu thống kê ban đầu (giữ nguyên nếu cần)
         logger.info("Initial loading of CMD statistics...");
         await updateCmdStatisticsFromDB();
         logger.info("CMD statistics loaded successfully.");
-        // ------------------------------------------------------------------
 
         // MQTT and Socket setup
         subscribeToTopics(initMqtt); // Subscribe to topics after MQTT is initialized

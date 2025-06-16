@@ -157,7 +157,6 @@ const ALL_CONTROL_CMDS_MAP = new Map<string, ControlCommand>();
 });
 
 // Danh sách tất cả các CMD nhận được (đã sắp xếp)
-const SORTED_ALL_RECEIVE_CMDS = [...MODBUS_RECEIVE_CMDS, ...SERIAL_RECEIVE_CMDS].sort((a, b) => a.label.localeCompare(b.label));
 const SORTED_MODBUS_RECEIVE_CMDS = MODBUS_RECEIVE_CMDS.sort((a, b) => a.label.localeCompare(b.label));
 const SORTED_SERIAL_RECEIVE_CMDS = SERIAL_RECEIVE_CMDS.sort((a, b) => a.label.localeCompare(b.label));
 

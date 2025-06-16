@@ -1,8 +1,8 @@
-import IotConfiguration from "../models/sql/iot_configuration.models";
+import models from "../models/sql";
 
 export const GetDataIotConfigurationWithParams = async (params: any) => {
     try {
-        const iots = await IotConfiguration.findAll({
+        const iots = await models.IotConfiguration.findAll({ // Sử dụng models.IotConfiguration
             where: params,
         });
         return {
@@ -19,7 +19,7 @@ export const GetDataIotConfigurationWithParams = async (params: any) => {
 
 export const FindOneDataIotConfiguration = async (condition: any) => {
     try {
-        let findOne = await IotConfiguration.findOne({
+        let findOne = await models.IotConfiguration.findOne({ // Sử dụng models.IotConfiguration
             where: condition
         });
         return findOne;
@@ -31,7 +31,7 @@ export const FindOneDataIotConfiguration = async (condition: any) => {
 
 export const CreateDataIotConfiguration = async (data: any) => {
     try {
-        await IotConfiguration.create(data);
+        await models.IotConfiguration.create(data); // Sử dụng models.IotConfiguration
         return true;
     } catch (error) {
         console.error("Error fetching distinct data:", error);
@@ -41,7 +41,7 @@ export const CreateDataIotConfiguration = async (data: any) => {
 
 export const UpdateDataIotConfiguration = async (data: any, condition: any) => {
     try {
-        await IotConfiguration.update(
+        await models.IotConfiguration.update( // Sử dụng models.IotConfiguration
             data,
             {
                 where: condition
@@ -52,5 +52,3 @@ export const UpdateDataIotConfiguration = async (data: any, condition: any) => {
         throw error;
     }
 };
-
-
