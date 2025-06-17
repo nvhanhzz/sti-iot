@@ -65,7 +65,7 @@ interface TcpConnection {
 }
 
 interface TcpConfig {
-    ips?: TcpConnection[];
+    ipAddresses?: TcpConnection[];
 }
 
 interface ExtendedIotInterface extends IotCMDInterface {
@@ -150,11 +150,11 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
 
             const tcpInitialValues = record.tcpConfig ? {
                 ...record.tcpConfig,
-                ips: record.tcpConfig.ips?.map(item => ({
+                ipAddresses: record.tcpConfig.ipAddresses?.map(item => ({
                     ...item,
                     address: Array.isArray(item.address) ? item.address.join(',') : item.address
                 })) || []
-            } : { ips: [] };
+            } : { ipAddresses: [] };
             tcpForm.setFieldsValue({ tcpConfig: tcpInitialValues });
 
             // Cập nhật ID của record trước đó
@@ -248,8 +248,8 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         payloadToSend.baudrate = Number(payloadToSend.baudrate);
                     }
                 } else if (fieldName === 'tcpConfig') {
-                    if (payloadToSend.ips) {
-                        payloadToSend.ips = payloadToSend.ips.map((item: any) => ({
+                    if (payloadToSend.ipAddresses) {
+                        payloadToSend.ipAddresses = payloadToSend.ipAddresses.map((item: any) => ({
                             ...item,
                             // Chuyển đổi chuỗi "8080,40001" thành mảng số [8080,40001]
                             address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
@@ -295,8 +295,8 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         address: Array.isArray(item.address) ? item.address.join(',') : item.address
                     }));
                 }
-                if (fieldName === 'tcpConfig' && resDataNew.tcpConfig?.ips) {
-                    resDataNew.tcpConfig.ips = resDataNew.tcpConfig.ips.map((item: any) => ({
+                if (fieldName === 'tcpConfig' && resDataNew.tcpConfig?.ipAddresses) {
+                    resDataNew.tcpConfig.ipAddresses = resDataNew.tcpConfig.ipAddresses.map((item: any) => ({
                         ...item,
                         address: Array.isArray(item.address) ? item.address.join(',') : item.address
                     }));
@@ -521,7 +521,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt TCP</Divider>
                         <Form form={tcpForm} layout="vertical">
-                            <Form.List name={['tcpConfig', 'ips']}>
+                            <Form.List name={['tcpConfig', 'ipAddresses']}>
                                 {(fields, { add, remove }) => (
                                     <>
                                         {fields.map(({ key, name, ...restField }) => (

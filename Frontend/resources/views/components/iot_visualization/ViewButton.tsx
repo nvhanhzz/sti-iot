@@ -70,7 +70,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
         try {
-            const response = await fetch('http://localhost:3335/api/iots/server-publish', {
+            const response = await fetch('http://192.168.1.121:3335/api/iots/server-publish', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mac: mac, hex: hexCommand })
@@ -146,7 +146,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
     const fetchInitialStatistics = useCallback(async (id: string) => {
         if (!id) return;
         try {
-            const response = await fetch(`http://localhost:3335/api/iots/statistics/${id}`);
+            const response = await fetch(`http://192.168.1.121:3335/api/iots/statistics/${id}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

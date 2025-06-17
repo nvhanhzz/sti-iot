@@ -15,7 +15,7 @@ interface FormData {
     firmwareFile: File | null;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3335';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.121:3335';
 
 const FirmwareFormModal: React.FC<FirmwareFormModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState<FormData>({

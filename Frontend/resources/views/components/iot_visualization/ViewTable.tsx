@@ -681,7 +681,7 @@ const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSucce
                 ...formValues,
             };
 
-            const response = await fetch('http://localhost:3335/api/iots/serial-command', {
+            const response = await fetch('http://192.168.1.121:3335/api/iots/serial-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
@@ -881,7 +881,7 @@ const ModbusControl: React.FC<ModbusControlProps> = ({ deviceMac, onControlSucce
                 ...formValues,
             };
 
-            const response = await fetch('http://localhost:3335/api/iots/modbus-command', {
+            const response = await fetch('http://192.168.1.121:3335/api/iots/modbus-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),

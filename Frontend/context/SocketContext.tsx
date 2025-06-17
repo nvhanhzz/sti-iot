@@ -16,7 +16,7 @@ interface ClientToServerEvents {
 
 // Khởi tạo socket
 // const SOCKET_URL = "http://192.168.1.37:3335";
-const SOCKET_URL = "http://localhost:3335";
+const SOCKET_URL = "http://192.168.1.121:3335";
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(SOCKET_URL, { autoConnect: false });
 
 // Tạo Context

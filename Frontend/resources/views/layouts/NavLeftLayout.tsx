@@ -4,6 +4,7 @@ import AuthContext from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { BsHouseDoor } from 'react-icons/bs';
 import { BsDeviceHddFill } from "react-icons/bs";
+import {MdOutlineMonitor} from "react-icons/md";
 
 interface ChildProps {
     collapsed: boolean;
@@ -45,6 +46,14 @@ const NavLeftLayout: React.FC<ChildProps> = ({ collapsed, mode }) => {
             target: false,
             icon: <BsDeviceHddFill size={20} />,
             link: '/settings-iot'
+        },
+        {
+            key: 'monitor',
+            label: 'Giám sát dữ liệu',
+            class: 'nav-item',
+            target: false,
+            icon: <MdOutlineMonitor size={20} />,
+            link: '/monitor'
         },
         // ... (các item khác)
     ];

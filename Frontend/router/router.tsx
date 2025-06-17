@@ -13,6 +13,7 @@ import SettingsIot from '../resources/views/settings/SettingsIot';
 import SettingsCMD from '../resources/views/settings/SettingsCMD';
 import SettingsPayloadType from '../resources/views/settings/SettingsPayloadType';
 import FirmwareList from "../resources/views/firmwareVersion";
+import Monitor from "../resources/views/monitor";
 
 const AppRouter: React.FC = () => {
     return (
@@ -23,6 +24,7 @@ const AppRouter: React.FC = () => {
                     <Route element={<Main />}>
                         <Route path="/home" element={<Home />} />
                         <Route path="/firmware-versions" element={<FirmwareList />} />
+                        <Route path="/monitor" element={<Monitor />} />
                         <Route path="/infor" element={<Infor />} />
                         <Route path="/apps" element={<AppControls />} />
                         <Route path="/accounts" element={<AccountControls />} />

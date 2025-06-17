@@ -13,7 +13,7 @@ import {
     updateRs485Settings,
     updateCanSettings, updateWifiSettings,
     updateRs232Settings,
-    updateFirmwareVersion, updateTcpSettings
+    updateFirmwareVersion, updateTcpSettings, getStatisticsById
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
@@ -31,7 +31,6 @@ router.post("/active-data-iots", UpdateDataIots);
 router.get("/payload-type/get-data-payload-type", sendDataPayloadType);
 router.post("/payload-type/update-data-payload-type", UpdateDataPayloadType);
 
-
 router.get("/get-data-iot-command", sendDataIotCmd);
 router.post("/setting-iot-command", SettingIotCmd);
 router.get("/get-data-iot-command-field", SendDataIotCmdField);
@@ -40,7 +39,8 @@ router.post("/setting-iot-command-field", SettingIotCmdField);
 router.post("/lock-iot-command", LockIotCmd);
 router.get("/get-distinct-iot-command", SendDistinctIotCmd);
 
-router.get("/statistics/:id", getStatistics);
+router.get("/statistics/:id", getStatisticsById);
+router.get("/statistics", getStatistics);
 
 router.put("/:id/basic-info", updateBasicInfo);
 router.put("/:id/wifi-settings", updateWifiSettings);
