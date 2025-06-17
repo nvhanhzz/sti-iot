@@ -3,8 +3,9 @@ import logger from "../../config/logger";
 import { deviceUpdateData } from "../../controllers/iots.controller";
 import { MasterIotGlobal, IotStatusGlobal } from "../../global";
 import { EmitData } from "../../sockets/emit";
+import {registerClient} from "../client";
 
-const subscribeTopics = ["device_send/+", "device/config/result/#"];
+const subscribeTopics = ["device_send/+", "device/config/result/#", "device/register"];
 
 interface PendingRequest {
     resolve: (value: any) => void;
@@ -56,8 +57,14 @@ const subscribeToTopics = (client: MqttClient) => {
                 }, 500);
             }
         }
-
-        if (topic.startsWith('device_send/')) {
+        if (topic === 'device/register') {
+            try {
+                const messageRequest = JSON.parse(message.toString())
+                await registerClient(messageRequest);
+            } catch (parseError) {
+                logger.error('❌ Error parsing MQTT config result message:', parseError);
+            }
+        } else if (topic.startsWith('device_send/')) {
             await deviceUpdateData(topic, message);
         } else if (topic.startsWith('device/config/result/')) {
             try {

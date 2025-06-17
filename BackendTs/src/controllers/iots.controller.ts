@@ -424,6 +424,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
             await iotStatistic.save();
             incrementCmdStat(mergedPayloads.deviceId, mergedPayloads.cmd, mergedPayloads.isMissed);
             await sendStatistics(mergedPayloads.deviceId);
+            mergedPayloads.deviceName = dataIot.name;
+            sendToMonitor(mergedPayloads);
 
             if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
                 const iotDevice = await models.IotSettings.findOne({
@@ -443,6 +445,10 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
             await sendDataRealTime(dataIot.id as number);
         }
     }
+};
+
+export const sendToMonitor = async (data: any) => {
+    await EmitData("server_emit_monitor", data);
 };
 
 export const sendStatistics = async (deviceId: string) => {
