@@ -13,7 +13,7 @@ import {
     updateRs485Settings,
     updateCanSettings, updateWifiSettings,
     updateRs232Settings,
-    updateFirmwareVersion
+    updateFirmwareVersion, updateTcpSettings
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
@@ -47,6 +47,7 @@ router.put("/:id/wifi-settings", updateWifiSettings);
 router.put("/:id/ethernet-settings", updateEthernetSettings);
 router.put("/:id/mqtt-settings", updateMqttSettings);
 router.put("/:id/rs485-settings", updateRs485Settings);
+router.put("/:id/tcp-settings", updateTcpSettings);
 router.put("/:id/rs232-settings", updateRs232Settings);
 router.put("/:id/can-settings", updateCanSettings);
 router.put("/:id/firmware-version", updateFirmwareVersion);

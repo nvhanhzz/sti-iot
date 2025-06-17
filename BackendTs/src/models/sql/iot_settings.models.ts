@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-const { BIGINT, INTEGER, STRING, DATE, BOOLEAN } = DataTypes;
+const { BIGINT, INTEGER, STRING, DATE, BOOLEAN, JSON } = DataTypes;
 
 class IotSettings extends Model { }
 
@@ -27,34 +27,52 @@ export function initializeIotSettings(sequelizeInstance: any) {
                 allowNull: true,
             },
 
-            wifi_ssid: {type: STRING, allowNull: true},
-            wifi_password: {type: STRING, allowNull: true},
-            wifi_ip: {type: STRING, allowNull: true},
-            wifi_gateway: {type: STRING, allowNull: true},
-            wifi_subnet: {type: STRING, allowNull: true},
-            wifi_dns: {type: STRING, allowNull: true},
+            // Cấu hình Wi-Fi gộp vào một trường JSON
+            wifiConfig: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình Wi-Fi (SSID, Password, IP, Gateway, Subnet, DNS)'
+            },
 
-            ethernet_ip: {type: STRING, allowNull: true},
-            ethernet_gateway: {type: STRING, allowNull: true},
-            ethernet_subnet: {type: STRING, allowNull: true},
-            ethernet_mac: {type: STRING, allowNull: true},
-            ethernet_dns: {type: STRING, allowNull: true},
+            // Cấu hình Ethernet gộp vào một trường JSON
+            ethernetConfig: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình Ethernet (MAC, IP, Gateway, Subnet, DNS)'
+            },
 
-            mqtt_mac: { type: STRING, allowNull: true },
-            mqtt_ip: { type: STRING, allowNull: true },
-            mqtt_gateway: { type: STRING, allowNull: true },
-            mqtt_subnet: { type: STRING, allowNull: true },
-            mqtt_dns: { type: STRING, allowNull: true },
+            // Cấu hình MQTT gộp vào một trường JSON
+            mqttConfig: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình MQTT (SERVER, PORT, USER, PW, SUBTOPIC, PUBTOPIC, QoS, keepAlive)'
+            },
 
-            rs485_id: { type: INTEGER, allowNull: true },
-            rs485_addresses: { type: STRING, allowNull: true },
-            rs485_baudrate: { type: INTEGER, allowNull: true },
-            rs485_serial_config: { type: STRING, allowNull: true },
+            rs485Config: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình RS485 (baudrate, serialConfig, ID, Address)'
+            },
 
-            can_baudrate: { type: INTEGER, allowNull: true },
+            tcpConfig: {
+                type: JSON,
+                allowNull: true,
+            },
 
-            rs232_baudrate: { type: INTEGER, allowNull: true },
-            rs232_serial_config: { type: STRING, allowNull: true },
+            can_baudrate: { type: INTEGER, allowNull: true, comment: 'Tốc độ baud của CAN' },
+
+            canConfig: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình can'
+            },
+
+            // Cấu hình RS232 gộp vào một trường JSON
+            rs232Config: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình RS232 (baudrate, serialConfig, ID, Address)'
+            },
 
             firmware_version_id: {
                 type: INTEGER,
@@ -63,7 +81,7 @@ export function initializeIotSettings(sequelizeInstance: any) {
             },
         },
         {
-            sequelize: sequelizeInstance, // Sử dụng instance được truyền vào
+            sequelize: sequelizeInstance,
             modelName: "master_iot",
             tableName: "master_iot",
             timestamps: true,

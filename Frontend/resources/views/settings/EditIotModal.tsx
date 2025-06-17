@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { SaveOutlined } from '@ant-design/icons';
+import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import {
     Button,
     Input,
@@ -10,51 +10,78 @@ import {
     Modal,
     Divider,
     InputNumber,
-    Select
+    Space
 } from 'antd';
 import IotService from '../../../services/IotService';
 import { IotCMDInterface } from '../../../interface/SettingInterface';
 
-const { Option } = Select;
+interface WifiConfig {
+    ssid?: string;
+    pw?: string;
+    ip?: string;
+    gateway?: string;
+    subnet?: string;
+    dns?: string;
+}
+
+interface EthernetConfig {
+    mac?: string;
+    ip?: string;
+    gateway?: string;
+    subnet?: string;
+    dns?: string;
+}
+
+interface MqttConfig {
+    server?: string;
+    port?: number;
+    user?: string;
+    pw?: string;
+    subTopic?: string;
+    pubTopic?: string;
+    qos?: number;
+    keepAlive?: number;
+}
+
+interface Rs485IdAddress {
+    id: number;
+    address: string;
+}
+
+interface Rs485Config {
+    baudrate?: number;
+    serialConfig?: string;
+    idAddresses?: Rs485IdAddress[];
+}
+
+interface Rs232Config {
+    baudrate?: number;
+    serialConfig?: string;
+}
+
+interface TcpConnection {
+    ip: string;
+    address: string;
+}
+
+interface TcpConfig {
+    ips?: TcpConnection[];
+}
 
 interface ExtendedIotInterface extends IotCMDInterface {
     connected?: boolean;
     input?: boolean;
     output?: boolean;
     mac?: string;
-    // Cập nhật các trường để khớp với tên cột DB
-    wifi_ssid?: string;
-    wifi_password?: string;
-    wifi_ip?: string;
-    wifi_gateway?: string;
-    wifi_subnet?: string;
-    wifi_dns?: string;
 
-    can_baudrate?: number;
+    wifiConfig?: WifiConfig;
+    ethernetConfig?: EthernetConfig;
+    mqttConfig?: MqttConfig;
+    rs485Config?: Rs485Config;
+    rs232Config?: Rs232Config;
+    tcpConfig?: TcpConfig;
 
-    mqtt_mac?: string;
-    mqtt_ip?: string;
-    mqtt_gateway?: string;
-    mqtt_subnet?: string;
-    mqtt_dns?: string;
-
-    ethernet_ip?: string;
-    ethernet_gateway?: string;
-    ethernet_subnet?: string;
-    ethernet_mac?: string;
-    ethernet_dns?: string;
-
-    rs485_id?: number;
-    rs485_addresses?: string;
-    rs485_baudrate?: number;
-    rs485_serial_config?: string;
-
-    rs232_baudrate?: number;
-    rs232_serial_config?: string;
-
-    firmware_version_id?: number; // Thay vì 'version', dùng ID nếu FE gửi ID
-    // Nếu FE gửi string version (vd: "1.0.0") và backend cần lookup ID, giữ 'version'
-    version?: string; // Giữ lại nếu FE hiển thị và gửi string version
+    canBaudrate?: number;
 }
 
 interface EditIotModalProps {
@@ -72,50 +99,60 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
     const [rs485Form] = Form.useForm();
     const [rs232Form] = Form.useForm();
     const [canForm] = Form.useForm();
-    const [versionForm] = Form.useForm();
+    const [tcpForm] = Form.useForm();
 
     useEffect(() => {
         if (record) {
             basicInfoForm.setFieldsValue(record);
 
-            // Gán trực tiếp các trường, không còn object lồng nhau
             wifiForm.setFieldsValue({
-                wifi_ssid: record.wifi_ssid,
-                wifi_password: record.wifi_password,
-                wifi_ip: record.wifi_ip,
-                wifi_gateway: record.wifi_gateway,
-                wifi_subnet: record.wifi_subnet,
-                wifi_dns: record.wifi_dns,
+                wifiConfig: record.wifiConfig || {
+                    ssid: "", pw: "", ip: "", gateway: "", subnet: "", dns: ""
+                }
             });
+
             ethernetForm.setFieldsValue({
-                ethernet_ip: record.ethernet_ip,
-                ethernet_gateway: record.ethernet_gateway,
-                ethernet_subnet: record.ethernet_subnet,
-                ethernet_mac: record.ethernet_mac,
-                ethernet_dns: record.ethernet_dns,
+                ethernetConfig: record.ethernetConfig || {
+                    mac: "", ip: "", gateway: "", subnet: "", dns: ""
+                }
             });
+
             mqttForm.setFieldsValue({
-                mqtt_mac: record.mqtt_mac,
-                mqtt_ip: record.mqtt_ip,
-                mqtt_gateway: record.mqtt_gateway,
-                mqtt_subnet: record.mqtt_subnet,
-                mqtt_dns: record.mqtt_dns,
+                mqttConfig: record.mqttConfig || {
+                    server: "", port: null, user: "", pw: "", subTopic: "", pubTopic: "", qos: null, keepAlive: null
+                }
             });
-            rs485Form.setFieldsValue({
-                rs485_id: record.rs485_id,
-                rs485_addresses: record.rs485_addresses,
-                rs485_baudrate: record.rs485_baudrate,
-                rs485_serial_config: record.rs485_serial_config,
-            });
+
+            const rs485InitialValues = record.rs485Config ? {
+                ...record.rs485Config,
+                idAddresses: record.rs485Config.idAddresses?.map(item => ({
+                    id: item.id,
+                    address: Array.isArray(item.address) ? item.address.join(',') : item.address
+                })) || []
+            } : { baudrate: null, serialConfig: "", idAddresses: [] };
+            rs485Form.setFieldsValue({ rs485Config: rs485InitialValues });
+
             rs232Form.setFieldsValue({
-                rs232_baudrate: record.rs232_baudrate,
-                rs232_serial_config: record.rs232_serial_config,
+                rs232Config: record.rs232Config || {
+                    baudrate: null, serialConfig: ""
+                }
             });
+
             canForm.setFieldsValue({
-                can_baudrate: record.can_baudrate,
+                canConfig: record.canBaudrate !== null && typeof record.canBaudrate !== 'undefined'
+                    ? { baudrate: record.canBaudrate }
+                    : { baudrate: null }
             });
-            versionForm.setFieldsValue({ version: record.version }); // Nếu record.version là string
-            // Hoặc versionForm.setFieldsValue({ firmware_version_id: record.firmware_version_id }); nếu FE gửi ID
+
+            const tcpInitialValues = record.tcpConfig ? {
+                ...record.tcpConfig,
+                ips: record.tcpConfig.ips?.map(item => ({
+                    ...item,
+                    address: Array.isArray(item.address) ? item.address.join(',') : item.address
+                })) || []
+            } : { ips: [] };
+            tcpForm.setFieldsValue({ tcpConfig: tcpInitialValues });
+
         } else {
             basicInfoForm.resetFields();
             wifiForm.resetFields();
@@ -124,14 +161,15 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             rs485Form.resetFields();
             rs232Form.resetFields();
             canForm.resetFields();
-            versionForm.resetFields();
+            tcpForm.resetFields();
         }
-    }, [record, basicInfoForm, wifiForm, ethernetForm, mqttForm, rs485Form, rs232Form, canForm, versionForm]);
+    }, [record, basicInfoForm, wifiForm, ethernetForm, mqttForm, rs485Form, rs232Form, canForm, tcpForm]);
 
     const handleSaveSection = async (
         formInstance: any,
         sectionName: string,
-        serviceCall: (id: string, data: any) => Promise<any>
+        serviceCall: (id: string, data: any) => Promise<any>,
+        fieldName?: string
     ) => {
         if (!record?.id) {
             message.error('ID thiết bị không hợp lệ!');
@@ -141,16 +179,71 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
         const loadingMessage = message.loading(`Đang lưu ${sectionName}...`, 0);
         try {
             const values = await formInstance.validateFields();
+            let payloadToSend = { ...values };
 
-            // payloadToSend giờ chính là values từ form, không cần mapping thêm
-            const payloadToSend = values;
+            if (fieldName) {
+                payloadToSend = { ...values[fieldName] };
+
+                if (fieldName === 'wifiConfig') {
+                } else if (fieldName === 'ethernetConfig') {
+                } else if (fieldName === 'mqttConfig') {
+                    if (payloadToSend.port !== null && payloadToSend.port !== undefined) {
+                        payloadToSend.port = Number(payloadToSend.port);
+                    }
+                    if (payloadToSend.qos !== null && payloadToSend.qos !== undefined) {
+                        payloadToSend.qos = Number(payloadToSend.qos);
+                    }
+                    if (payloadToSend.keepAlive !== null && payloadToSend.keepAlive !== undefined) {
+                        payloadToSend.keepAlive = Number(payloadToSend.keepAlive);
+                    }
+                } else if (fieldName === 'rs485Config') {
+                    if (payloadToSend.baudrate !== null && payloadToSend.baudrate !== undefined) {
+                        payloadToSend.baudrate = Number(payloadToSend.baudrate);
+                    }
+                    if (payloadToSend.idAddresses) {
+                        payloadToSend.idAddresses = payloadToSend.idAddresses.map((item: any) => ({
+                            id: Number(item.id),
+                            address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
+                        }));
+                    }
+                } else if (fieldName === 'rs232Config') {
+                    if (payloadToSend.baudrate !== null && payloadToSend.baudrate !== undefined) {
+                        payloadToSend.baudrate = Number(payloadToSend.baudrate);
+                    }
+                } else if (fieldName === 'canConfig') {
+                    if (payloadToSend.baudrate !== null && payloadToSend.baudrate !== undefined) {
+                        payloadToSend.baudrate = Number(payloadToSend.baudrate);
+                    }
+                } else if (fieldName === 'tcpConfig') {
+                    if (payloadToSend.ips) {
+                        payloadToSend.ips = payloadToSend.ips.map((item: any) => ({
+                            ...item,
+                            address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
+                        }));
+                    }
+                }
+            }
 
             // @ts-ignore
-            const response: any = await serviceCall(record.id, payloadToSend);
+            const response: any = await serviceCall(record.id, { [fieldName]: payloadToSend });
             const resData = response?.data;
 
             if (resData?.data) {
                 const resDataNew = resData.data;
+
+                if (fieldName === 'rs485Config' && resDataNew.rs485Config?.idAddresses) {
+                    resDataNew.rs485Config.idAddresses = resDataNew.rs485Config.idAddresses.map((item: any) => ({
+                        ...item,
+                        address: Array.isArray(item.address) ? item.address.join(',') : item.address
+                    }));
+                }
+                if (fieldName === 'tcpConfig' && resDataNew.tcpConfig?.ips) {
+                    resDataNew.tcpConfig.ips = resDataNew.tcpConfig.ips.map((item: any) => ({
+                        ...item,
+                        address: Array.isArray(item.address) ? item.address.join(',') : item.address
+                    }));
+                }
+
                 message.success(`${sectionName} cập nhật thành công!`);
                 onSaveSuccess({ ...record, ...resDataNew });
             } else {
@@ -167,23 +260,16 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
     };
 
     const handleSaveBasicInfo = () => handleSaveSection(basicInfoForm, 'Thông tin cơ bản', IotService.updateIotBasicInfo.bind(IotService));
-    const handleSaveWifi = () => handleSaveSection(wifiForm, 'Cài đặt WiFi', IotService.updateIotWifiSettings.bind(IotService));
-    const handleSaveEthernet = () => handleSaveSection(ethernetForm, 'Cài đặt Ethernet', IotService.updateIotEthernetSettings.bind(IotService));
-    const handleSaveMqtt = () => handleSaveSection(mqttForm, 'Cài đặt MQTT', IotService.updateIotMqttSettings.bind(IotService));
-    const handleSaveRs485 = () => handleSaveSection(rs485Form, 'Cài đặt RS485', IotService.updateIotRs485Settings.bind(IotService));
-    const handleSaveRs232 = () => handleSaveSection(rs232Form, 'Cài đặt RS232', IotService.updateIotRs232Settings.bind(IotService));
-    const handleSaveCan = () => handleSaveSection(canForm, 'Cài đặt CAN', IotService.updateIotCanSettings.bind(IotService));
-    const handleSaveVersion = () => handleSaveSection(versionForm, 'Phiên bản Firmware', IotService.updateIotFirmwareVersion.bind(IotService));
+    const handleSaveWifi = () => handleSaveSection(wifiForm, 'Cài đặt WiFi', IotService.updateIotWifiSettings.bind(IotService), 'wifiConfig');
+    const handleSaveEthernet = () => handleSaveSection(ethernetForm, 'Cài đặt Ethernet', IotService.updateIotEthernetSettings.bind(IotService), 'ethernetConfig');
+    const handleSaveMqtt = () => handleSaveSection(mqttForm, 'Cài đặt MQTT', IotService.updateIotMqttSettings.bind(IotService), 'mqttConfig');
+    const handleSaveRs485 = () => handleSaveSection(rs485Form, 'Cài đặt RS485', IotService.updateIotRs485Settings.bind(IotService), 'rs485Config');
+    const handleSaveRs232 = () => handleSaveSection(rs232Form, 'Cài đặt RS232', IotService.updateIotRs232Settings.bind(IotService), 'rs232Config');
+    const handleSaveCan = () => handleSaveSection(canForm, 'Cài đặt CAN', IotService.updateIotCanSettings.bind(IotService), 'canConfig');
+    const handleSaveTcp = () => handleSaveSection(tcpForm, 'Cài đặt TCP', IotService.updateIotTcpSettings.bind(IotService), 'tcpConfig');
 
     const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
     const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-
-    const firmwareVersions = [
-        { value: '1.0.0', label: '1.0.0' },
-        { value: '1.0.1', label: '1.0.1' },
-        { value: '1.0.2', label: '1.0.2' },
-        { value: '2.0.0', label: '2.0.0' },
-    ];
 
     return (
         <Modal
@@ -195,12 +281,12 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             destroyOnClose
             maskClosable={false}
             style={{ top: 10 }}
-            bodyStyle={{ maxHeight: 'calc(100vh - 100px)', padding: '10px 24px' }}
+            bodyStyle={{ maxHeight: 'calc(100vh - 70px)', padding: '10px 24px', overflowY: "auto" }}
         >
-            <Row gutter={20}>
+            <Row gutter={10}>
                 <Col span={12}>
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                        <Divider orientation="left">Thông tin cơ bản</Divider>
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Thông tin cơ bản</Divider>
                         <Form form={basicInfoForm} layout="vertical">
                             <Row gutter={16} align="bottom">
                                 <Col span={8}>
@@ -233,363 +319,432 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                        <Divider orientation="left">Cài đặt Ethernet</Divider>
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt MQTT</Divider>
+                        <Form form={mqttForm} layout="vertical">
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'server']}
+                                        label="Server"
+                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ Server MQTT!' }]}
+                                    >
+                                        <Input placeholder="192.168.1.67" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'port']}
+                                        label="Port"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Port MQTT!' }, { type: 'number', min: 1, max: 65535, message: 'Cổng không hợp lệ!' }]}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="1883" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'user']}
+                                        label="Tên người dùng"
+                                    >
+                                        <Input placeholder="..." />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16} align="bottom">
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'pw']}
+                                        label="Mật khẩu"
+                                    >
+                                        <Input.Password placeholder="***" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'subTopic']}
+                                        label="Subscribe Topic"
+                                    >
+                                        <Input placeholder="device/response/" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'pubTopic']}
+                                        label="Publish Topic"
+                                    >
+                                        <Input placeholder="device_send/" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16} align="bottom">
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'qos']}
+                                        label="QoS"
+                                        rules={[{ type: 'number', min: 0, max: 2, message: 'QoS không hợp lệ (0-2)!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="1" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['mqttConfig', 'keepAlive']}
+                                        label="Keep Alive (giây)"
+                                        rules={[{ type: 'number', min: 0, message: 'Keep Alive không hợp lệ!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="60" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveMqtt}>
+                                            Lưu
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </div>
+
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt RS232</Divider>
+                        <Form form={rs232Form} layout="vertical">
+                            <Row gutter={16}  align="bottom">
+                                <Col span={10}>
+                                    <Form.Item
+                                        name={['rs232Config', 'baudrate']}
+                                        label="Baudrate"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS232!' }]}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="9600" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={10}>
+                                    <Form.Item
+                                        name={['rs232Config', 'serialConfig']}
+                                        label="Cấu hình Serial"
+                                        rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
+                                    >
+                                        <Input placeholder="8N1" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={4}>
+                                    <Form.Item>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs232}>
+                                            Lưu
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </div>
+
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt TCP</Divider>
+                        <Form form={tcpForm} layout="vertical">
+                            <Form.List name={['tcpConfig', 'ips']}>
+                                {(fields, { add, remove }) => (
+                                    <>
+                                        {fields.map(({ key, name, ...restField }) => (
+                                            <div key={key} style={{ background: '#e6e6e6', padding: '10px', borderRadius: '5px', marginBottom: '10px' }}>
+                                                <Space style={{ display: 'flex', marginBottom: 8 }} align="baseline" size="middle">
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'ip']}
+                                                        rules={[
+                                                            { required: true, message: 'Vui lòng nhập IP!' },
+                                                            { pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }
+                                                        ]}
+                                                        style={{ flex: 1, marginBottom: 0 }}
+                                                    >
+                                                        <Input placeholder="IP đích (ví dụ: 192.168.1.100)" />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'address']}
+                                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' },
+                                                            ({ }) => ({
+                                                                validator(_, value) {
+                                                                    if (value && value.split(',').some((s: string) => isNaN(Number(s.trim())) || s.trim() === '')) {
+                                                                        return Promise.reject(new Error('Mỗi địa chỉ phải là một số và được ngăn cách bởi dấu phẩy!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                },
+                                                            }),
+                                                        ]}
+                                                        style={{ flex: 2, marginBottom: 0 }}
+                                                    >
+                                                        <Input placeholder="Địa chỉ (ví dụ: 8080,40001)" />
+                                                    </Form.Item>
+                                                    <MinusCircleOutlined onClick={() => remove(name)} />
+                                                </Space>
+                                            </div>
+                                        ))}
+                                        <Form.Item>
+                                            <Button type="dashed" onClick={() => add({ ip: '', address: '' })} block icon={<PlusOutlined />}>
+                                                Thêm cấu hình IP & Địa chỉ TCP
+                                            </Button>
+                                        </Form.Item>
+                                    </>
+                                )}
+                            </Form.List>
+
+                            <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveTcp}>
+                                    Lưu
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </div>
+                </Col>
+
+                <Col span={12}>
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt WiFi</Divider>
+                        <Form form={wifiForm} layout="vertical">
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'ssid']}
+                                        label="SSID"
+                                        rules={[{ required: true, message: 'Vui lòng nhập SSID!' }]}
+                                    >
+                                        <Input placeholder="STI_VietNam_No8" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'pw']}
+                                        label="Mật khẩu WiFi"
+                                    >
+                                        <Input.Password placeholder="66668888" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'ip']}
+                                        label="IP"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
+                                    >
+                                        <Input placeholder="192.168.1.123" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16} align="bottom">
+                                <Col span={7}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'gateway']}
+                                        label="Gateway"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <Input placeholder="192.168.1.1" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={7}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'subnet']}
+                                        label="Subnet"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <Input placeholder="255.255.255.0" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={6}>
+                                    <Form.Item
+                                        name={['wifiConfig', 'dns']}
+                                        label="DNS"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <Input placeholder="8.8.8.8" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={4}>
+                                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveWifi}>
+                                            Lưu
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </div>
+
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt Ethernet</Divider>
                         <Form form={ethernetForm} layout="vertical">
                             <Row gutter={16}>
                                 <Col span={8}>
                                     <Form.Item
-                                        name="ethernet_ip"
+                                        name={['ethernetConfig', 'ip']}
                                         label="IP"
                                         rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
                                     >
-                                    <Input placeholder="192.168.0.10" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="ethernet_gateway"
-                            label="Gateway"
-                            rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
-                        >
-                            <Input placeholder="192.168.1.1" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="ethernet_subnet"
-                            label="Subnet"
-                            rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
-                        >
-                            <Input placeholder="255.255.255.0" />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16} align="bottom">
-                    <Col span={8}>
-                        <Form.Item
-                            name="ethernet_mac"
-                            label="Địa chỉ MAC"
-                            rules={[
-                                { required: true, message: 'Vui lòng nhập địa chỉ MAC!' },
-                                { pattern: macRegex, message: 'Định dạng MAC không hợp lệ!' }
-                            ]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <Input placeholder="DE:AD:BE:EF:FE:ED" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="ethernet_dns"
-                            label="DNS"
-                            rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <Input placeholder="8.8.8.8" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                            <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveEthernet}>
-                                Lưu
-                            </Button>
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </Form>
-    </div>
+                                        <Input placeholder="192.168.1.235" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['ethernetConfig', 'gateway']}
+                                        label="Gateway"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
+                                    >
+                                        <Input placeholder="192.168.1.1" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['ethernetConfig', 'subnet']}
+                                        label="Subnet"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
+                                    >
+                                        <Input placeholder="255.255.255.0" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16} align="bottom">
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['ethernetConfig', 'mac']}
+                                        label="Địa chỉ MAC"
+                                        rules={[
+                                            { required: true, message: 'Vui lòng nhập địa chỉ MAC!' },
+                                            { pattern: macRegex, message: 'Định dạng MAC không hợp lệ!' }
+                                        ]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <Input placeholder="DE:AD:BE:EF:FE:ED" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name={['ethernetConfig', 'dns']}
+                                        label="DNS"
+                                        rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <Input placeholder="8.8.8.8" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveEthernet}>
+                                            Lưu
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </div>
 
-        <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-            <Divider orientation="left">Cài đặt RS485</Divider>
-            <Form form={rs485Form} layout="vertical">
-                <Row gutter={16}>
-                    <Col span={8}>
-                        <Form.Item
-                            name="rs485_id"
-                            label="ID"
-                        >
-                            <InputNumber style={{ width: '100%' }} placeholder="1" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={16}>
-                        <Form.Item
-                            name="rs485_addresses"
-                            label="Địa chỉ (cách nhau bởi dấu phẩy)"
-                        >
-                            <Input.TextArea rows={2} placeholder="40001,40002,40003,40004,40005" />
-                        </Form.Item>
-                    </Col>
-                </Row>
-                <Row gutter={16} align="bottom">
-                    <Col span={8}>
-                        <Form.Item
-                            name="rs485_baudrate"
-                            label="Baudrate"
-                            rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS485!' }]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <InputNumber style={{ width: '100%' }} placeholder="9600" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item
-                            name="rs485_serial_config"
-                            label="Cấu hình Serial"
-                            rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <Input placeholder="8N1" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                            <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs485}>
-                                Lưu
-                            </Button>
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </Form>
-        </div>
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt CAN</Divider>
+                        <Form form={canForm} layout="vertical">
+                            <Row gutter={16} align="bottom">
+                                <Col span={16}>
+                                    <Form.Item
+                                        name={['canConfig', 'baudrate']}
+                                        label="Baudrate"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Baudrate CAN!' }]}
+                                        style={{ marginBottom: 0 }}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="51000" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveCan}>
+                                            Lưu
+                                        </Button>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Form>
+                    </div>
 
-        <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-            <Divider orientation="left">Cài đặt RS232</Divider>
-            <Form form={rs232Form} layout="vertical">
-                <Row gutter={16} align="bottom">
-                    <Col span={10}>
-                        <Form.Item
-                            name="rs232_baudrate"
-                            label="Baudrate"
-                            rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS232!' }]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <InputNumber style={{ width: '100%' }} placeholder="9600" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={10}>
-                        <Form.Item
-                            name="rs232_serial_config"
-                            label="Cấu hình Serial"
-                            rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
-                            style={{ marginBottom: 0 }}
-                        >
-                            <Input placeholder="8N1" />
-                        </Form.Item>
-                    </Col>
-                    <Col span={4}>
-                        <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                            <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs232}>
-                                Lưu
-                            </Button>
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </Form>
-        </div>
-    </Col>
+                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt RS485</Divider>
+                        <Form form={rs485Form} layout="vertical">
+                            <Row gutter={20}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name={['rs485Config', 'baudrate']}
+                                        label="Baudrate"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS485!' }]}
+                                    >
+                                        <InputNumber style={{ width: '100%' }} placeholder="9600" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name={['rs485Config', 'serialConfig']}
+                                        label="Cấu hình Serial"
+                                        rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
+                                    >
+                                        <Input placeholder="8N1" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
 
-        <Col span={12}>
-            <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                <Divider orientation="left">Cài đặt WiFi</Divider>
-                <Form form={wifiForm} layout="vertical">
-                    <Row gutter={16}>
-                        <Col span={8}>
-                            <Form.Item
-                                name="wifi_ssid"
-                                label="SSID"
-                                rules={[{ required: true, message: 'Vui lòng nhập SSID!' }]}
-                            >
-                                <Input placeholder="SSID" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="wifi_password"
-                                label="Mật khẩu WiFi"
-                            >
-                                <Input.Password placeholder="Nhập mật khẩu" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="wifi_ip"
-                                label="IP"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
-                            >
-                                <Input placeholder="192.168.1.123" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Row gutter={16} align="bottom">
-                        <Col span={7}>
-                            <Form.Item
-                                name="wifi_gateway"
-                                label="Gateway"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="192.168.1.1" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={7}>
-                            <Form.Item
-                                name="wifi_subnet"
-                                label="Subnet"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="255.255.255.0" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                            <Form.Item
-                                name="wifi_dns"
-                                label="DNS"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="8.8.8.8" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={4}>
+                            <Divider orientation="left" style={{ marginTop: -10, marginBottom: 10 }}>Cấu hình ID & Địa chỉ RS485</Divider>
+                            <Form.List name={['rs485Config', 'idAddresses']}>
+                                {(fields, { add, remove }) => (
+                                    <>
+                                        {fields.map(({ key, name, ...restField }) => (
+                                            <div key={key} style={{ background: '#e6e6e6', padding: '10px', borderRadius: '5px', marginBottom: '10px' }}>
+                                                <Space style={{ display: 'flex', marginBottom: 8 }} align="baseline" size="middle">
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'id']}
+                                                        rules={[{ required: true, message: 'Vui lòng nhập ID!' }, { type: 'number', message: 'ID phải là số!' }]}
+                                                        style={{ flex: 1, marginBottom: 0 }}
+                                                    >
+                                                        <InputNumber style={{ width: '100%' }} placeholder="ID (ví dụ: 1)" />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'address']}
+                                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' },
+                                                            ({ }) => ({
+                                                                validator(_, value) {
+                                                                    if (value && value.split(',').some((s: string) => isNaN(Number(s.trim())) || s.trim() === '')) {
+                                                                        return Promise.reject(new Error('Mỗi địa chỉ phải là một số và được ngăn cách bởi dấu phẩy!'));
+                                                                    }
+                                                                    return Promise.resolve();
+                                                                },
+                                                            }),
+                                                        ]}
+                                                        style={{ flex: 2, marginBottom: 0 }}
+                                                    >
+                                                        <Input placeholder="Địa chỉ (ví dụ: 40001,40002)" />
+                                                    </Form.Item>
+                                                    <MinusCircleOutlined onClick={() => remove(name)} />
+                                                </Space>
+                                            </div>
+                                        ))}
+                                        <Form.Item>
+                                            <Button type="dashed" onClick={() => add({ id: null, address: '' })} block icon={<PlusOutlined />}>
+                                                Thêm ID & Địa chỉ RS485
+                                            </Button>
+                                        </Form.Item>
+                                    </>
+                                )}
+                            </Form.List>
+
                             <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveWifi}>
+                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs485}>
                                     Lưu
                                 </Button>
                             </Form.Item>
-                        </Col>
-                    </Row>
-                </Form>
-            </div>
-
-            <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                <Divider orientation="left">Cài đặt MQTT</Divider>
-                <Form form={mqttForm} layout="vertical">
-                    <Row gutter={16}>
-                        <Col span={8}>
-                            <Form.Item
-                                name="mqtt_mac"
-                                label="Địa chỉ MAC"
-                                rules={[
-                                    { required: true, message: 'Vui lòng nhập địa chỉ MAC!' },
-                                    { pattern: macRegex, message: 'Định dạng MAC không hợp lệ!' }
-                                ]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="DE:AD:BE:EF:FE:ED" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="mqtt_ip"
-                                label="IP"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
-                            >
-                                <Input placeholder="192.168.1.235" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="mqtt_gateway"
-                                label="Gateway"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
-                            >
-                                <Input placeholder="192.168.1.1" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Row gutter={16} align="bottom">
-                        <Col span={8}>
-                            <Form.Item
-                                name="mqtt_subnet"
-                                label="Subnet"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="255.255.255.0" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name="mqtt_dns"
-                                label="DNS"
-                                rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Input placeholder="8.8.8.8" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveMqtt}>
-                                    Lưu
-                                </Button>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form>
-            </div>
-
-            <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
-                <Divider orientation="left">Cài đặt CAN</Divider>
-                <Form form={canForm} layout="vertical">
-                    <Row gutter={16} align="bottom">
-                        <Col span={16}>
-                            <Form.Item
-                                name="can_baudrate"
-                                label="Baudrate"
-                                rules={[{ required: true, message: 'Vui lòng nhập Baudrate CAN!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <InputNumber style={{ width: '100%' }} placeholder="5100" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveCan}>
-                                    Lưu
-                                </Button>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form>
-            </div>
-
-            <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '0px' }}>
-                <Divider orientation="left">Phiên bản Firmware</Divider>
-                <Form form={versionForm} layout="vertical">
-                    <Row gutter={16} align="bottom">
-                        <Col span={16}>
-                            <Form.Item
-                                name="version" // Giữ nguyên 'version' nếu FE gửi string version
-                                // Hoặc 'firmware_version_id' nếu FE gửi ID
-                                label="Phiên bản Firmware"
-                                rules={[{ required: true, message: 'Vui lòng chọn phiên bản firmware!' }]}
-                                style={{ marginBottom: 0 }}
-                            >
-                                <Select placeholder="Chọn phiên bản">
-                                    {firmwareVersions.map(option => (
-                                        <Option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveVersion}>
-                                    Lưu
-                                </Button>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form>
-            </div>
-        </Col>
-    </Row>
-    </Modal>
+                        </Form>
+                    </div>
+                </Col>
+            </Row>
+        </Modal>
     );
 };
 

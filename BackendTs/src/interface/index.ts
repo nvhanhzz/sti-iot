@@ -1,63 +1,87 @@
+interface WifiConfig {
+    ssid?: string;
+    pw?: string;
+    ip?: string;
+    gateway?: string;
+    subnet?: string;
+    dns?: string;
+}
+
+interface EthernetConfig {
+    mac?: string;
+    ip?: string;
+    gateway?: string;
+    subnet?: string;
+    dns?: string;
+}
+
+interface MqttConfig {
+    server?: string;
+    port?: number;
+    user?: string;
+    pw?: string;
+    subTopic?: string;
+    pubTopic?: string;
+    qos?: number;
+    keepAlive?: number;
+}
+
+interface Rs485IdAddress {
+    id: number;
+    address: number[]; // Address sẽ là mảng các số khi được parse từ JSON
+}
+
+interface Rs485Config {
+    baudrate?: number;
+    serialConfig?: string;
+    idAddresses?: Rs485IdAddress[];
+}
+
+interface TcpConnection {
+    ip: string;
+    address: number[]; // Address sẽ là mảng các số khi được parse từ JSON
+}
+
+interface TcpConfig {
+    ips?: TcpConnection[];
+}
+
+interface Rs232Config {
+    baudrate?: number;
+    serialConfig?: string;
+}
+
+interface CanConfig {
+    baudrate?: number;
+}
+
 export interface MasterIotInterface {
     id?: number;
     name?: string;
-    device_id?: string;
+    deviceId?: string; // Đã đổi device_id thành camelCase
     mac?: string;
-    ip?: string; // New: General IP if any, otherwise specific ones like wifi_ip, ethernet_ip
+    ip?: string;
     type?: number;
     note?: string;
-    user_created?: number;
-    time_created?: string; // Assuming string for Date, or Date if you prefer
-    user_updated?: number;
-    time_updated?: string; // Assuming string for Date, or Date if you prefer
+    userCreated?: number; // Đã đổi user_created thành camelCase
+    timeCreated?: string; // Đã đổi time_created thành camelCase, kiểu string cho Date hoặc Date
+    userUpdated?: number; // Đã đổi user_updated thành camelCase
+    timeUpdated?: string; // Đã đổi time_updated thành camelCase, kiểu string cho Date hoặc Date
     isdelete?: boolean;
-    tcp_status?: 'requestOpen' | 'opened' | 'requestClose' | 'closed';
-    udp_status?: 'requestOpen' | 'opened' | 'requestClose' | 'closed';
+    tcpStatus?: 'requestOpen' | 'opened' | 'requestClose' | 'closed'; // Đã đổi tcp_status thành camelCase
+    udpStatus?: 'requestOpen' | 'opened' | 'requestClose' | 'closed'; // Đã đổi udp_status thành camelCase
 
-    // Wifi
-    wifi_ssid?: string;
-    wifi_password?: string;
-    wifi_ip?: string;
-    wifi_gateway?: string;
-    wifi_subnet?: string;
-    wifi_dns?: string;
+    // Các trường JSON
+    wifiConfig?: WifiConfig;
+    ethernetConfig?: EthernetConfig;
+    mqttConfig?: MqttConfig;
+    rs485Config?: Rs485Config;
+    tcpConfig?: TcpConfig;
+    rs232Config?: Rs232Config;
 
-    // Ethernet
-    ethernet_ip?: string;
-    ethernet_gateway?: string;
-    ethernet_subnet?: string;
-    ethernet_mac?: string;
-    ethernet_dns?: string;
+    canConfig?: CanConfig; // Đã đổi can_baudrate thành camelCase
 
-    // MQTT
-    mqtt_mac?: string;
-    mqtt_ip?: string;
-    mqtt_gateway?: string;
-    mqtt_subnet?: string;
-    mqtt_dns?: string;
-
-    // RS485
-    rs485_id?: number;
-    rs485_addresses?: string;
-    rs485_baudrate?: number;
-    rs485_serial_config?: string;
-
-    // CAN
-    can_baudrate?: number;
-
-    // RS232
-    rs232_baudrate?: number;
-    rs232_serial_config?: string;
-
-    // Firmware Version (updated to be a foreign key)
-    firmware_version_id?: number; // Trỏ đến id của bảng FirmwareVersion
-    // Nếu bạn muốn bao gồm cả thông tin FirmwareVersion khi include,
-    // có thể thêm một trường lồng vào (nếu bạn sử dụng kiểu dữ liệu lồng)
-    // firmware?: {
-    //     id: number;
-    //     versionNumber: string;
-    //     // ... các trường khác của FirmwareVersion nếu cần
-    // };
+    firmwareVersionId?: number; // Đã đổi firmware_version_id thành camelCase
 }
 
 export interface IotStatusInterface {

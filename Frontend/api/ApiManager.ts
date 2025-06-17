@@ -6,6 +6,7 @@ const API_URLMASTERDATA = `${window.location.protocol}//${API_IP ? API_IP : wind
 
 const LOGIN_PORT = import.meta.env.VITE_PORT_LOGIN;
 const LOGIN_URL = `${window.location.protocol}//${window.location.hostname}:${LOGIN_PORT}`;
+
 class ApiManager {
 
     //API Đăng nhập
@@ -72,7 +73,6 @@ class ApiManager {
         return `${API_URLMASTERDATA}/api/iots/device-send-data`;
     }
 
-    // --- NEW API ENDPOINTS FOR SECTION-SPECIFIC IoT SETTINGS ---
     ApiUpdateIotBasicInfo(id: string) {
         return `${API_URLMASTERDATA}/api/iots/${id}/basic-info`;
     }
@@ -94,11 +94,12 @@ class ApiManager {
     ApiUpdateIotCanSettings(id: string) {
         return `${API_URLMASTERDATA}/api/iots/${id}/can-settings`;
     }
+    ApiUpdateIotTcpSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/tcp-settings`;
+    }
     ApiUpdateIotFirmwareVersion(id: string) {
         return `${API_URLMASTERDATA}/api/iots/${id}/firmware-version`;
     }
-    // --- END NEW API ENDPOINTS ---
-
 
     // Api Cài đặt payload
     // ApiGetDataPayloadType() {

@@ -3,11 +3,46 @@ import { httpRequest } from '../services/HttpRequestService'
 import { HttpResponse } from '../interface/HttpInterface';
 import { getAuthToken } from '../cookie/AuthCookie';
 
+// Định nghĩa Interface cho cấu trúc JSON của MQTT (lấy từ component)
+interface MqttConfig {
+    SERVER?: string;
+    PORT?: number;
+    USER?: string;
+    PW?: string;
+    SUBTOPIC?: string;
+    PUBTOPIC?: string;
+    QoS?: number;
+    keepAlive?: number;
+}
+
+// Định nghĩa Interface cho cấu trúc JSON của RS485 (lấy từ component)
+interface Rs485IdAddress {
+    ID: string;
+    Address: string;
+}
+
+interface Rs485Config {
+    baudrate?: number;
+    serialConfig?: string;
+    idAddresses?: Rs485IdAddress[]; // Mảng các cặp ID/Address
+}
+
+// Định nghĩa Interface cho cấu trúc JSON của TCP (lấy từ component)
+interface TcpConnection {
+    ip: string;
+    address: string;
+}
+
+interface TcpConfig {
+    ips?: TcpConnection[]; // Mảng các đối tượng TcpConnection
+}
+
 class IotService {
     // Helper để lấy token
     private getAuthHeader() {
         const token = getAuthToken();
-        return token ? `Bearer ${token.slice(1, -1)}` : ''; // Remove leading/trailing quotes
+        // Loại bỏ dấu nháy kép ở đầu và cuối nếu có (do cách lưu cookie)
+        return token ? `Bearer ${token.replace(/^"|"$/g, '')}` : '';
     }
 
     async GetDataIots(params: any) {
@@ -20,7 +55,7 @@ class IotService {
             });
             return response;
         } catch (error) {
-            console.error("Lỗi Phần Mềm:", error);
+            console.error("Lỗi Phần Mềm khi lấy dữ liệu IoT:", error); // Rõ ràng hơn
             throw error;
         }
     }
@@ -37,7 +72,7 @@ class IotService {
             });
             return response;
         } catch (error) {
-            console.error("Lỗi Phần Mềm:", error);
+            console.error("Lỗi Phần Mềm khi cập nhật dữ liệu IoT tổng quát:", error); // Rõ ràng hơn
             throw error;
         }
     }
@@ -52,7 +87,7 @@ class IotService {
             });
             return response;
         } catch (error) {
-            console.error("Lỗi Phần Mềm:", error);
+            console.error("Lỗi Phần Mềm khi lấy cột IoT:", error); // Rõ ràng hơn
             throw error;
         }
     }
@@ -67,7 +102,7 @@ class IotService {
             });
             return response;
         } catch (error) {
-            console.error("Lỗi Phần Mềm:", error);
+            console.error("Lỗi Phần Mềm khi khóa IoT:", error); // Rõ ràng hơn
             throw error;
         }
     }
@@ -82,12 +117,10 @@ class IotService {
             });
             return response;
         } catch (error) {
-            console.error("Lỗi Phần Mềm:", error);
+            console.error("Lỗi Phần Mềm khi gửi dữ liệu thiết bị:", error); // Rõ ràng hơn
             throw error;
         }
     }
-
-    // --- NEW API CALLS FOR SECTION-SPECIFIC UPDATES ---
 
     async updateIotBasicInfo(id: string, data: { name?: string; mac?: string }) {
         try {
@@ -106,7 +139,7 @@ class IotService {
 
     async updateIotWifiSettings(id: string, data: { SSID?: string; PW?: string; IP?: string; GATEWAY?: string; SUBNET?: string; DNS?: string; }) {
         try {
-            debugger;
+            // debugger; // Dòng debugger này có thể xóa sau khi debug xong
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotWifiSettings(id), {
                 headers: {
                     Authorization: this.getAuthHeader(),
@@ -135,7 +168,8 @@ class IotService {
         }
     }
 
-    async updateIotMqttSettings(id: string, data: { MAC?: string; IP?: string; GATEWAY?: string; SUBNET?: string; DNS?: string; }) {
+    // Đã cập nhật kiểu dữ liệu cho 'data' để khớp với MqttConfig
+    async updateIotMqttSettings(id: string, data: MqttConfig) {
         try {
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotMqttSettings(id), {
                 headers: {
@@ -150,7 +184,8 @@ class IotService {
         }
     }
 
-    async updateIotRs485Settings(id: string, data: { rs485Addresses?: { ID?: number; Address?: string; }; rs485Config?: { baudrate?: number; serialConfig?: string; }; }) {
+    // Đã cập nhật kiểu dữ liệu cho 'data' để khớp với Rs485Config
+    async updateIotRs485Settings(id: string, data: Rs485Config) {
         try {
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotRs485Settings(id), {
                 headers: {
@@ -180,7 +215,7 @@ class IotService {
         }
     }
 
-    async updateIotCanSettings(id: string, data: { baudrate?: number; }) {
+    async updateIotCanSettings(id: string, data: { can_baudrate?: number; }) { // Đổi tên 'baudrate' thành 'can_baudrate' cho rõ ràng hơn nếu API nhận như vậy
         try {
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotCanSettings(id), {
                 headers: {
@@ -191,6 +226,22 @@ class IotService {
             return response;
         } catch (error) {
             console.error("Lỗi cập nhật Cài đặt CAN:", error);
+            throw error;
+        }
+    }
+
+    // NEW: Phương thức cập nhật cài đặt TCP
+    async updateIotTcpSettings(id: string, data: TcpConfig) {
+        try {
+            const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotTcpSettings(id), {
+                headers: {
+                    Authorization: this.getAuthHeader(),
+                },
+                data: data,
+            });
+            return response;
+        } catch (error) {
+            console.error("Lỗi cập nhật Cài đặt TCP:", error);
             throw error;
         }
     }
