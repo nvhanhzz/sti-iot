@@ -59,8 +59,6 @@ export function initializeIotSettings(sequelizeInstance: any) {
                 allowNull: true,
             },
 
-            can_baudrate: { type: INTEGER, allowNull: true, comment: 'Tốc độ baud của CAN' },
-
             canConfig: {
                 type: JSON,
                 allowNull: true,

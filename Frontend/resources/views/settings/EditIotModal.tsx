@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import {
     Button,
@@ -81,7 +81,7 @@ interface ExtendedIotInterface extends IotCMDInterface {
     rs232Config?: Rs232Config;
     tcpConfig?: TcpConfig;
 
-    canBaudrate?: number;
+    canConfig?: { baudrate?: number }; // Cập nhật để phản ánh chỉ dùng canConfig (JSON)
 }
 
 interface EditIotModalProps {
@@ -101,8 +101,13 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
     const [canForm] = Form.useForm();
     const [tcpForm] = Form.useForm();
 
+    // Dùng useRef để kiểm soát việc setFieldsValue chỉ khi record thay đổi ID hoặc isVisible thay đổi
+    const prevRecordIdRef = useRef<string | undefined>(undefined);
+
     useEffect(() => {
-        if (record) {
+        // Chỉ setFieldsValue khi record thay đổi (hoặc khi record.id thay đổi),
+        // và khi modal hiển thị.
+        if (isVisible && record && record.id !== prevRecordIdRef.current) {
             basicInfoForm.setFieldsValue(record);
 
             wifiForm.setFieldsValue({
@@ -138,10 +143,9 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 }
             });
 
+            // Thay đổi cách khởi tạo canForm để phù hợp với canConfig (JSON)
             canForm.setFieldsValue({
-                canConfig: record.canBaudrate !== null && typeof record.canBaudrate !== 'undefined'
-                    ? { baudrate: record.canBaudrate }
-                    : { baudrate: null }
+                canConfig: record.canConfig || { baudrate: null }
             });
 
             const tcpInitialValues = record.tcpConfig ? {
@@ -153,7 +157,12 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             } : { ips: [] };
             tcpForm.setFieldsValue({ tcpConfig: tcpInitialValues });
 
-        } else {
+            // Cập nhật ID của record trước đó
+            // @ts-ignore - record.id should be string based on MasterIotInterface (device_id: string)
+            prevRecordIdRef.current = record.id;
+
+        } else if (!isVisible) {
+            // Reset các form khi modal bị đóng (isVisible = false)
             basicInfoForm.resetFields();
             wifiForm.resetFields();
             ethernetForm.resetFields();
@@ -162,8 +171,9 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             rs232Form.resetFields();
             canForm.resetFields();
             tcpForm.resetFields();
+            prevRecordIdRef.current = undefined; // Đặt lại để lần sau mở lại modal với cùng record.id sẽ set lại giá trị
         }
-    }, [record, basicInfoForm, wifiForm, ethernetForm, mqttForm, rs485Form, rs232Form, canForm, tcpForm]);
+    }, [isVisible, record, basicInfoForm, wifiForm, ethernetForm, mqttForm, rs485Form, rs232Form, canForm, tcpForm]);
 
     const handleSaveSection = async (
         formInstance: any,
@@ -179,14 +189,32 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
         const loadingMessage = message.loading(`Đang lưu ${sectionName}...`, 0);
         try {
             const values = await formInstance.validateFields();
-            let payloadToSend = { ...values };
+            let payloadToSend: any = { ...values };
 
             if (fieldName) {
-                payloadToSend = { ...values[fieldName] };
+                // Lấy giá trị của fieldName từ values (ví dụ: values.wifiConfig)
+                payloadToSend = values[fieldName];
+
+                // --- Bắt đầu phần lọc giá trị null/undefined/empty array ---
+                const filteredConfigData: { [key: string]: any } = {};
+                for (const key in payloadToSend) {
+                    if (payloadToSend.hasOwnProperty(key)) {
+                        const value = payloadToSend[key];
+                        // Lọc null, undefined và mảng rỗng
+                        if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0)) {
+                            filteredConfigData[key] = value;
+                        }
+                    }
+                }
+                payloadToSend = filteredConfigData; // Gán lại payload đã lọc
+                // --- Kết thúc phần lọc giá trị null/undefined/empty array ---
 
                 if (fieldName === 'wifiConfig') {
+                    // Không cần xử lý đặc biệt cho wifiConfig nếu không có Number
                 } else if (fieldName === 'ethernetConfig') {
+                    // Không cần xử lý đặc biệt cho ethernetConfig
                 } else if (fieldName === 'mqttConfig') {
+                    // Chuyển đổi sang kiểu Number nếu không null/undefined
                     if (payloadToSend.port !== null && payloadToSend.port !== undefined) {
                         payloadToSend.port = Number(payloadToSend.port);
                     }
@@ -203,6 +231,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     if (payloadToSend.idAddresses) {
                         payloadToSend.idAddresses = payloadToSend.idAddresses.map((item: any) => ({
                             id: Number(item.id),
+                            // Chuyển đổi chuỗi "1,2,3" thành mảng số [1,2,3]
                             address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
                         }));
                     }
@@ -211,6 +240,10 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         payloadToSend.baudrate = Number(payloadToSend.baudrate);
                     }
                 } else if (fieldName === 'canConfig') {
+                    // canConfig bây giờ là một trường JSON, payloadToSend đã là object chứa baudrate (hoặc các thuộc tính khác của canConfig)
+                    // Không cần gán lại payloadToSend = { canBaudrate: ... }
+                    // PayloadToSend đã là { baudrate: ... } hoặc { baudrate: ..., otherProp: ...}
+                    // và sẽ được bọc đúng cách trong apiPayload dưới dạng { canConfig: { baudrate: ... } }
                     if (payloadToSend.baudrate !== null && payloadToSend.baudrate !== undefined) {
                         payloadToSend.baudrate = Number(payloadToSend.baudrate);
                     }
@@ -218,19 +251,44 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     if (payloadToSend.ips) {
                         payloadToSend.ips = payloadToSend.ips.map((item: any) => ({
                             ...item,
+                            // Chuyển đổi chuỗi "8080,40001" thành mảng số [8080,40001]
                             address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
                         }));
                     }
                 }
+            } else { // Trường hợp basicInfo (không có fieldName)
+                // Lọc null/undefined/empty array cho basicInfo
+                const filteredBasicInfo: { [key: string]: any } = {};
+                for (const key in payloadToSend) {
+                    if (payloadToSend.hasOwnProperty(key)) {
+                        const value = payloadToSend[key];
+                        if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0)) {
+                            filteredBasicInfo[key] = value;
+                        }
+                    }
+                }
+                payloadToSend = filteredBasicInfo;
             }
 
+            // =========================================================================
+            // ĐÂY LÀ ĐOẠN CODE ĐƯỢC THAY ĐỔI ĐỂ SỬA LỖI KEY RỖNG
+            // Chuẩn bị payload cuối cùng cho API
+            let apiPayload: any;
+            if (fieldName) { // Nếu có fieldName (wifiConfig, mqttConfig, canConfig, ...)
+                apiPayload = { [fieldName]: payloadToSend };
+            } else { // Đối với basic info (fieldName là undefined/null)
+                apiPayload = payloadToSend; // Gửi thẳng object basic info, không bọc trong khóa rỗng
+            }
+            // =========================================================================
+
             // @ts-ignore
-            const response: any = await serviceCall(record.id, { [fieldName]: payloadToSend });
+            const response: any = await serviceCall(record.id, apiPayload); // Gọi serviceCall với payload đã chuẩn bị
             const resData = response?.data;
 
             if (resData?.data) {
                 const resDataNew = resData.data;
 
+                // Chuẩn hóa dữ liệu nhận được từ server để hiển thị lên form
                 if (fieldName === 'rs485Config' && resDataNew.rs485Config?.idAddresses) {
                     resDataNew.rs485Config.idAddresses = resDataNew.rs485Config.idAddresses.map((item: any) => ({
                         ...item,
@@ -243,9 +301,28 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         address: Array.isArray(item.address) ? item.address.join(',') : item.address
                     }));
                 }
+                // Nếu backend trả về canConfig (JSON) thì setFieldsValue trực tiếp
+                // Hoặc nếu backend vẫn trả về canBaudrate và bạn muốn map lại thành canConfig cho form
+                if (fieldName === 'canConfig' && resDataNew.canConfig !== undefined) {
+                    // Giả sử resDataNew.canConfig đã là { baudrate: X }
+                    // Không cần chuyển đổi thêm, vì form mong đợi canConfig: { baudrate: X }
+                    resDataNew.canConfig = resDataNew.canConfig;
+                }
+
 
                 message.success(`${sectionName} cập nhật thành công!`);
+
+                // Cập nhật lại CHỈ form hiện tại với dữ liệu mới từ server
+                if (fieldName) {
+                    formInstance.setFieldsValue({ [fieldName]: resDataNew[fieldName] });
+                } else {
+                    formInstance.setFieldsValue(resDataNew); // Cho basic info
+                }
+
+                // Gọi onSaveSuccess để component cha có thể cập nhật record tổng thể
+                // Đảm bảo dữ liệu ở component cha luôn mới nhất.
                 onSaveSuccess({ ...record, ...resDataNew });
+
             } else {
                 message.error(resData?.message || `Có lỗi xảy ra khi cập nhật ${sectionName}!`);
             }
@@ -647,7 +724,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                             <Row gutter={16} align="bottom">
                                 <Col span={16}>
                                     <Form.Item
-                                        name={['canConfig', 'baudrate']}
+                                        name={['canConfig', 'baudrate']} // Tên này phải trùng với cách bạn setFieldsValue cho canForm
                                         label="Baudrate"
                                         rules={[{ required: true, message: 'Vui lòng nhập Baudrate CAN!' }]}
                                         style={{ marginBottom: 0 }}

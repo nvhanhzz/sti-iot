@@ -761,7 +761,7 @@ const processAndBuildPayload = (value: any, expectedTypes: readonly string[], fi
 
             // Bước 2: Nếu khớp và chuyển đổi thành công, xây dựng buffer với giá trị đã được validate.
             const builtBuffer = buildPayloadSegment(validatedValue, currentPayloadType);
-             // Loại này không còn là "suy luận" mà là "khớp đầu tiên"
+            // Loại này không còn là "suy luận" mà là "khớp đầu tiên"
             return {
                 buffer: builtBuffer,
                 hex: builtBuffer.toString('hex').toUpperCase(),
