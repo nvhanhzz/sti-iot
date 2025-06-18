@@ -9,6 +9,12 @@ import 'antd/dist/reset.css'; // For Ant Design v5. For v4: 'antd/dist/antd.css'
 import ClearableInput from './ClearableInput'; // Keep this for text inputs
 import "./Monitor.css";
 
+// Import React Icons
+import { FaFilter, FaTimes, FaColumns, FaPlay, FaPause, FaChevronRight } from 'react-icons/fa';
+// Import Tooltip from react-tooltip
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css'; // Import tooltip CSS
+
 // --- Interfaces ---
 
 interface MonitorDataItem {
@@ -120,6 +126,9 @@ const styles = {
         cursor: 'pointer',
         fontSize: '14px',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        display: 'flex', // Added for icon alignment
+        alignItems: 'center', // Added for icon alignment
+        gap: '5px', // Space between icon and text if any
     } as CSSProperties,
     primaryButton: {
         backgroundColor: '#007bff',
@@ -234,6 +243,9 @@ const styles = {
         minWidth: '36px',
         textAlign: 'left',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        display: 'flex', // For icon alignment
+        alignItems: 'center', // For icon alignment
+        justifyContent: 'center', // For icon centering
     } as CSSProperties,
     paginationButtonActive: {
         backgroundColor: '#007bff',
@@ -303,6 +315,13 @@ const styles = {
     columnPickerCheckbox: {
         marginRight: '8px',
     } as CSSProperties,
+    // New style for pause/play button container
+    controlButtonsContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginRight: 'auto', // Pushes other items to the right
+    } as CSSProperties,
 };
 
 const Monitor: React.FC = () => {
@@ -342,6 +361,9 @@ const Monitor: React.FC = () => {
     const [isColumnPickerOpen, setIsColumnPickerOpen] = useState<boolean>(false);
     const columnPickerRef = useRef<HTMLDivElement>(null);
 
+    // New state for pause/play
+    const [isPaused, setIsPaused] = useState<boolean>(false);
+
     // --- Helper Functions ---
     const titleCase = useCallback((str: string): string => {
         return str.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
@@ -380,6 +402,7 @@ const Monitor: React.FC = () => {
     // --- Column Generation Logic ---
     const generateColumns = useCallback((currentData: MonitorDataItem[]) => {
         const fixedColumns: TableColumn[] = [
+            // Đảm bảo cột STT được định nghĩa ở đây
             { title: 'STT', dataIndex: 'stt', key: 'stt', hideable: false },
             { title: 'Tên thiết bị', dataIndex: 'deviceName', key: 'deviceName', sortable: false, hideable: true },
             { title: 'MAC', dataIndex: 'mac', key: 'mac', sortable: false, hideable: true },
@@ -437,11 +460,11 @@ const Monitor: React.FC = () => {
 
         setTableColumns(finalColumns);
 
-        // --- SỬA ĐỔI LOGIC ĐỂ GIỮ TRẠNG THÁI HIỂN THỊ CỘT ---
+        // --- SỬA ĐỔI LOGIC ĐỂ GIỮ TRẠẠNG THÁI HIỂN THỊ CỘT ---
         setSelectedColumnKeys(prevKeys => {
             if (prevKeys.size === 0) {
-                // Tải lần đầu: chọn tất cả các cột có thể ẩn (hideable) theo mặc định
-                return new Set(finalColumns.filter(c => c.hideable !== false).map(c => c.key));
+                // Tải lần đầu: chọn tất cả các cột có thể ẩn (hideable) theo mặc định, bao gồm STT
+                return new Set(finalColumns.filter(c => c.hideable !== false || c.key === 'stt').map(c => c.key));
             } else {
                 // Giữ trạng thái đã chọn trước đó và chỉ thêm các cột THỰC SỰ MỚI
                 const newSet = new Set<string>();
@@ -452,6 +475,9 @@ const Monitor: React.FC = () => {
                         newSet.add(key);
                     }
                 });
+
+                // Đảm bảo cột STT luôn được chọn
+                newSet.add('stt');
 
                 // Thêm các cột MỚI được phát hiện (chưa từng có trong allKeysRef.current trước đó)
                 // và chúng là hideable, vào trạng thái đã chọn (hiển thị)
@@ -564,6 +590,11 @@ const Monitor: React.FC = () => {
 
     // --- Socket.IO Event Handler ---
     const handleSocketEventMonitor = useCallback((eventData: MonitorDataItem) => {
+        if (isPaused) { // Check if paused
+            console.log("Dữ liệu socket bị tạm dừng, không thêm vào bảng.");
+            return;
+        }
+
         console.log("Dữ liệu nhận từ socket:", eventData);
 
         const { deviceId, cmd, startTime, endTime } = appliedFilters; // Use appliedFilters
@@ -603,6 +634,7 @@ const Monitor: React.FC = () => {
             return;
         }
 
+        // Only add new data from socket if on page 1 and sorted by timestamp desc
         if (pagination.currentPage === 1 && sorter.field === 'timestamp' && sorter.order === 'desc') {
             const rowKey = eventData._id || `${eventData.timestamp || Date.now()}-${eventData.deviceId || 'unknown'}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -613,13 +645,14 @@ const Monitor: React.FC = () => {
 
             setMonitorData(prevData => {
                 const newData = [dataWithKey, ...prevData];
+                // Slice to maintain page size for real-time additions on page 1
                 return newData.slice(0, pagination.pageSize);
             });
-            generateColumns([dataWithKey]);
+            generateColumns([dataWithKey]); // Re-generate columns in case new keys appear
         } else {
             console.log("Dữ liệu từ socket phù hợp bộ lọc nhưng không thêm vào vì không ở trang 1 hoặc sắp xếp khác.");
         }
-    }, [appliedFilters, pagination.currentPage, pagination.pageSize, sorter.field, sorter.order, generateColumns]);
+    }, [appliedFilters, pagination.currentPage, pagination.pageSize, sorter.field, sorter.order, generateColumns, isPaused]); // Add isPaused to dependencies
 
     // --- Effects ---
 
@@ -870,6 +903,8 @@ const Monitor: React.FC = () => {
                 }}
                 onClick={() => typeof p === 'number' && handlePaginationButtonClick(p)}
                 disabled={typeof p !== 'number' || loading}
+                data-tooltip-id="global-tooltip"
+                data-tooltip-content={`Trang ${p}`}
             >
                 {p}
             </button>
@@ -879,6 +914,9 @@ const Monitor: React.FC = () => {
     const handleColumnToggle = useCallback((columnKey: string, isChecked: boolean) => {
         setSelectedColumnKeys(prev => {
             const newSet = new Set(prev);
+            if (columnKey === 'stt') { // STT column should always be visible and cannot be toggled
+                return newSet;
+            }
             if (isChecked) {
                 newSet.add(columnKey);
             } else {
@@ -888,12 +926,20 @@ const Monitor: React.FC = () => {
         });
     }, []);
 
+    // New handler for pause/play
+    const togglePause = useCallback(() => {
+        setIsPaused(prev => !prev);
+    }, []);
+
+
     const totalRecords = pagination.totalRecords || 0;
     const startIndex = totalRecords > 0 ? (pagination.currentPage - 1) * pagination.pageSize + 1 : 0;
     const endIndex = Math.min(startIndex + pagination.pageSize - 1, totalRecords);
 
     return (
         <div style={styles.container}>
+            <h2>Giám sát dữ liệu</h2>
+
             {/* Filter Panel */}
             <div style={styles.filterPanel}>
                 <div style={styles.filterGroup}>
@@ -953,21 +999,37 @@ const Monitor: React.FC = () => {
                         style={{ ...styles.button, ...styles.primaryButton }}
                         onClick={handleApplyFilters}
                         disabled={loading}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content="Áp dụng các bộ lọc đã chọn"
                     >
-                        Áp dụng Bộ lọc
+                        <FaFilter /> Áp dụng Bộ lọc
                     </button>
                     <button
                         style={styles.button}
                         onClick={handleClearFilters}
                         disabled={loading}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content="Xóa tất cả bộ lọc"
                     >
-                        Xóa Bộ lọc
+                        <FaTimes /> Xóa Bộ lọc
                     </button>
                 </div>
             </div>
 
-            {/* Header Section (Entries per page, Column Picker) */}
+            {/* Header Section (Pause/Play, Entries per page, Column Picker) */}
             <div style={styles.headerSection}>
+                <div style={styles.controlButtonsContainer}>
+                    <button
+                        style={{ ...styles.button, ...(isPaused ? styles.primaryButton : {}) }}
+                        onClick={togglePause}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content={isPaused ? "Tiếp tục nhận dữ liệu" : "Tạm dừng nhận dữ liệu"}
+                    >
+                        {isPaused ? <FaPlay /> : <FaPause />}
+                        {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
+                    </button>
+                </div>
+
                 <div style={styles.entriesDropdown}>
                     <span>Hiển thị</span>
                     <select
@@ -990,6 +1052,8 @@ const Monitor: React.FC = () => {
                             });
                         }}
                         disabled={loading}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content="Số bản ghi hiển thị trên mỗi trang"
                     >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
@@ -1005,13 +1069,15 @@ const Monitor: React.FC = () => {
                         style={{ ...styles.button }}
                         onClick={() => setIsColumnPickerOpen(prev => !prev)}
                         disabled={loading}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content="Chọn các cột để hiển thị/ẩn"
                     >
-                        Chọn cột hiển thị
+                        <FaColumns /> Chọn cột hiển thị
                     </button>
                     {isColumnPickerOpen && (
                         <div style={styles.columnPickerDropdown}>
                             {tableColumns
-                                .filter(col => col.hideable !== false)
+                                .filter(col => col.hideable !== false) // Only show hideable columns in the picker
                                 .map(column => (
                                     <div
                                         key={`col-picker-${column.key}`}
@@ -1025,10 +1091,11 @@ const Monitor: React.FC = () => {
                                             style={styles.columnPickerCheckbox}
                                             checked={selectedColumnKeys.has(column.key)}
                                             onChange={(e) => handleColumnToggle(column.key, e.target.checked)}
-                                            disabled={loading}
+                                            disabled={loading || column.key === 'stt'} // Disable STT checkbox
                                         />
                                         <label htmlFor={`col-toggle-${column.key}`}>
                                             {column.title}
+                                            {column.key === 'stt' && " (luôn hiển thị)"} {/* Add note for STT */}
                                         </label>
                                     </div>
                                 ))}
@@ -1054,6 +1121,7 @@ const Monitor: React.FC = () => {
                                     key={column.key}
                                     style={{
                                         ...styles.th,
+                                        // STT column should always be centered if desired
                                         ...(column.key === 'stt' ? styles.thCentered : {}),
                                         ...(column.sortable ? { cursor: 'pointer' } : { cursor: 'default' }),
                                     }}
@@ -1095,25 +1163,30 @@ const Monitor: React.FC = () => {
                                             key={column.key}
                                             style={{
                                                 ...styles.td,
-                                                ...(column.key === 'stt' || column.key === 'value' ? styles.tdCentered : {}),
+                                                // Ensure STT column is centered
+                                                ...(column.key === 'stt' ? styles.tdCentered : {}),
                                             }}
                                         >
                                             {(() => {
                                                 if (column.key === 'stt') {
+                                                    // Calculate STT based on current page and page size
                                                     return (pagination.currentPage - 1) * pagination.pageSize + index + 1;
                                                 }
 
                                                 const displayValue = item[column.dataIndex as keyof MonitorDataItem];
 
                                                 if (column.key === 'timestamp' && typeof displayValue === 'number') {
+                                                    // Convert Unix timestamp (seconds) to readable date-time string
                                                     return moment(displayValue * 1000).format('DD-MM-YYYY HH:mm:ss');
                                                 }
                                                 if (typeof displayValue === 'boolean') {
                                                     return <span style={{ ...styles.tag, ...(displayValue ? styles.tagGreen : styles.tagRed) }}>{displayValue ? 'TRUE' : 'FALSE'}</span>;
                                                 }
+                                                // Handle null, undefined, or empty string values by displaying '-'
                                                 if (displayValue === null || typeof displayValue === 'undefined' || (typeof displayValue === 'string' && displayValue.trim() === '')) {
                                                     return '-';
                                                 }
+                                                // Default to string conversion for other data types
                                                 return String(displayValue);
                                             })()}
                                         </td>
@@ -1136,11 +1209,14 @@ const Monitor: React.FC = () => {
                         style={{ ...styles.paginationButton, ...(!pagination.hasNextPage || loading ? styles.paginationButtonDisabled : {}) }}
                         onClick={() => handlePaginationButtonClick('next')}
                         disabled={!pagination.hasNextPage || loading}
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content="Trang tiếp theo"
                     >
-                        Tiếp
+                        <FaChevronRight />
                     </button>
                 </div>
             </div>
+            <Tooltip id="global-tooltip" /> {/* Add the Tooltip component here */}
         </div>
     );
 }
