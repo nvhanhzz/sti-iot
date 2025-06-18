@@ -45,7 +45,7 @@ const NavLeftLayout: React.FC<ChildProps> = ({ collapsed, mode }) => {
             class: 'nav-item',
             target: false,
             icon: <BsDeviceHddFill size={20} />,
-            link: '/settings-iot'
+            link: '/devices'
         },
         {
             key: 'monitor',
@@ -88,7 +88,7 @@ const NavLeftLayout: React.FC<ChildProps> = ({ collapsed, mode }) => {
                     <div className="navbar-content scroll-div">
                         <ul className="nav pcoded-inner-navbar">
                             {menuitems.map((item) => {
-                                const isActive = location.pathname === item.link;
+                                const isActive = location.pathname.startsWith(item.link as string);
 
                                 // Kết hợp class hiện có và style inline
                                 const listItemInlineStyle = isActive ? activeLinkStyle : {};

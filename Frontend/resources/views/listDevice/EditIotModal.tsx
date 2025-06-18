@@ -12,9 +12,9 @@ import {
     InputNumber,
     Space
 } from 'antd';
-import IotService from '../../../services/IotService'; // Đảm bảo đường dẫn này đúng
-import { IotCMDInterface } from '../../../interface/SettingInterface'; // Đảm bảo đường dẫn này đúng
-import "./SettingIot.css";
+import IotService from '../../../services/IotService.ts'; // Đảm bảo đường dẫn này đúng
+import { IotCMDInterface } from '../../../interface/SettingInterface.ts'; // Đảm bảo đường dẫn này đúng
+import "./ListDevice.css";
 
 interface WifiConfig {
     ssid?: string;

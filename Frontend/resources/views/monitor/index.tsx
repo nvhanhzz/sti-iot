@@ -194,7 +194,7 @@ const styles = {
         transition: 'background-color 0.2s ease',
     } as CSSProperties,
     tableRowEven: {
-        backgroundColor: '#f6f6f6',
+        // backgroundColor: '#f6f6f6',
     } as CSSProperties,
     tableRowHover: {
         backgroundColor: '#f0f0f0',
