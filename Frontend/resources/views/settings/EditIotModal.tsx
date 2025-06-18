@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react'; // Import useState
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import {
     Button,
@@ -104,6 +104,17 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
     // Dùng useRef để kiểm soát việc setFieldsValue chỉ khi record thay đổi ID hoặc isVisible thay đổi
     const prevRecordIdRef = useRef<string | undefined>(undefined);
 
+    // Thêm các state để quản lý trạng thái loading của từng form
+    const [isLoadingBasicInfo, setIsLoadingBasicInfo] = useState(false);
+    const [isLoadingWifi, setIsLoadingWifi] = useState(false);
+    const [isLoadingEthernet, setIsLoadingEthernet] = useState(false);
+    const [isLoadingMqtt, setIsLoadingMqtt] = useState(false);
+    const [isLoadingRs485, setIsLoadingRs485] = useState(false);
+    const [isLoadingRs232, setIsLoadingRs232] = useState(false);
+    const [isLoadingCan, setIsLoadingCan] = useState(false);
+    const [isLoadingTcp, setIsLoadingTcp] = useState(false);
+
+
     useEffect(() => {
         // Chỉ setFieldsValue khi record thay đổi (hoặc khi record.id thay đổi),
         // và khi modal hiển thị.
@@ -179,6 +190,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
         formInstance: any,
         sectionName: string,
         serviceCall: (id: string, data: any) => Promise<any>,
+        setLoadingState: React.Dispatch<React.SetStateAction<boolean>>, // Thêm tham số setLoadingState
         fieldName?: string
     ) => {
         if (!record?.id) {
@@ -186,6 +198,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             return;
         }
 
+        setLoadingState(true); // Bắt đầu loading
         const loadingMessage = message.loading(`Đang lưu ${sectionName}...`, 0);
         try {
             const values = await formInstance.validateFields();
@@ -270,8 +283,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 payloadToSend = filteredBasicInfo;
             }
 
-            // =========================================================================
-            // ĐÂY LÀ ĐOẠN CODE ĐƯỢC THAY ĐỔI ĐỂ SỬA LỖI KEY RỖNG
             // Chuẩn bị payload cuối cùng cho API
             let apiPayload: any;
             if (fieldName) { // Nếu có fieldName (wifiConfig, mqttConfig, canConfig, ...)
@@ -279,7 +290,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             } else { // Đối với basic info (fieldName là undefined/null)
                 apiPayload = payloadToSend; // Gửi thẳng object basic info, không bọc trong khóa rỗng
             }
-            // =========================================================================
 
             // @ts-ignore
             const response: any = await serviceCall(record.id, apiPayload); // Gọi serviceCall với payload đã chuẩn bị
@@ -302,13 +312,9 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     }));
                 }
                 // Nếu backend trả về canConfig (JSON) thì setFieldsValue trực tiếp
-                // Hoặc nếu backend vẫn trả về canBaudrate và bạn muốn map lại thành canConfig cho form
                 if (fieldName === 'canConfig' && resDataNew.canConfig !== undefined) {
-                    // Giả sử resDataNew.canConfig đã là { baudrate: X }
-                    // Không cần chuyển đổi thêm, vì form mong đợi canConfig: { baudrate: X }
                     resDataNew.canConfig = resDataNew.canConfig;
                 }
-
 
                 message.success(`${sectionName} cập nhật thành công!`);
 
@@ -320,7 +326,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 }
 
                 // Gọi onSaveSuccess để component cha có thể cập nhật record tổng thể
-                // Đảm bảo dữ liệu ở component cha luôn mới nhất.
                 onSaveSuccess({ ...record, ...resDataNew });
 
             } else {
@@ -333,17 +338,18 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             message.error(errorMessage);
         } finally {
             loadingMessage();
+            setLoadingState(false); // Kết thúc loading
         }
     };
 
-    const handleSaveBasicInfo = () => handleSaveSection(basicInfoForm, 'Thông tin cơ bản', IotService.updateIotBasicInfo.bind(IotService));
-    const handleSaveWifi = () => handleSaveSection(wifiForm, 'Cài đặt WiFi', IotService.updateIotWifiSettings.bind(IotService), 'wifiConfig');
-    const handleSaveEthernet = () => handleSaveSection(ethernetForm, 'Cài đặt Ethernet', IotService.updateIotEthernetSettings.bind(IotService), 'ethernetConfig');
-    const handleSaveMqtt = () => handleSaveSection(mqttForm, 'Cài đặt MQTT', IotService.updateIotMqttSettings.bind(IotService), 'mqttConfig');
-    const handleSaveRs485 = () => handleSaveSection(rs485Form, 'Cài đặt RS485', IotService.updateIotRs485Settings.bind(IotService), 'rs485Config');
-    const handleSaveRs232 = () => handleSaveSection(rs232Form, 'Cài đặt RS232', IotService.updateIotRs232Settings.bind(IotService), 'rs232Config');
-    const handleSaveCan = () => handleSaveSection(canForm, 'Cài đặt CAN', IotService.updateIotCanSettings.bind(IotService), 'canConfig');
-    const handleSaveTcp = () => handleSaveSection(tcpForm, 'Cài đặt TCP', IotService.updateIotTcpSettings.bind(IotService), 'tcpConfig');
+    const handleSaveBasicInfo = () => handleSaveSection(basicInfoForm, 'Thông tin cơ bản', IotService.updateIotBasicInfo.bind(IotService), setIsLoadingBasicInfo);
+    const handleSaveWifi = () => handleSaveSection(wifiForm, 'Cài đặt WiFi', IotService.updateIotWifiSettings.bind(IotService), setIsLoadingWifi, 'wifiConfig');
+    const handleSaveEthernet = () => handleSaveSection(ethernetForm, 'Cài đặt Ethernet', IotService.updateIotEthernetSettings.bind(IotService), setIsLoadingEthernet, 'ethernetConfig');
+    const handleSaveMqtt = () => handleSaveSection(mqttForm, 'Cài đặt MQTT', IotService.updateIotMqttSettings.bind(IotService), setIsLoadingMqtt, 'mqttConfig');
+    const handleSaveRs485 = () => handleSaveSection(rs485Form, 'Cài đặt RS485', IotService.updateIotRs485Settings.bind(IotService), setIsLoadingRs485, 'rs485Config');
+    const handleSaveRs232 = () => handleSaveSection(rs232Form, 'Cài đặt RS232', IotService.updateIotRs232Settings.bind(IotService), setIsLoadingRs232, 'rs232Config');
+    const handleSaveCan = () => handleSaveSection(canForm, 'Cài đặt CAN', IotService.updateIotCanSettings.bind(IotService), setIsLoadingCan, 'canConfig');
+    const handleSaveTcp = () => handleSaveSection(tcpForm, 'Cài đặt TCP', IotService.updateIotTcpSettings.bind(IotService), setIsLoadingTcp, 'tcpConfig');
 
     const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
     const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
@@ -387,7 +393,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={8}>
                                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveBasicInfo}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveBasicInfo} loading={isLoadingBasicInfo} disabled={isLoadingBasicInfo}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -476,7 +482,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={8}>
                                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveMqtt}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveMqtt} loading={isLoadingMqtt} disabled={isLoadingMqtt}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -509,7 +515,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={4}>
                                     <Form.Item>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs232}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs232} loading={isLoadingRs232} disabled={isLoadingRs232}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -560,7 +566,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                             </div>
                                         ))}
                                         <Form.Item>
-                                            <Button type="dashed" onClick={() => add({ ip: '', address: '' })} block icon={<PlusOutlined />}>
+                                            <Button type="dashed" onClick={() => add({ ip: '', address: '' })} block icon={<PlusOutlined />} disabled={isLoadingTcp}>
                                                 Thêm cấu hình IP & Địa chỉ TCP
                                             </Button>
                                         </Form.Item>
@@ -569,7 +575,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                             </Form.List>
 
                             <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveTcp}>
+                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveTcp} loading={isLoadingTcp} disabled={isLoadingTcp}>
                                     Lưu
                                 </Button>
                             </Form.Item>
@@ -642,7 +648,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={4}>
                                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveWifi}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveWifi} loading={isLoadingWifi} disabled={isLoadingWifi}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -708,7 +714,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={8}>
                                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveEthernet}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveEthernet} loading={isLoadingEthernet} disabled={isLoadingEthernet}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -733,7 +739,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                 </Col>
                                 <Col span={8}>
                                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveCan}>
+                                        <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveCan} loading={isLoadingCan} disabled={isLoadingCan}>
                                             Lưu
                                         </Button>
                                     </Form.Item>
@@ -803,7 +809,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                             </div>
                                         ))}
                                         <Form.Item>
-                                            <Button type="dashed" onClick={() => add({ id: null, address: '' })} block icon={<PlusOutlined />}>
+                                            <Button type="dashed" onClick={() => add({ id: null, address: '' })} block icon={<PlusOutlined />} disabled={isLoadingRs485}>
                                                 Thêm ID & Địa chỉ RS485
                                             </Button>
                                         </Form.Item>
@@ -812,7 +818,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                             </Form.List>
 
                             <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs485}>
+                                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRs485} loading={isLoadingRs485} disabled={isLoadingRs485}>
                                     Lưu
                                 </Button>
                             </Form.Item>
