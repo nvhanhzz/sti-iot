@@ -2,11 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import {
-    EditOutlined,
-    DeleteOutlined,
     ReloadOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
+import { FaLock, FaLockOpen } from "react-icons/fa";
+import { AiFillEdit } from "react-icons/ai";
 import { TbPlugConnectedX, TbPlugConnected } from "react-icons/tb";
 import { LuFileOutput, LuFileInput } from "react-icons/lu";
 import type { TableColumnsType } from 'antd';
@@ -20,12 +20,14 @@ import {
     message,
     Row,
     Col,
+    Tooltip, // Import Tooltip
 } from 'antd';
 import { IotCMDInterface } from '../../../interface/SettingInterface';
 import LoadingTable from '../components/LoadingTable';
 import IotService from '../../../services/IotService';
 import { useSocket } from '../../../context/SocketContext';
-import EditIotModal from './EditIotModal'; // Import the new modal component
+import EditIotModal from './EditIotModal';
+import "./SettingIot.css";
 
 type ContextType = {
     changePageName: (page: string, grouppage: string) => void;
@@ -72,7 +74,9 @@ export interface ExtendedIotInterface extends IotCMDInterface {
     rs485Config?: RS485Config;
     rs232Config?: RS232Config;
     version?: string;
-    firmware?: string; // Add firmware here if it's not in IotCMDInterface
+    firmware?: {
+        versionNumber: string
+    };
 }
 
 const SettingsIot: React.FC = () => {
@@ -110,7 +114,6 @@ const SettingsIot: React.FC = () => {
         };
         setData(updateData);
         setDataAll(updateData);
-        // Optionally, update currentEditingRecord if the modal remains open for further edits
         setCurrentEditingRecord(updatedRecord);
     };
 
@@ -133,8 +136,8 @@ const SettingsIot: React.FC = () => {
         },
         {
             title: 'Phiên bản',
-            dataIndex: 'firmware',
-            key: 'firmware',
+            key: 'firmware.versionNumber',
+            render: (_, record: ExtendedIotInterface) => record.firmware?.versionNumber || '',
         },
         {
             title: 'Trạng thái',
@@ -179,39 +182,42 @@ const SettingsIot: React.FC = () => {
             title: 'Hành động',
             dataIndex: 'operation',
             width: '15%',
-            render: (_, record: ExtendedIotInterface) => (
-                <Flex gap="small" wrap>
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        onClick={() => handleEditRecord(record)}
-                    >
-                        Chỉnh
-                    </Button>
-                    <Popconfirm
-                        title={`Xác nhận ${record.isdelete ? 'mở khóa' : 'khóa'} ?`}
-                        onConfirm={() => handleLockUnlock(record.id)}
-                        okText="Đồng ý"
-                        cancelText="Hủy"
-                    >
+            render: (_, record: ExtendedIotInterface) => {
+                const isUnlockDisabled = record.isdelete && !record.name;
+                return (
+                    <Flex gap="small" wrap>
                         <Button
-                            danger={!record.isdelete}
-                            style={record.isdelete ? { backgroundColor: '#fff', color: '#000', border: '1px solid #ddd' } : {}}
-                            icon={<DeleteOutlined />}
-                            disabled={record.isdelete && !record.name}
+                            icon={<AiFillEdit />}
+                            onClick={() => handleEditRecord(record)}
+                            type="text"
+                            style={{ color: '#1890ff' }}
+                        />
+                        <Popconfirm
+                            title={`Xác nhận ${record.isdelete ? 'mở khóa' : 'khóa'} ?`}
+                            onConfirm={() => handleLockUnlock(record.id)}
+                            okText="Đồng ý"
+                            cancelText="Hủy"
                         >
-                            {record.isdelete ? 'Mở khóa' : 'Khóa'}
-                        </Button>
-                    </Popconfirm>
-                </Flex>
-            ),
+                            <Tooltip title={isUnlockDisabled ? "Cập nhật thông tin để mở khóa" : ""}>
+                                <Button
+                                    danger={!record.isdelete}
+                                    icon={record.isdelete ? <FaLockOpen /> : <FaLock />}
+                                    disabled={isUnlockDisabled}
+                                    type="text"
+                                    style={{ color: record.isdelete ? '#d9d9d9' : '#ff4d4f' }}
+                                />
+                            </Tooltip>
+                        </Popconfirm>
+                    </Flex>
+                );
+            },
         },
     ];
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response: any = await IotService.GetDataIots({});
+            const response: any = await IotService.GetDataIotsV2({});
             if (response?.data?.data) {
                 setDataAll(response.data.data);
                 setData(response.data.data);
@@ -324,13 +330,12 @@ const SettingsIot: React.FC = () => {
 
     return (
         <>
-            <div className="card">
+            {/* Phần tìm kiếm tách riêng */}
+            <div className="card" style={{ marginBottom: '20px' }}>
                 <div className="card-header">
+                    <h3 style={{ marginBottom: '15px' }}>Tìm kiếm thiết bị</h3>
                     <Row gutter={[16, 16]} align="middle">
-                        <Col style={{ display: "flex", alignItems: "center" }}>
-                            <h4 style={{ marginBottom: 0 }}>Tìm kiếm: </h4>
-                        </Col>
-                        <Col span={6}>
+                        <Col span={8}>
                             <Input
                                 placeholder="Tên thiết bị"
                                 value={searchName}
@@ -338,7 +343,7 @@ const SettingsIot: React.FC = () => {
                                 allowClear
                             />
                         </Col>
-                        <Col span={4}>
+                        <Col span={8}>
                             <Input
                                 placeholder="Địa chỉ MAC"
                                 value={searchMac}
@@ -346,7 +351,7 @@ const SettingsIot: React.FC = () => {
                                 allowClear
                             />
                         </Col>
-                        <Col xs={24} sm={12}>
+                        <Col xs={24} sm={8}>
                             <Flex gap="small" wrap>
                                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
                                     Tìm kiếm
@@ -361,6 +366,14 @@ const SettingsIot: React.FC = () => {
                         </Col>
                     </Row>
                 </div>
+            </div>
+
+            {/* Bảng danh sách thiết bị */}
+            <div className="card" style={{
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Thêm box-shadow nhẹ nhàng
+                borderRadius: '8px', // Bo tròn góc nhẹ
+                overflow: 'hidden' // Đảm bảo box-shadow không bị tràn
+            }}>
                 <div className="card-body">
                     {loading ? (
                         <LoadingTable />
@@ -373,6 +386,7 @@ const SettingsIot: React.FC = () => {
                                 dataSource={data}
                                 bordered
                                 pagination={false}
+                                rowClassName={(_record, index) => index % 2 === 0 ? 'even-row' : 'odd-row'}
                             />
                         </>
                     )}

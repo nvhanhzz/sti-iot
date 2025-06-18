@@ -60,6 +60,9 @@ class ApiManager {
     ApiGetDataIots() {
         return `${API_URLMASTERDATA}/api/iots/get-data-iots`;
     }
+    ApiGetDataIotsV2() {
+        return `${API_URLMASTERDATA}/api/v2/iots/get-data-iots`;
+    }
     ApiUpdateDataIots() {
         return `${API_URLMASTERDATA}/api/iots/active-data-iots`;
     }

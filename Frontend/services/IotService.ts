@@ -60,6 +60,21 @@ class IotService {
         }
     }
 
+    async GetDataIotsV2(params: any) {
+        try {
+            const response = await httpRequest<{ response: HttpResponse }>("GET", ApiManager.ApiGetDataIotsV2(), {
+                headers: {
+                    Authorization: this.getAuthHeader(),
+                },
+                params: params,
+            });
+            return response;
+        } catch (error) {
+            console.error("Lỗi Phần Mềm khi lấy dữ liệu IoT:", error); // Rõ ràng hơn
+            throw error;
+        }
+    }
+
     // Giữ lại PostDataUpdateIots nếu nó vẫn được sử dụng cho các mục đích khác
     // Hoặc xem xét loại bỏ nếu các API section-specific thay thế hoàn toàn nó
     async PostDataUpdateIots(data: any) {
