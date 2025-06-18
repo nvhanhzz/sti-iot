@@ -284,6 +284,11 @@ interface GetStatisticsQuery {
     sortOrder?: 'asc' | 'desc';
 }
 
+interface ExtendedIotStatistic extends IIotStatistic {
+    deviceName?: string;
+    mac?: string;
+}
+
 export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>, res: Response) => {
     try {
         const {
@@ -311,8 +316,24 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
         }
         if (isNaN(limitNumber) || limitNumber < 1) {
             res.status(400).send({ message: "Invalid 'limit' parameter. Must be a positive number." });
-            return
+            return;
         }
+
+        // --- Bổ sung: Lấy tất cả thông tin thiết bị và tạo mapping ---
+        const allIots = MasterIotGlobal.getAll(); // Giả định hàm này trả về mảng các thiết bị
+        // Tạo một Map để tra cứu deviceName và mac nhanh chóng bằng deviceId
+        const deviceMap = new Map<number, { deviceName: string; mac: string }>();
+        if (allIots && Array.isArray(allIots)) {
+            allIots.forEach((device: any) => { // Giả định mỗi device có thuộc tính 'device_id', 'name', 'mac'
+                if (device.id) {
+                    deviceMap.set(device.id, {
+                        deviceName: device.name || 'Unknown Device',
+                        mac: device.mac || 'Unknown MAC'
+                    });
+                }
+            });
+        }
+        // --- Kết thúc phần bổ sung ---
 
         let findQuery: any = {};
         let sortCriteria: any = {};
@@ -328,16 +349,16 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
             if (startTime) {
                 const parsedStartTime = parseInt(startTime as string);
                 if (isNaN(parsedStartTime)) {
-                     res.status(400).send({ message: "Invalid 'startTime' parameter." });
-                     return;
+                    res.status(400).send({ message: "Invalid 'startTime' parameter." });
+                    return;
                 }
                 findQuery.timestamp.$gte = parsedStartTime;
             }
             if (endTime) {
                 const parsedEndTime = parseInt(endTime as string);
                 if (isNaN(parsedEndTime)) {
-                     res.status(400).send({message: "Invalid 'endTime' parameter."});
-                     return;
+                    res.status(400).send({message: "Invalid 'endTime' parameter."});
+                    return;
                 }
                 findQuery.timestamp.$lte = parsedEndTime;
             }
@@ -353,7 +374,7 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
         }
 
         let totalRecords: number | undefined;
-        let statistics: IIotStatistic[] = []; // Khởi tạo với mảng rỗng để tránh lỗi "used before assigned"
+        let statistics: ExtendedIotStatistic[] = []; // Thay đổi kiểu dữ liệu sang ExtendedIotStatistic
         let hasNextPage: boolean = false;
         let hasPreviousPage: boolean = false;
         let nextCursor: { lastTimestamp: number; lastId: string } | null = null;
@@ -366,17 +387,27 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
 
             totalRecords = await IotStatistic.countDocuments(findQuery);
 
-            statistics = await IotStatistic.find(findQuery)
+            const rawStatistics = await IotStatistic.find(findQuery)
                 .sort(sortCriteria)
                 .skip(skipAmount)
                 .limit(limitNumber)
                 .lean();
 
+            // --- Bổ sung: Ánh xạ deviceName và mac vào rawStatistics ---
+            statistics = rawStatistics.map(stat => {
+                const device = deviceMap.get(parseInt(stat.deviceId));
+                return {
+                    ...stat,
+                    deviceName: device?.deviceName,
+                    mac: device?.mac
+                };
+            });
+            // --- Kết thúc phần bổ sung ---
+
             hasNextPage = (skipAmount + statistics.length) < totalRecords;
             hasPreviousPage = pageNumber > 1;
 
-        } else { // Đây là khối logic cho Keyset Pagination
-            // Dòng này được di chuyển lên trên để đảm bảo luôn được thực thi và kết quả được gán cho 'statistics'
+        } else { // Keyset Pagination
             let queryBuilder = IotStatistic.find(findQuery);
 
             if (direction === 'next' && lastTimestamp && lastId) {
@@ -384,8 +415,8 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
                 const parsedLastId = mongoose.Types.ObjectId.isValid(lastId) ? new mongoose.Types.ObjectId(lastId) : lastId;
 
                 if (isNaN(parsedLastTimestamp)) {
-                     res.status(400).send({message: "Invalid 'lastTimestamp' for keyset 'next'."});
-                     return;
+                    res.status(400).send({message: "Invalid 'lastTimestamp' for keyset 'next'."});
+                    return;
                 }
 
                 if (effectiveSortOrder === -1) {
@@ -409,8 +440,8 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
                 const parsedFirstId = mongoose.Types.ObjectId.isValid(firstId) ? new mongoose.Types.ObjectId(firstId) : firstId;
 
                 if (isNaN(parsedFirstTimestamp)) {
-                     res.status(400).send({message: "Invalid 'firstTimestamp' for keyset 'prev'."});
-                     return;
+                    res.status(400).send({message: "Invalid 'firstTimestamp' for keyset 'prev'."});
+                    return;
                 }
 
                 const reverseSortCriteria: any = {};
@@ -418,83 +449,73 @@ export const getStatistics = async (req: Request<{}, {}, {}, GetStatisticsQuery>
                     reverseSortCriteria[key] = sortCriteria[key] * -1;
                 }
 
-                if (effectiveSortOrder === -1) {
-                    queryBuilder = queryBuilder.where({
-                        $or: [
-                            { timestamp: { $gt: parsedFirstTimestamp } },
-                            { timestamp: parsedFirstTimestamp, _id: { $gt: parsedFirstId } }
-                        ]
-                    });
-                } else {
-                    queryBuilder = queryBuilder.where({
-                        $or: [
-                            { timestamp: { $lt: parsedFirstTimestamp } },
-                            { timestamp: parsedFirstTimestamp, _id: { $lt: parsedFirstId } }
-                        ]
-                    });
-                }
-
                 const rawStatistics = await queryBuilder
-                    .sort(reverseSortCriteria) // Sắp xếp ngược lại
-                    .limit(limitNumber + 1) // Lấy thêm 1 bản ghi để kiểm tra hasPreviousPage
+                    .sort(reverseSortCriteria)
+                    .limit(limitNumber + 1)
                     .lean();
 
-                statistics = rawStatistics.reverse(); // Đảo ngược kết quả hiển thị
+                // --- Bổ sung: Ánh xạ deviceName và mac vào rawStatistics của 'prev' ---
+                const mappedRawStatistics = rawStatistics.map(stat => {
+                    const device = deviceMap.get(parseInt(stat.deviceId));
+                    return {
+                        ...stat,
+                        deviceName: device?.deviceName,
+                        mac: device?.mac
+                    };
+                });
+                statistics = mappedRawStatistics.reverse();
+                // --- Kết thúc phần bổ sung ---
 
                 if (rawStatistics.length > limitNumber) {
-                    hasPreviousPage = true; // Có nhiều hơn số lượng limit -> có trang trước đó
+                    hasPreviousPage = true;
                 }
-                // HasNextPage cho trường hợp 'prev' cần logic phức tạp hơn,
-                // thông thường sẽ dựa vào việc liệu trang hiện tại có phải là trang cuối cùng của dãy lùi không.
-                // Để đơn giản, ta sẽ chỉ xác định nó nếu có nextCursor.
             }
 
-            // Thực hiện truy vấn cuối cùng nếu không phải là trường hợp 'prev' đã được xử lý riêng
-            if (direction !== 'prev' || (!firstTimestamp && !firstId)) { // Bao gồm cả trang đầu tiên (direction=next, không lastTimestamp/lastId)
-                statistics = await queryBuilder
+            if (direction !== 'prev' || (!firstTimestamp && !firstId)) {
+                const rawStatistics = await queryBuilder
                     .sort(sortCriteria)
-                    .limit(limitNumber + 1) // Lấy thêm 1 bản ghi để kiểm tra hasNextPage
+                    .limit(limitNumber + 1)
                     .lean();
 
-                if (statistics.length > limitNumber) {
+                // --- Bổ sung: Ánh xạ deviceName và mac vào rawStatistics của 'next' (bao gồm cả trang đầu) ---
+                let mappedRawStatistics = rawStatistics.map(stat => {
+                    const device = deviceMap.get(parseInt(stat.deviceId));
+                    return {
+                        ...stat,
+                        deviceName: device?.deviceName,
+                        mac: device?.mac
+                    };
+                });
+                // --- Kết thúc phần bổ sung ---
+
+                if (mappedRawStatistics.length > limitNumber) {
                     hasNextPage = true;
-                    statistics.pop(); // Bỏ bản ghi thừa
+                    mappedRawStatistics.pop();
                 }
+                statistics = mappedRawStatistics; // Gán kết quả đã ánh xạ
             }
         }
 
-        // Đảm bảo `statistics` luôn là mảng, ngay cả khi không có kết quả
         if (statistics.length > 0) {
             const firstDoc = statistics[0];
             const lastDoc = statistics[statistics.length - 1];
 
             nextCursor = {
                 lastTimestamp: lastDoc.timestamp,
-                // Ép kiểu _id thành string một cách an toàn
                 lastId: (lastDoc._id as Types.ObjectId).toString()
             };
             previousCursor = {
                 firstTimestamp: firstDoc.timestamp,
-                // Ép kiểu _id thành string một cách an toàn
                 firstId: (firstDoc._id as Types.ObjectId).toString()
             };
 
-            // Logic hasPreviousPage cho keyset khi không phải 'jump'
-            // Để xác định chính xác hasPreviousPage, bạn cần kiểm tra xem có bản ghi nào trước `firstDoc` không.
-            // Cách đơn giản nhất là dựa vào việc có `firstTimestamp` và `firstId` được truyền vào hay không.
-            // Hoặc thực hiện một truy vấn `countDocuments` với điều kiện `{$or: [...]}` ngược lại,
-            // nhưng điều này sẽ tốn tài nguyên.
-            // Để có độ chính xác cao hơn, cần một query riêng biệt để kiểm tra xem có bản ghi nào
-            // thỏa mãn điều kiện `{$lt: firstTimestamp}` hoặc `{$lt: firstId}` (với sort ngược) không.
-            // Hiện tại, ta sẽ giữ lại logic đơn giản nhất.
-            hasPreviousPage = !!(firstTimestamp && firstId); // Chỉ có previous nếu đã có firstTimestamp/firstId
+            hasPreviousPage = !!(firstTimestamp && firstId);
         }
-
 
         res.status(200).send({
             data: statistics,
             pagination: {
-                method: direction === 'jump' ? 'offset' : 'keyset', // Fix TS2367 by direct check
+                method: direction === 'jump' ? 'offset' : 'keyset',
                 totalRecords: totalRecords,
                 currentPage: direction === 'jump' ? pageNumber : undefined,
                 pageSize: limitNumber,
@@ -670,6 +691,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
             await iotStatistic.save();
             incrementCmdStat(mergedPayloads.deviceId, mergedPayloads.cmd, mergedPayloads.isMissed);
             await sendStatistics(mergedPayloads.deviceId);
+            mergedPayloads.deviceName = dataIot.name || 'Unknow device';
+            mergedPayloads.mac = dataIot.mac || 'Unknow MAC';
             await sendToMonitor(mergedPayloads);
 
             if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
