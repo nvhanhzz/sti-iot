@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'; // Import useState
+import React, { useEffect, useRef, useState } from 'react';
 import { SaveOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import {
     Button,
@@ -12,8 +12,9 @@ import {
     InputNumber,
     Space
 } from 'antd';
-import IotService from '../../../services/IotService';
-import { IotCMDInterface } from '../../../interface/SettingInterface';
+import IotService from '../../../services/IotService'; // Đảm bảo đường dẫn này đúng
+import { IotCMDInterface } from '../../../interface/SettingInterface'; // Đảm bảo đường dẫn này đúng
+import "./SettingIot.css";
 
 interface WifiConfig {
     ssid?: string;
@@ -81,7 +82,7 @@ interface ExtendedIotInterface extends IotCMDInterface {
     rs232Config?: Rs232Config;
     tcpConfig?: TcpConfig;
 
-    canConfig?: { baudrate?: number }; // Cập nhật để phản ánh chỉ dùng canConfig (JSON)
+    canConfig?: { baudrate?: number };
 }
 
 interface EditIotModalProps {
@@ -101,10 +102,8 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
     const [canForm] = Form.useForm();
     const [tcpForm] = Form.useForm();
 
-    // Dùng useRef để kiểm soát việc setFieldsValue chỉ khi record thay đổi ID hoặc isVisible thay đổi
     const prevRecordIdRef = useRef<string | undefined>(undefined);
 
-    // Thêm các state để quản lý trạng thái loading của từng form
     const [isLoadingBasicInfo, setIsLoadingBasicInfo] = useState(false);
     const [isLoadingWifi, setIsLoadingWifi] = useState(false);
     const [isLoadingEthernet, setIsLoadingEthernet] = useState(false);
@@ -116,8 +115,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
 
 
     useEffect(() => {
-        // Chỉ setFieldsValue khi record thay đổi (hoặc khi record.id thay đổi),
-        // và khi modal hiển thị.
         if (isVisible && record && record.id !== prevRecordIdRef.current) {
             basicInfoForm.setFieldsValue(record);
 
@@ -154,7 +151,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 }
             });
 
-            // Thay đổi cách khởi tạo canForm để phù hợp với canConfig (JSON)
             canForm.setFieldsValue({
                 canConfig: record.canConfig || { baudrate: null }
             });
@@ -168,12 +164,10 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             } : { ipAddresses: [] };
             tcpForm.setFieldsValue({ tcpConfig: tcpInitialValues });
 
-            // Cập nhật ID của record trước đó
             // @ts-ignore - record.id should be string based on MasterIotInterface (device_id: string)
             prevRecordIdRef.current = record.id;
 
         } else if (!isVisible) {
-            // Reset các form khi modal bị đóng (isVisible = false)
             basicInfoForm.resetFields();
             wifiForm.resetFields();
             ethernetForm.resetFields();
@@ -182,7 +176,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             rs232Form.resetFields();
             canForm.resetFields();
             tcpForm.resetFields();
-            prevRecordIdRef.current = undefined; // Đặt lại để lần sau mở lại modal với cùng record.id sẽ set lại giá trị
+            prevRecordIdRef.current = undefined;
         }
     }, [isVisible, record, basicInfoForm, wifiForm, ethernetForm, mqttForm, rs485Form, rs232Form, canForm, tcpForm]);
 
@@ -190,7 +184,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
         formInstance: any,
         sectionName: string,
         serviceCall: (id: string, data: any) => Promise<any>,
-        setLoadingState: React.Dispatch<React.SetStateAction<boolean>>, // Thêm tham số setLoadingState
+        setLoadingState: React.Dispatch<React.SetStateAction<boolean>>,
         fieldName?: string
     ) => {
         if (!record?.id) {
@@ -198,36 +192,27 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             return;
         }
 
-        setLoadingState(true); // Bắt đầu loading
+        setLoadingState(true);
         const loadingMessage = message.loading(`Đang lưu ${sectionName}...`, 0);
         try {
             const values = await formInstance.validateFields();
             let payloadToSend: any = { ...values };
 
             if (fieldName) {
-                // Lấy giá trị của fieldName từ values (ví dụ: values.wifiConfig)
                 payloadToSend = values[fieldName];
 
-                // --- Bắt đầu phần lọc giá trị null/undefined/empty array ---
                 const filteredConfigData: { [key: string]: any } = {};
                 for (const key in payloadToSend) {
                     if (payloadToSend.hasOwnProperty(key)) {
                         const value = payloadToSend[key];
-                        // Lọc null, undefined và mảng rỗng
                         if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0)) {
                             filteredConfigData[key] = value;
                         }
                     }
                 }
-                payloadToSend = filteredConfigData; // Gán lại payload đã lọc
-                // --- Kết thúc phần lọc giá trị null/undefined/empty array ---
+                payloadToSend = filteredConfigData;
 
-                if (fieldName === 'wifiConfig') {
-                    // Không cần xử lý đặc biệt cho wifiConfig nếu không có Number
-                } else if (fieldName === 'ethernetConfig') {
-                    // Không cần xử lý đặc biệt cho ethernetConfig
-                } else if (fieldName === 'mqttConfig') {
-                    // Chuyển đổi sang kiểu Number nếu không null/undefined
+                if (fieldName === 'mqttConfig') {
                     if (payloadToSend.port !== null && payloadToSend.port !== undefined) {
                         payloadToSend.port = Number(payloadToSend.port);
                     }
@@ -244,7 +229,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     if (payloadToSend.idAddresses) {
                         payloadToSend.idAddresses = payloadToSend.idAddresses.map((item: any) => ({
                             id: Number(item.id),
-                            // Chuyển đổi chuỗi "1,2,3" thành mảng số [1,2,3]
                             address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
                         }));
                     }
@@ -253,10 +237,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         payloadToSend.baudrate = Number(payloadToSend.baudrate);
                     }
                 } else if (fieldName === 'canConfig') {
-                    // canConfig bây giờ là một trường JSON, payloadToSend đã là object chứa baudrate (hoặc các thuộc tính khác của canConfig)
-                    // Không cần gán lại payloadToSend = { canBaudrate: ... }
-                    // PayloadToSend đã là { baudrate: ... } hoặc { baudrate: ..., otherProp: ...}
-                    // và sẽ được bọc đúng cách trong apiPayload dưới dạng { canConfig: { baudrate: ... } }
                     if (payloadToSend.baudrate !== null && payloadToSend.baudrate !== undefined) {
                         payloadToSend.baudrate = Number(payloadToSend.baudrate);
                     }
@@ -264,13 +244,11 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     if (payloadToSend.ipAddresses) {
                         payloadToSend.ipAddresses = payloadToSend.ipAddresses.map((item: any) => ({
                             ...item,
-                            // Chuyển đổi chuỗi "8080,40001" thành mảng số [8080,40001]
                             address: item.address ? item.address.split(',').map((s: string) => Number(s.trim())) : [],
                         }));
                     }
                 }
-            } else { // Trường hợp basicInfo (không có fieldName)
-                // Lọc null/undefined/empty array cho basicInfo
+            } else {
                 const filteredBasicInfo: { [key: string]: any } = {};
                 for (const key in payloadToSend) {
                     if (payloadToSend.hasOwnProperty(key)) {
@@ -283,22 +261,20 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 payloadToSend = filteredBasicInfo;
             }
 
-            // Chuẩn bị payload cuối cùng cho API
             let apiPayload: any;
-            if (fieldName) { // Nếu có fieldName (wifiConfig, mqttConfig, canConfig, ...)
+            if (fieldName) {
                 apiPayload = { [fieldName]: payloadToSend };
-            } else { // Đối với basic info (fieldName là undefined/null)
-                apiPayload = payloadToSend; // Gửi thẳng object basic info, không bọc trong khóa rỗng
+            } else {
+                apiPayload = payloadToSend;
             }
 
             // @ts-ignore
-            const response: any = await serviceCall(record.id, apiPayload); // Gọi serviceCall với payload đã chuẩn bị
+            const response: any = await serviceCall(record.id, apiPayload);
             const resData = response?.data;
 
             if (resData?.data) {
                 const resDataNew = resData.data;
 
-                // Chuẩn hóa dữ liệu nhận được từ server để hiển thị lên form
                 if (fieldName === 'rs485Config' && resDataNew.rs485Config?.idAddresses) {
                     resDataNew.rs485Config.idAddresses = resDataNew.rs485Config.idAddresses.map((item: any) => ({
                         ...item,
@@ -311,21 +287,18 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         address: Array.isArray(item.address) ? item.address.join(',') : item.address
                     }));
                 }
-                // Nếu backend trả về canConfig (JSON) thì setFieldsValue trực tiếp
                 if (fieldName === 'canConfig' && resDataNew.canConfig !== undefined) {
                     resDataNew.canConfig = resDataNew.canConfig;
                 }
 
                 message.success(`${sectionName} cập nhật thành công!`);
 
-                // Cập nhật lại CHỈ form hiện tại với dữ liệu mới từ server
                 if (fieldName) {
                     formInstance.setFieldsValue({ [fieldName]: resDataNew[fieldName] });
                 } else {
-                    formInstance.setFieldsValue(resDataNew); // Cho basic info
+                    formInstance.setFieldsValue(resDataNew);
                 }
 
-                // Gọi onSaveSuccess để component cha có thể cập nhật record tổng thể
                 onSaveSuccess({ ...record, ...resDataNew });
 
             } else {
@@ -338,7 +311,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             message.error(errorMessage);
         } finally {
             loadingMessage();
-            setLoadingState(false); // Kết thúc loading
+            setLoadingState(false);
         }
     };
 
@@ -364,11 +337,11 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             destroyOnClose
             maskClosable={false}
             style={{ top: 10 }}
-            bodyStyle={{ maxHeight: 'calc(100vh - 70px)', padding: '10px 24px', overflowY: "auto" }}
+            bodyStyle={{ maxHeight: 'calc(100vh - 60px)', padding: '10px 24px', overflowY: "auto" }}
         >
             <Row gutter={10}>
                 <Col span={12}>
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Thông tin cơ bản</Divider>
                         <Form form={basicInfoForm} layout="vertical">
                             <Row gutter={16} align="bottom">
@@ -378,6 +351,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         label="Tên thiết bị"
                                         rules={[{ required: true, message: 'Vui lòng nhập tên thiết bị!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="Nhập tên thiết bị" />
                                     </Form.Item>
@@ -387,6 +361,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name="mac"
                                         label="Địa chỉ MAC"
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input disabled placeholder="Địa chỉ MAC cố định" />
                                     </Form.Item>
@@ -402,7 +377,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt MQTT</Divider>
                         <Form form={mqttForm} layout="vertical">
                             <Row gutter={16}>
@@ -411,6 +386,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['mqttConfig', 'server']}
                                         label="Server"
                                         rules={[{ required: true, message: 'Vui lòng nhập địa chỉ Server MQTT!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="192.168.1.67" />
                                     </Form.Item>
@@ -420,6 +396,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['mqttConfig', 'port']}
                                         label="Port"
                                         rules={[{ required: true, message: 'Vui lòng nhập Port MQTT!' }, { type: 'number', min: 1, max: 65535, message: 'Cổng không hợp lệ!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="1883" />
                                     </Form.Item>
@@ -428,6 +405,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['mqttConfig', 'user']}
                                         label="Tên người dùng"
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="..." />
                                     </Form.Item>
@@ -438,6 +416,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['mqttConfig', 'pw']}
                                         label="Mật khẩu"
+                                        validateTrigger={[]}
                                     >
                                         <Input.Password placeholder="***" />
                                     </Form.Item>
@@ -446,6 +425,8 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['mqttConfig', 'subTopic']}
                                         label="Subscribe Topic"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Subscribe Topic!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="device/response/" />
                                     </Form.Item>
@@ -454,6 +435,8 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['mqttConfig', 'pubTopic']}
                                         label="Publish Topic"
+                                        rules={[{ required: true, message: 'Vui lòng nhập Publish Topic!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="device_send/" />
                                     </Form.Item>
@@ -464,8 +447,10 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['mqttConfig', 'qos']}
                                         label="QoS"
-                                        rules={[{ type: 'number', min: 0, max: 2, message: 'QoS không hợp lệ (0-2)!' }]}
+                                        rules={[{ required: true, message: 'Vui lòng nhập Qos!' },
+                                            { type: 'number', min: 0, max: 1, message: 'QoS không hợp lệ (0-1)!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="1" />
                                     </Form.Item>
@@ -476,6 +461,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         label="Keep Alive (giây)"
                                         rules={[{ type: 'number', min: 0, message: 'Keep Alive không hợp lệ!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="60" />
                                     </Form.Item>
@@ -491,7 +477,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt RS232</Divider>
                         <Form form={rs232Form} layout="vertical">
                             <Row gutter={16}  align="bottom">
@@ -500,6 +486,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['rs232Config', 'baudrate']}
                                         label="Baudrate"
                                         rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS232!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="9600" />
                                     </Form.Item>
@@ -509,6 +496,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['rs232Config', 'serialConfig']}
                                         label="Cấu hình Serial"
                                         rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="8N1" />
                                     </Form.Item>
@@ -524,7 +512,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt TCP</Divider>
                         <Form form={tcpForm} layout="vertical">
                             <Form.List name={['tcpConfig', 'ipAddresses']}>
@@ -541,6 +529,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                                             { pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }
                                                         ]}
                                                         style={{ flex: 1, marginBottom: 0 }}
+                                                        validateTrigger={[]}
                                                     >
                                                         <Input placeholder="IP đích (ví dụ: 192.168.1.100)" />
                                                     </Form.Item>
@@ -558,6 +547,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                                             }),
                                                         ]}
                                                         style={{ flex: 2, marginBottom: 0 }}
+                                                        validateTrigger={[]}
                                                     >
                                                         <Input placeholder="Địa chỉ (ví dụ: 8080,40001)" />
                                                     </Form.Item>
@@ -584,7 +574,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                 </Col>
 
                 <Col span={12}>
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt WiFi</Divider>
                         <Form form={wifiForm} layout="vertical">
                             <Row gutter={16}>
@@ -593,6 +583,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['wifiConfig', 'ssid']}
                                         label="SSID"
                                         rules={[{ required: true, message: 'Vui lòng nhập SSID!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="STI_VietNam_No8" />
                                     </Form.Item>
@@ -601,6 +592,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['wifiConfig', 'pw']}
                                         label="Mật khẩu WiFi"
+                                        validateTrigger={[]}
                                     >
                                         <Input.Password placeholder="66668888" />
                                     </Form.Item>
@@ -610,6 +602,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['wifiConfig', 'ip']}
                                         label="IP"
                                         rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="192.168.1.123" />
                                     </Form.Item>
@@ -620,8 +613,21 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['wifiConfig', 'gateway']}
                                         label="Gateway"
-                                        rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
+                                        rules={[
+                                            { pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    const ipValue = getFieldValue(['wifiConfig', 'ip']);
+                                                    if (ipValue && !value) {
+                                                        return Promise.reject(new Error('Vui lòng nhập gateway'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            }),
+                                        ]}
+                                        dependencies={[['wifiConfig', 'ip']]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="192.168.1.1" />
                                     </Form.Item>
@@ -630,8 +636,21 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['wifiConfig', 'subnet']}
                                         label="Subnet"
-                                        rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
+                                        rules={[
+                                            { pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    const ipValue = getFieldValue(['wifiConfig', 'ip']);
+                                                    if (ipValue && !value) {
+                                                        return Promise.reject(new Error('Vui lòng nhập subnet'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            }),
+                                        ]}
+                                        dependencies={[['wifiConfig', 'ip']]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="255.255.255.0" />
                                     </Form.Item>
@@ -642,6 +661,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         label="DNS"
                                         rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="8.8.8.8" />
                                     </Form.Item>
@@ -657,7 +677,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt Ethernet</Divider>
                         <Form form={ethernetForm} layout="vertical">
                             <Row gutter={16}>
@@ -666,6 +686,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['ethernetConfig', 'ip']}
                                         label="IP"
                                         rules={[{ pattern: ipRegex, message: 'Định dạng IP không hợp lệ!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="192.168.1.235" />
                                     </Form.Item>
@@ -674,7 +695,20 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['ethernetConfig', 'gateway']}
                                         label="Gateway"
-                                        rules={[{ pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' }]}
+                                        rules={[
+                                            { pattern: ipRegex, message: 'Định dạng Gateway không hợp lệ!' },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    const ipValue = getFieldValue(['ethernetConfig', 'ip']);
+                                                    if (ipValue && !value) {
+                                                        return Promise.reject(new Error('Vui lòng nhập gateway'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            }),
+                                        ]}
+                                        dependencies={[['ethernetConfig', 'ip']]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="192.168.1.1" />
                                     </Form.Item>
@@ -683,7 +717,20 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                     <Form.Item
                                         name={['ethernetConfig', 'subnet']}
                                         label="Subnet"
-                                        rules={[{ pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' }]}
+                                        rules={[
+                                            { pattern: ipRegex, message: 'Định dạng Subnet không hợp lệ!' },
+                                            ({ getFieldValue }) => ({
+                                                validator(_, value) {
+                                                    const ipValue = getFieldValue(['ethernetConfig', 'ip']);
+                                                    if (ipValue && !value) {
+                                                        return Promise.reject(new Error('Vui lòng nhập subnet'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            }),
+                                        ]}
+                                        dependencies={[['ethernetConfig', 'ip']]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="255.255.255.0" />
                                     </Form.Item>
@@ -695,9 +742,11 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['ethernetConfig', 'mac']}
                                         label="Địa chỉ MAC"
                                         rules={[
+                                            { required: true, message: 'Vui lòng nhập địa chỉ mac!' },
                                             { pattern: macRegex, message: 'Định dạng MAC không hợp lệ!' }
                                         ]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="DE:AD:BE:EF:FE:ED" />
                                     </Form.Item>
@@ -708,6 +757,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         label="DNS"
                                         rules={[{ pattern: ipRegex, message: 'Định dạng DNS không hợp lệ!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="8.8.8.8" />
                                     </Form.Item>
@@ -723,16 +773,17 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt CAN</Divider>
                         <Form form={canForm} layout="vertical">
                             <Row gutter={16} align="bottom">
                                 <Col span={16}>
                                     <Form.Item
-                                        name={['canConfig', 'baudrate']} // Tên này phải trùng với cách bạn setFieldsValue cho canForm
+                                        name={['canConfig', 'baudrate']}
                                         label="Baudrate"
                                         rules={[{ required: true, message: 'Vui lòng nhập Baudrate CAN!' }]}
                                         style={{ marginBottom: 0 }}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="51000" />
                                     </Form.Item>
@@ -748,7 +799,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                         </Form>
                     </div>
 
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '10px' }}>
                         <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt RS485</Divider>
                         <Form form={rs485Form} layout="vertical">
                             <Row gutter={20}>
@@ -757,6 +808,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['rs485Config', 'baudrate']}
                                         label="Baudrate"
                                         rules={[{ required: true, message: 'Vui lòng nhập Baudrate RS485!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <InputNumber style={{ width: '100%' }} placeholder="9600" />
                                     </Form.Item>
@@ -766,13 +818,14 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['rs485Config', 'serialConfig']}
                                         label="Cấu hình Serial"
                                         rules={[{ required: true, message: 'Vui lòng nhập cấu hình Serial!' }]}
+                                        validateTrigger={[]}
                                     >
                                         <Input placeholder="8N1" />
                                     </Form.Item>
                                 </Col>
                             </Row>
 
-                            <Divider orientation="left" style={{ marginTop: -10, marginBottom: 10 }}>Cấu hình ID & Địa chỉ RS485</Divider>
+                            <Divider orientation="left" style={{ marginTop: -5, marginBottom: 10 }}>Cấu hình ID & Địa chỉ RS485</Divider>
                             <Form.List name={['rs485Config', 'idAddresses']}>
                                 {(fields, { add, remove }) => (
                                     <>
@@ -784,6 +837,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                                         name={[name, 'id']}
                                                         rules={[{ required: true, message: 'Vui lòng nhập ID!' }, { type: 'number', message: 'ID phải là số!' }]}
                                                         style={{ flex: 1, marginBottom: 0 }}
+                                                        validateTrigger={[]}
                                                     >
                                                         <InputNumber style={{ width: '100%' }} placeholder="ID (ví dụ: 1)" />
                                                     </Form.Item>
@@ -801,6 +855,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                                             }),
                                                         ]}
                                                         style={{ flex: 2, marginBottom: 0 }}
+                                                        validateTrigger={[]}
                                                     >
                                                         <Input placeholder="Địa chỉ (ví dụ: 40001,40002)" />
                                                     </Form.Item>

@@ -45,9 +45,9 @@ class IotService {
         return token ? `Bearer ${token.replace(/^"|"$/g, '')}` : '';
     }
 
-    async GetDataIots(params: any) {
+    async GetDataIotsVer2(params: any) {
         try {
-            const response = await httpRequest<{ response: HttpResponse }>("GET", ApiManager.ApiGetDataIots(), {
+            const response = await httpRequest<{ response: HttpResponse }>("GET", ApiManager.ApiGetDataIotsV2(), {
                 headers: {
                     Authorization: this.getAuthHeader(),
                 },
@@ -60,9 +60,9 @@ class IotService {
         }
     }
 
-    async GetDataIotsV2(params: any) {
+    async GetDataIots(params: any) {
         try {
-            const response = await httpRequest<{ response: HttpResponse }>("GET", ApiManager.ApiGetDataIotsV2(), {
+            const response = await httpRequest<{ response: HttpResponse }>("GET", ApiManager.ApiGetDataIots(), {
                 headers: {
                     Authorization: this.getAuthHeader(),
                 },

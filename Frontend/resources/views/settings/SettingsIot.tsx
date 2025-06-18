@@ -217,7 +217,7 @@ const SettingsIot: React.FC = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response: any = await IotService.GetDataIotsV2({});
+            const response: any = await IotService.GetDataIotsVer2({});
             if (response?.data?.data) {
                 setDataAll(response.data.data);
                 setData(response.data.data);

@@ -51,6 +51,10 @@
     padding: 12px 8px; /* Điều chỉnh padding nếu cần để khớp với header */
 }
 
+.ant-table-bordered .ant-table-thead > tr > th:first-child {
+    border-radius: 0 !important;
+}
+
 /* Loại bỏ border phải cuối cùng của các ô header và body để bảng trông gọn gàng hơn */
 .ant-table-bordered .ant-table-thead > tr > th:last-child {
     border-right: 1px solid #aeaeae !important;
@@ -73,4 +77,11 @@
 
 .ant-table-bordered .ant-table-tbody > tr > td:first-child {
     border-left: 1px solid #aeaeae; /* Xóa border trái của ô body đầu tiên nếu .ant-table-container đã có border ngoài */
+}
+
+.ant-form-item-explain-error {
+    min-height: 22px !important; /* Đặt chiều cao tối thiểu cho vùng chứa thông báo lỗi */
+    line-height: 1.5714285714285714; /* Giữ line-height mặc định của Ant Design */
+    position: absolute;
+    font-size: 13px;
 }

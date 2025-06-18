@@ -1213,7 +1213,7 @@ export const controlModbusCommand = async (req: Request, res: Response) => {
 
 interface DeviceConfigPayload {
     transactionId: string;
-    [key: string]: any;
+    [key: string]: any; // Cho phép thêm các thuộc tính động như 'wifi', 'ethernet', 'can', ...
 }
 
 export async function updateIotSection(
@@ -1237,6 +1237,7 @@ export async function updateIotSection(
         const deviceMAC = iot.mac;
         const requestBody = req.body; // Dữ liệu từ FE: { section_config: { ... } } hoặc { name: "..." } cho basic
 
+        // Vẫn giữ kiểm tra này nếu requestBody hoàn toàn rỗng từ FE
         if (Object.keys(requestBody).length === 0) {
             res.status(400).json({ message: "Không có dữ liệu để cập nhật." });
             return;
@@ -1246,9 +1247,25 @@ export async function updateIotSection(
 
         if (sectionName === 'basic') {
             // Trường hợp 'basic': Cập nhật database trực tiếp và phản hồi ngay
-            // FE gửi { name: "New Name", mac: "AA:BB:CC..." }
             console.log(`[${sectionName}] Cập nhật trực tiếp database cho thiết bị ${deviceMAC}.`);
-            const updatedIot = await iot.update(requestBody); // requestBody chính là dữ liệu cần update
+            // Lọc bỏ các giá trị null/undefined/empty string cho basic info
+            const filteredBasicInfo: { [key: string]: any } = {};
+            for (const key in requestBody) {
+                if (requestBody.hasOwnProperty(key)) {
+                    const value = requestBody[key];
+                    if (value !== null && typeof value !== 'undefined' && value !== '') { // Thêm điều kiện value !== ''
+                        filteredBasicInfo[key] = value;
+                    }
+                }
+            }
+
+            // Nếu sau khi lọc basic info không còn gì, vẫn coi là không có dữ liệu để cập nhật
+            if (Object.keys(filteredBasicInfo).length === 0) {
+                res.status(400).json({ message: "Không có dữ liệu hợp lệ (không null/undefined/empty) để cập nhật thông tin cơ bản." });
+                return;
+            }
+
+            const updatedIot = await iot.update(filteredBasicInfo); // Cập nhật với dữ liệu đã lọc
             MasterIotGlobal.replaceById(updatedIot);
 
             finalUpdatedIotRecord = updatedIot;
@@ -1273,43 +1290,52 @@ export async function updateIotSection(
                     reject,
                     timeout,
                     deviceMAC,
-                    updateData: requestBody,
+                    updateData: requestBody, // updateData vẫn giữ nguyên requestBody đầy đủ để cập nhật DB sau
                     sectionName,
                 });
 
-                // Lấy dữ liệu cấu hình cụ thể từ requestBody dựa vào sectionName
-                // Ví dụ: req.body = { wifi_config: { SSID: "...", PW: "..." } }
-                // => configDataToSend = { SSID: "...", PW: "..." }
-                // Hoặc: req.body = { can_config: { baudrate: ... } }
-                const configDataToSend = requestBody[`${sectionName}Config`];
+                const rawConfigDataToSend = requestBody[`${sectionName}Config`];
 
-                if (!configDataToSend || Object.keys(configDataToSend).length === 0) {
-                    clearTimeout(timeout);
-                    pendingDeviceRequests.delete(transactionId);
-                    return reject(new Error(`Không có dữ liệu cấu hình hợp lệ cho ${sectionName}.`));
-                }
+                // Bắt đầu phần lọc:
+                // Nếu rawConfigDataToSend không phải là một đối tượng, hoặc là null/undefined,
+                // ta sẽ coi như không có cấu hình cụ thể nào được gửi cho section này.
+                // Trong trường hợp này, filteredConfigData sẽ là một đối tượng rỗng.
+                let filteredConfigData: { [key: string]: any } = {};
 
-                // Lọc bỏ các giá trị null/undefined trước khi gửi qua MQTT
-                const filteredConfigData: { [key: string]: any } = {};
-                for (const key in configDataToSend) {
-                    if (configDataToSend.hasOwnProperty(key)) {
-                        const value = configDataToSend[key];
-                        if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0)) {
-                            filteredConfigData[key] = value;
+                if (rawConfigDataToSend && typeof rawConfigDataToSend === 'object' && !Array.isArray(rawConfigDataToSend)) {
+                    for (const key in rawConfigDataToSend) {
+                        if (rawConfigDataToSend.hasOwnProperty(key)) {
+                            const value = rawConfigDataToSend[key];
+                            // Lọc bỏ null, undefined, mảng rỗng, chuỗi rỗng
+                            if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0) && value !== '') {
+                                filteredConfigData[key] = value;
+                            }
                         }
                     }
+                } else if (Array.isArray(rawConfigDataToSend)) {
+                    // Xử lý đặc biệt cho các trường hợp là mảng (ví dụ: tcpConfig.ipAddresses, rs485Config.idAddresses)
+                    // Nếu là một mảng rỗng, nó sẽ bị lọc bỏ.
+                    // Nếu là mảng có phần tử, hãy chắc chắn các phần tử được giữ lại.
+                    // Phần này cần được xử lý cẩn thận tùy thuộc vào cấu trúc mảng cụ thể.
+                    // Với ví dụ hiện tại, nếu mảng là rỗng nó đã bị lọc. Nếu không rỗng thì giữ nguyên.
+                    if (rawConfigDataToSend.length > 0) {
+                        filteredConfigData = rawConfigDataToSend; // Giữ lại mảng nếu có dữ liệu
+                    }
                 }
+                // Nếu rawConfigDataToSend là một kiểu dữ liệu nguyên thủy (ví dụ: chỉ một số baudrate cho CAN)
+                // và không được bọc trong object, thì logic này cần được điều chỉnh.
+                // Hiện tại, giả định rằng mọi cấu hình (kể cả CAN) đều được bọc trong một object.
 
-                if (Object.keys(filteredConfigData).length === 0) {
-                    clearTimeout(timeout);
-                    pendingDeviceRequests.delete(transactionId);
-                    return reject(new Error(`Không có dữ liệu hợp lệ (không null/undefined) để gửi cho ${sectionName}.`));
-                }
+                // KHÔNG REJECT NẾU filteredConfigData RỖNG!
+                // Vẫn tiếp tục tạo payload và gửi qua MQTT với cấu hình rỗng nếu không có gì để gửi.
+                // Điều này cho phép thiết bị "reset" một phần cấu hình nếu cần.
 
                 const payload: DeviceConfigPayload = {
                     transactionId: transactionId
                 };
                 // Đặt dữ liệu đã lọc vào trường sectionName trong payload
+                // Nếu filteredConfigData là mảng, nó sẽ được gán trực tiếp.
+                // Nếu là object, nó sẽ được gán.
                 payload[sectionName] = filteredConfigData;
 
                 const publishSuccess = publishJson(client, configTopic, payload);
@@ -1328,8 +1354,50 @@ export async function updateIotSection(
             console.log(`[${sectionName}] Thiết bị ${deviceMAC} đã xác nhận cấu hình. Cập nhật database.`);
 
             // Cập nhật database sau khi thiết bị xác nhận
-            // Sử dụng trực tiếp requestBody vì nó chứa đối tượng JSON config (e.g., { wifi_config: {...} })
-            const updatedIot = await iot.update(requestBody);
+            // Sử dụng requestBody gốc từ FE để cập nhật database
+            // Lý do: Nếu FE gửi { wifiConfig: { ssid: "mywifi", pw: "" } }
+            // Filtered payload MQTT sẽ chỉ là { wifi: { ssid: "mywifi" } }
+            // Nhưng DB cần lưu cả { ssid: "mywifi", pw: "" } để phản ánh trạng thái chính xác.
+            // Hoặc nếu bạn muốn DB chỉ lưu các giá trị không rỗng, bạn cần áp dụng lại logic lọc cho DB.
+            // Giả định bạn muốn DB lưu những gì FE đã gửi, bao gồm cả rỗng/null,
+            // chỉ MQTT payload là được lọc.
+            // Nếu muốn DB cũng lọc theo logic tương tự MQTT, hãy áp dụng filteredConfigData cho DB.
+
+            // Để phù hợp với việc bạn muốn "bỏ" các giá trị undefined/null/empty/[] khỏi DB,
+            // chúng ta cần áp dụng lại logic lọc cho `requestBody` trước khi cập nhật DB.
+            let updatedIotDataForDb: { [key: string]: any } = {};
+
+            // Lấy ra phần cấu hình liên quan (ví dụ: wifiConfig) từ requestBody
+            const configForDb = requestBody[`${sectionName}Config`];
+            if (configForDb && typeof configForDb === 'object' && !Array.isArray(configForDb)) {
+                // Lọc các giá trị cho phần config của DB
+                const filteredConfigForDb: { [key: string]: any } = {};
+                for (const key in configForDb) {
+                    if (configForDb.hasOwnProperty(key)) {
+                        const value = configForDb[key];
+                        // Lọc bỏ null, undefined, mảng rỗng, chuỗi rỗng
+                        if (value !== null && typeof value !== 'undefined' && !(Array.isArray(value) && value.length === 0) && value !== '') {
+                            filteredConfigForDb[key] = value;
+                        }
+                    }
+                }
+                updatedIotDataForDb[`${sectionName}Config`] = filteredConfigForDb;
+            } else if (Array.isArray(configForDb) && configForDb.length > 0) {
+                // Nếu là mảng có dữ liệu, giữ nguyên cho DB
+                updatedIotDataForDb[`${sectionName}Config`] = configForDb;
+            } else if (Array.isArray(configForDb) && configForDb.length === 0) {
+                // Nếu là mảng rỗng, bạn muốn nó được "bỏ" khỏi DB, có nghĩa là set nó thành null hoặc undefined
+                // Tùy thuộc vào cách Sequelize/Mongoose xử lý việc này.
+                // Với Sequelize, nếu bạn gửi { field: null }, nó sẽ lưu null.
+                // Để "bỏ", có thể không gửi trường đó, hoặc gửi { field: undefined }.
+                // Trong trường hợp này, nếu `filteredConfigForDb` là rỗng (sau khi lọc),
+                // nó sẽ được gán `{}` cho trường config, điều này có thể mong muốn.
+                // Nếu muốn hoàn toàn xóa trường đó khỏi bản ghi DB nếu nó rỗng, cần logic phức tạp hơn.
+                // Hiện tại, `{}` là hành vi phổ biến.
+                updatedIotDataForDb[`${sectionName}Config`] = {}; // Lưu rỗng object nếu tất cả bị lọc
+            }
+
+            const updatedIot = await iot.update(updatedIotDataForDb); // Cập nhật DB với dữ liệu đã lọc
             MasterIotGlobal.replaceById(updatedIot);
 
             finalUpdatedIotRecord = updatedIot;
