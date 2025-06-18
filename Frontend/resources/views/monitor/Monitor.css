@@ -2,3 +2,40 @@
 .row-missed-packet-inline {
     background-color: #ffe6e6 !important;
 }
+
+/* Màu placeholder cho input HTML thông thường (dùng trong ClearableInput của bạn) */
+input::placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+    font-weight: normal;
+}
+input::-webkit-input-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+input::-moz-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+input:-ms-input-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+
+/* Màu placeholder cho input của Ant Design DatePicker */
+.ant-picker-input > input::placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+.ant-picker-input > input::-webkit-input-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+.ant-picker-input > input::-moz-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}
+.ant-picker-input > input:-ms-input-placeholder {
+    color: #a0a0a0;
+    opacity: 1;
+}

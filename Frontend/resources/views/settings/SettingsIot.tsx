@@ -371,7 +371,7 @@ const SettingsIot: React.FC = () => {
             {/* Bảng danh sách thiết bị */}
             <div className="card" style={{
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Thêm box-shadow nhẹ nhàng
-                borderRadius: '8px', // Bo tròn góc nhẹ
+                borderRadius: '2px', // Bo tròn góc nhẹ
                 overflow: 'hidden' // Đảm bảo box-shadow không bị tràn
             }}>
                 <div className="card-body">

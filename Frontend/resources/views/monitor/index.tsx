@@ -1,31 +1,29 @@
 import React, { useCallback, useEffect, useState, useRef, CSSProperties } from "react";
-import { useSocket } from "../../../context/SocketContext"; // Đảm bảo đường dẫn đúng
-import moment from "moment"; // Đảm bảo đã cài đặt: npm install moment
+import { useSocket } from "../../../context/SocketContext";
+import moment, { Moment } from "moment";
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { DatePicker } from 'antd';
+import 'antd/dist/reset.css'; // For Ant Design v5. For v4: 'antd/dist/antd.css'
+
+import ClearableInput from './ClearableInput'; // Keep this for text inputs
+import "./Monitor.css";
 
 // --- Interfaces ---
 
-// Loại bỏ IotDeviceInfo vì không còn cần lấy thông tin thiết bị riêng
-// interface IotDeviceInfo {
-//     id: string;
-//     name: string;
-//     mac: string;
-// }
-
-// Interface cho dữ liệu giám sát
 interface MonitorDataItem {
     _id: string;
     isMissed?: boolean;
     cmd?: string;
     deviceId: string;
-    deviceName?: string; // Giờ đây có thể nhận trực tiếp từ backend
-    mac?: string;       // Giờ đây có thể nhận trực tiếp từ backend
+    deviceName?: string;
+    mac?: string;
     timestamp: number; // Unix timestamp in SECONDS (sẽ nhân * 1000 cho moment)
     value?: number | string | boolean;
     key: string;
     [key: string]: any;
 }
 
-// Interface cho thông tin phân trang
 interface PaginationInfo {
     method: 'offset';
     totalRecords: number;
@@ -39,25 +37,24 @@ interface PaginationInfo {
     sortOrder: 'asc' | 'desc';
 }
 
-// Interface cho cấu hình cột bảng
 interface TableColumn {
     title: string;
     dataIndex: string;
     key: string;
     sortable?: boolean;
+    hideable?: boolean;
 }
 
-// Kiểu dữ liệu cho các giá trị input trong panel lọc
 type FilterInputValues = {
-    deviceId?: string; // Sẽ lấy từ dropdown deviceName (nhưng dropdown sẽ không cần load thiết bị nữa)
+    deviceId?: string;
     cmd?: string;
-    startTime?: string; // Chuỗi datetime-local (YYYY-MM-DDTHH:mm)
-    endTime?: string;   // Chuỗi datetime-local (YYYY-MM-DDTHH:mm)
+    startTime?: string;
+    endTime?: string;
 };
 
 
 // --- Hằng số ---
-const API_BASE_URL = 'http://localhost:3335/api'; // Đã đổi port thành 3335
+const API_BASE_URL = 'http://localhost:3335/api';
 
 // --- Inline CSS Styles ---
 const styles = {
@@ -90,12 +87,12 @@ const styles = {
         marginBottom: '2px',
         fontSize: '13px',
     } as CSSProperties,
-    filterInput: {
-        padding: '10px 12px',
-        border: '1px solid #ddd',
+    filterInput: { // This style will be passed to Ant Design DatePicker via its `style` prop
+        padding: '10px 12px', // Ant Design already has good padding, but can override
+        border: '1px solid #ddd', // Ant Design inputs have their own borders
         borderRadius: '3px',
         fontSize: '14px',
-        width: '200px',
+        // width: '200px', // Set width directly on DatePicker style prop
     } as CSSProperties,
     filterSelect: {
         padding: '10px 12px',
@@ -274,20 +271,52 @@ const styles = {
         color: '#ff4d4f',
         border: '1px solid #f0c2c2',
     } as CSSProperties,
+    columnPickerContainer: {
+        position: 'relative',
+        display: 'inline-block',
+        marginLeft: '10px',
+    } as CSSProperties,
+    columnPickerDropdown: {
+        position: 'absolute',
+        top: '100%',
+        right: 0,
+        marginTop: '8px',
+        backgroundColor: '#fff',
+        border: '1px solid #e0e0e0',
+        borderRadius: '4px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        zIndex: 200,
+        minWidth: '180px',
+        padding: '10px 0',
+        maxHeight: '300px',
+        overflowY: 'auto',
+    } as CSSProperties,
+    columnPickerItem: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '8px 15px',
+        cursor: 'pointer',
+    } as CSSProperties,
+    columnPickerItemHover: {
+        backgroundColor: '#f5f5f5',
+    } as CSSProperties,
+    columnPickerCheckbox: {
+        marginRight: '8px',
+    } as CSSProperties,
 };
 
 const Monitor: React.FC = () => {
     const socket = useSocket();
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const [monitorData, setMonitorData] = useState<MonitorDataItem[]>([]);
-    // Loại bỏ state iotDevices vì không cần nữa
-    // const [iotDevices, setIotDevices] = useState<IotDeviceInfo[]>([]);
-    // Loại bỏ state loadingIotDevices vì không cần nữa
-    // const [loadingIotDevices, setLoadingIotDevices] = useState<boolean>(true);
     const [tableColumns, setTableColumns] = useState<TableColumn[]>([]);
-    const [loading, setLoading] = useState<boolean>(false); // Chỉ còn loading cho dữ liệu chính
+    const [loading, setLoading] = useState<boolean>(false);
     const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
 
-    const [filterInputValues, setFilterInputValues] = useState<FilterInputValues>({});
+    const [appliedFilters, setAppliedFilters] = useState<FilterInputValues>({});
+    const [pendingFilters, setPendingFilters] = useState<FilterInputValues>({}); // For inputs not yet applied
 
     const [sorter, setSorter] = useState<{ field: 'timestamp' | 'id'; order: 'asc' | 'desc' }>({
         field: 'timestamp',
@@ -309,100 +338,97 @@ const Monitor: React.FC = () => {
 
     const allKeysRef = useRef(new Set<string>());
 
+    const [selectedColumnKeys, setSelectedColumnKeys] = useState<Set<string>>(new Set());
+    const [isColumnPickerOpen, setIsColumnPickerOpen] = useState<boolean>(false);
+    const columnPickerRef = useRef<HTMLDivElement>(null);
+
     // --- Helper Functions ---
     const titleCase = useCallback((str: string): string => {
         return str.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
     }, []);
 
-    // Loại bỏ hàm getDeviceInfo vì thông tin đã có sẵn từ backend
-    // const getDeviceInfo = useCallback((deviceId: string): { name: string; mac: string } => {
-    //     debugger;
-    //     const device = iotDevices.find(dev => dev.id === deviceId);
-    //     return {
-    //         name: device ? device.name : `Thiết bị không rõ (${deviceId})`,
-    //         mac: device ? device.mac : 'N/A'
-    //     };
-    // }, [iotDevices]); // iotDevices không còn là dependency
+    const buildUrlParams = useCallback((
+        currentAppliedFilters: FilterInputValues,
+        currentPage: number,
+        currentLimit: number,
+        currentSorterField: 'timestamp' | 'id',
+        currentSorterOrder: 'asc' | 'desc'
+    ): string => {
+        const params = new URLSearchParams();
+
+        if (currentAppliedFilters.deviceId) params.append('deviceId', currentAppliedFilters.deviceId);
+        if (currentAppliedFilters.cmd) params.append('cmd', currentAppliedFilters.cmd);
+
+        // Convert string date time to Unix timestamp (seconds) for URL
+        if (currentAppliedFilters.startTime) {
+            const momentTime = moment(currentAppliedFilters.startTime);
+            if (momentTime.isValid()) params.append('startTime', momentTime.unix().toString());
+        }
+        if (currentAppliedFilters.endTime) {
+            const momentTime = moment(currentAppliedFilters.endTime);
+            if (momentTime.isValid()) params.append('endTime', momentTime.unix().toString());
+        }
+
+        params.append('page', currentPage.toString());
+        params.append('limit', currentLimit.toString());
+        params.append('sortBy', currentSorterField);
+        params.append('sortOrder', currentSorterOrder);
+
+        return params.toString();
+    }, []);
 
     // --- Column Generation Logic ---
     const generateColumns = useCallback((currentData: MonitorDataItem[]) => {
-        // Cố định các cột chính bao gồm deviceName và mac
         const fixedColumns: TableColumn[] = [
-            { title: 'STT', dataIndex: 'stt', key: 'stt' },
-            { title: 'Tên thiết bị', dataIndex: 'deviceName', key: 'deviceName', sortable: false },
-            { title: 'MAC', dataIndex: 'mac', key: 'mac', sortable: false },
-            { title: 'Lệnh (CMD)', dataIndex: 'cmd', key: 'cmd', sortable: false },
-            { title: 'Thời gian', dataIndex: 'timestamp', key: 'timestamp', sortable: true },
+            { title: 'STT', dataIndex: 'stt', key: 'stt', hideable: false },
+            { title: 'Tên thiết bị', dataIndex: 'deviceName', key: 'deviceName', sortable: false, hideable: true },
+            { title: 'MAC', dataIndex: 'mac', key: 'mac', sortable: false, hideable: true },
+            { title: 'Lệnh (CMD)', dataIndex: 'cmd', key: 'cmd', sortable: false, hideable: true },
+            { title: 'Thời gian', dataIndex: 'timestamp', key: 'timestamp', sortable: true, hideable: true },
         ];
 
-        if (!currentData || currentData.length === 0) {
-            // Nếu không có dữ liệu, đảm bảo chỉ hiển thị các cột cố định
-            if (tableColumns.length !== fixedColumns.length ||
-                !fixedColumns.every((col, i) => tableColumns[i] && tableColumns[i].key === col.key)) {
-                setTableColumns(fixedColumns);
-            }
-            return;
-        }
-
-        const newKeys = new Set<string>();
+        const newKeysFromData = new Set<string>();
         currentData.forEach(item => {
-            Object.keys(item).forEach(key => newKeys.add(key));
+            Object.keys(item).forEach(key => newKeysFromData.add(key));
         });
 
-        let keysAdded = false;
-        newKeys.forEach(key => {
+        // Tạm thời lưu trữ các khóa cột đã biết trước khi cập nhật allKeysRef
+        const previouslyKnownKeys = new Set(allKeysRef.current);
+
+        newKeysFromData.forEach(key => {
             if (!allKeysRef.current.has(key)) {
                 allKeysRef.current.add(key);
-                keysAdded = true;
             }
         });
 
-        const allCurrentRefKeys = Array.from(allKeysRef.current);
-        // Lấy keys của các cột hiện tại, loại trừ STT vì nó được thêm tự động
-        const currentColumnKeys = new Set(tableColumns.filter(col => col.key !== 'stt').map(col => col.key));
-
-        const hasColumnStructureChanged = allCurrentRefKeys.length !== currentColumnKeys.size ||
-            !allCurrentRefKeys.every(key => currentColumnKeys.has(key));
-
-        if (!keysAdded && !hasColumnStructureChanged) {
-            return;
-        }
-
-        // Ưu tiên thứ tự hiển thị và các khóa cần ẩn
         const preferredOrder = ['deviceName', 'mac', 'cmd', 'status', 'timestamp', 'value', '_id'];
-        const hiddenKeys = new Set(['isMissed', 'deviceId', 'key', '__v', '_id']); // deviceId cũng có thể ẩn đi nếu deviceName/mac đủ
+        const hiddenKeys = new Set(['isMissed', 'deviceId', 'key', '__v', '_id']);
 
         const sortedDynamicKeys = Array.from(allKeysRef.current).sort((a, b) => {
             const indexA = preferredOrder.indexOf(a);
             const indexB = preferredOrder.indexOf(b);
 
-            // Xử lý các khóa ẩn trước
             if (hiddenKeys.has(a) && hiddenKeys.has(b)) return 0;
             if (hiddenKeys.has(a)) return 1;
             if (hiddenKeys.has(b)) return -1;
 
-            // Xử lý các khóa không có trong preferredOrder
             if (indexA === -1 && indexB === -1) {
-                return a.localeCompare(b); // Sắp xếp theo thứ tự chữ cái
+                return a.localeCompare(b);
             }
-            if (indexA === -1) return 1; // a không có trong preferredOrder, đẩy xuống cuối
-            if (indexB === -1) return -1; // b không có trong preferredOrder, đẩy b lên trước a
-            return indexA - indexB; // Sắp xếp theo preferredOrder
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
         });
 
-        // Lọc ra các cột động (không phải cột cố định và không bị ẩn)
         const dynamicColumns: TableColumn[] = sortedDynamicKeys
             .filter(key => !hiddenKeys.has(key) && !fixedColumns.some(fCol => fCol.key === key))
-            .map(key => {
-                const title = titleCase(key);
-                const sortable = ['timestamp', '_id'].includes(key); // _id vẫn có thể sortable nếu muốn
-                return {
-                    title: title,
-                    dataIndex: key,
-                    key: key,
-                    sortable: sortable,
-                };
-            });
+            .map(key => ({
+                title: titleCase(key),
+                dataIndex: key,
+                key: key,
+                sortable: ['timestamp', '_id'].includes(key),
+                hideable: true,
+            }));
 
         const finalColumns = [
             ...fixedColumns,
@@ -410,9 +436,38 @@ const Monitor: React.FC = () => {
         ];
 
         setTableColumns(finalColumns);
-    }, [tableColumns.length, titleCase]); // Không còn phụ thuộc vào iotDevices
 
-    // --- Data Fetching Logic (for monitoring data) ---
+        // --- SỬA ĐỔI LOGIC ĐỂ GIỮ TRẠNG THÁI HIỂN THỊ CỘT ---
+        setSelectedColumnKeys(prevKeys => {
+            if (prevKeys.size === 0) {
+                // Tải lần đầu: chọn tất cả các cột có thể ẩn (hideable) theo mặc định
+                return new Set(finalColumns.filter(c => c.hideable !== false).map(c => c.key));
+            } else {
+                // Giữ trạng thái đã chọn trước đó và chỉ thêm các cột THỰC SỰ MỚI
+                const newSet = new Set<string>();
+
+                // Giữ lại các cột đã chọn trước đó (nếu chúng vẫn tồn tại trong finalColumns)
+                prevKeys.forEach(key => {
+                    if (finalColumns.some(col => col.key === key)) {
+                        newSet.add(key);
+                    }
+                });
+
+                // Thêm các cột MỚI được phát hiện (chưa từng có trong allKeysRef.current trước đó)
+                // và chúng là hideable, vào trạng thái đã chọn (hiển thị)
+                finalColumns.forEach(col => {
+                    if (col.hideable !== false && !previouslyKnownKeys.has(col.key)) {
+                        newSet.add(col.key);
+                    }
+                });
+                return newSet;
+            }
+        });
+        // -------------------------------------------------------------
+
+    }, [titleCase]); // tableColumns.length không cần thiết ở đây, nó sẽ gây vòng lặp vô tận
+
+    // --- Data Fetching Logic ---
     const fetchData = useCallback(async (
         {
             page: reqPage = 1,
@@ -421,8 +476,8 @@ const Monitor: React.FC = () => {
             sortOrder: reqSortOrder = sorter.order,
             deviceId: reqDeviceId,
             cmd: reqCmd,
-            startTime: reqStartTime, // This will be the formatted string
-            endTime: reqEndTime,     // This will be the formatted string
+            startTime: reqStartTime,
+            endTime: reqEndTime,
         }: {
             page?: number;
             limit?: number;
@@ -434,7 +489,7 @@ const Monitor: React.FC = () => {
             endTime?: string;
         } = {}
     ) => {
-        setLoading(true); // Chỉ còn loading chính
+        setLoading(true);
         try {
             const params = new URLSearchParams();
             params.append('page', reqPage.toString());
@@ -446,7 +501,6 @@ const Monitor: React.FC = () => {
             if (reqDeviceId) params.append('deviceId', reqDeviceId);
             if (reqCmd) params.append('cmd', reqCmd);
 
-            // Convert formatted string to Unix timestamp (seconds) before sending to API
             if (reqStartTime) {
                 const momentTime = moment(reqStartTime);
                 if (momentTime.isValid()) {
@@ -471,11 +525,10 @@ const Monitor: React.FC = () => {
                 throw new Error(result.message || 'Lỗi khi tải dữ liệu');
             }
 
-            // Dữ liệu đã có sẵn deviceName và mac từ backend, chỉ cần thêm key
             const dataWithKeys: MonitorDataItem[] = result.data.map((item: MonitorDataItem, index: number) => {
                 return {
                     ...item,
-                    key: `${item._id || item.timestamp}-${Date.now()}-${index}`, // Tạo key unique
+                    key: `${item._id || item.timestamp}-${Date.now()}-${index}`,
                 };
             });
 
@@ -489,8 +542,8 @@ const Monitor: React.FC = () => {
                 hasPreviousPage: result.pagination.hasPreviousPage,
                 sortBy: result.pagination.sortBy,
                 sortOrder: result.pagination.sortOrder,
-                nextCursor: null, // Keep null for offset pagination
-                previousCursor: null, // Keep null for offset pagination
+                nextCursor: null,
+                previousCursor: null,
             }));
 
             generateColumns(dataWithKeys);
@@ -507,24 +560,52 @@ const Monitor: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [entriesPerPage, sorter.field, sorter.order, generateColumns]); // Loại bỏ getDeviceInfo và loadingIotDevices, iotDevices từ dependencies
+    }, [entriesPerPage, sorter.field, sorter.order, generateColumns]);
 
     // --- Socket.IO Event Handler ---
     const handleSocketEventMonitor = useCallback((eventData: MonitorDataItem) => {
-        console.log(eventData);
-        const hasActiveFilters = Object.keys(filterInputValues).some(key => {
-            const filterValue = filterInputValues[key as keyof FilterInputValues];
-            if (typeof filterValue === 'string') {
-                return filterValue.trim() !== '';
-            }
-            return filterValue !== undefined;
-        });
+        console.log("Dữ liệu nhận từ socket:", eventData);
 
-        // Chỉ thêm dữ liệu từ socket nếu đang ở trang 1, không có bộ lọc và sắp xếp theo timestamp giảm dần
-        if (pagination.currentPage === 1 && !hasActiveFilters && sorter.field === 'timestamp' && sorter.order === 'desc') {
+        const { deviceId, cmd, startTime, endTime } = appliedFilters; // Use appliedFilters
+
+        let passesFilter = true;
+
+        if (deviceId && eventData.deviceId) {
+            if (!eventData.deviceId.includes(deviceId)) {
+                passesFilter = false;
+            }
+        }
+
+        if (cmd && eventData.cmd) {
+            if (!eventData.cmd.includes(cmd)) {
+                passesFilter = false;
+            }
+        }
+
+        const eventTimestampInSeconds = eventData.timestamp;
+
+        if (startTime) {
+            const filterStartTimeMoment = moment(startTime);
+            if (filterStartTimeMoment.isValid() && eventTimestampInSeconds < filterStartTimeMoment.unix()) {
+                passesFilter = false;
+            }
+        }
+
+        if (endTime) {
+            const filterEndTimeMoment = moment(endTime);
+            if (filterEndTimeMoment.isValid() && eventTimestampInSeconds > filterEndTimeMoment.unix()) {
+                passesFilter = false;
+            }
+        }
+
+        if (!passesFilter) {
+            console.log("Dữ liệu từ socket không phù hợp với bộ lọc hiện tại.");
+            return;
+        }
+
+        if (pagination.currentPage === 1 && sorter.field === 'timestamp' && sorter.order === 'desc') {
             const rowKey = eventData._id || `${eventData.timestamp || Date.now()}-${eventData.deviceId || 'unknown'}-${Math.random().toString(36).substr(2, 9)}`;
 
-            // Dữ liệu từ socket đã có sẵn deviceName và mac
             const dataWithKey = {
                 ...eventData,
                 key: rowKey,
@@ -535,49 +616,73 @@ const Monitor: React.FC = () => {
                 return newData.slice(0, pagination.pageSize);
             });
             generateColumns([dataWithKey]);
-            setPagination(prev => ({ ...prev, totalRecords: prev.totalRecords + 1 }));
+        } else {
+            console.log("Dữ liệu từ socket phù hợp bộ lọc nhưng không thêm vào vì không ở trang 1 hoặc sắp xếp khác.");
         }
-    }, [filterInputValues, pagination.currentPage, pagination.pageSize, sorter.field, sorter.order, generateColumns, pagination.totalRecords]); // Loại bỏ getDeviceInfo từ dependencies
+    }, [appliedFilters, pagination.currentPage, pagination.pageSize, sorter.field, sorter.order, generateColumns]);
 
     // --- Effects ---
 
-    // Loại bỏ Effect để tải danh sách thiết bị IoT vì không cần nữa
-    // useEffect(() => {
-    //     const fetchIotDevices = async () => {
-    //         setLoadingIotDevices(true);
-    //         try {
-    //             const response = await fetch(`${API_BASE_URL}/iots/get-data-iots`);
-    //             const result = await response.json();
-    //             if (!response.ok) {
-    //                 throw new Error(result.message || 'Không thể tải thông tin thiết bị IoT');
-    //             }
-    //             setIotDevices(result.data);
-    //         } catch (error) {
-    //             console.error("Lỗi khi tải thông tin thiết bị IoT:", error);
-    //             alert("Không thể tải thông tin thiết bị IoT. Vui lòng kiểm tra console.");
-    //         } finally {
-    //             setLoadingIotDevices(false);
-    //         }
-    //     };
-    //     fetchIotDevices();
-    // }, []);
+    // Effect to read URL params and set initial state
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const initialFilters: FilterInputValues = {
+            deviceId: params.get('deviceId') || '',
+            cmd: params.get('cmd') || '',
+            startTime: '', // Initialize as empty string
+            endTime: '',   // Initialize as empty string
+        };
 
-    // Effect để tải dữ liệu giám sát khi các tham số thay đổi (filterInputValues, sorter, pagination.currentPage, entriesPerPage)
+        const rawStartTime = params.get('startTime');
+        if (rawStartTime) {
+            const momentTime = moment.unix(parseInt(rawStartTime));
+            if (momentTime.isValid()) {
+                initialFilters.startTime = momentTime.format('YYYY-MM-DDTHH:mm:ss');
+            }
+        }
+        const rawEndTime = params.get('endTime');
+        if (rawEndTime) {
+            const momentTime = moment.unix(parseInt(rawEndTime));
+            if (momentTime.isValid()) {
+                initialFilters.endTime = momentTime.format('YYYY-MM-DDTHH:mm:ss');
+            }
+        }
+
+        const initialPage = parseInt(params.get('page') || '1');
+        const initialLimit = parseInt(params.get('limit') || '10');
+        const initialSortBy = (params.get('sortBy') as 'timestamp' | 'id') || 'timestamp';
+        const initialSortOrder = (params.get('sortOrder') as 'asc' | 'desc') || 'desc';
+
+        setAppliedFilters(initialFilters);
+        setPendingFilters(initialFilters); // pendingFilters also initialized from URL
+
+        setPagination(prev => ({
+            ...prev,
+            currentPage: initialPage,
+            pageSize: initialLimit,
+        }));
+        setEntriesPerPage(initialLimit);
+        setSorter({ field: initialSortBy, order: initialSortOrder });
+
+    }, [location.search]);
+
+
+    // Effect to fetch monitoring data when applied filters, sorter, pagination.currentPage, or entriesPerPage change
     useEffect(() => {
         const currentFilters: Parameters<typeof fetchData>[0] = {
             page: pagination.currentPage,
             limit: entriesPerPage,
             sortBy: sorter.field,
             sortOrder: sorter.order,
-            deviceId: filterInputValues.deviceId,
-            cmd: filterInputValues.cmd,
-            startTime: filterInputValues.startTime,
-            endTime: filterInputValues.endTime,
+            deviceId: appliedFilters.deviceId,
+            cmd: appliedFilters.cmd,
+            startTime: appliedFilters.startTime,
+            endTime: appliedFilters.endTime,
         };
         fetchData(currentFilters);
-    }, [entriesPerPage, filterInputValues, sorter, pagination.currentPage, fetchData]); // Loại bỏ loadingIotDevices, iotDevices từ dependencies
+    }, [entriesPerPage, appliedFilters, sorter, pagination.currentPage, fetchData]);
 
-    // Effect cho Socket.IO event listener (không đổi)
+    // Effect for Socket.IO event listener
     useEffect(() => {
         if (socket) {
             socket.on("server_emit_monitor", handleSocketEventMonitor);
@@ -589,39 +694,88 @@ const Monitor: React.FC = () => {
         };
     }, [socket, handleSocketEventMonitor]);
 
+    // Effect to close column picker dropdown when clicked outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (columnPickerRef.current && !columnPickerRef.current.contains(event.target as Node)) {
+                setIsColumnPickerOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     // --- Handlers ---
 
-    const handleFilterInputChange = useCallback((field: keyof FilterInputValues, value: string) => {
-        setFilterInputValues(prev => ({ ...prev, [field]: value }));
+    // Handle change for text inputs (deviceId, cmd)
+    const handleFilterInputChange = useCallback((field: 'deviceId' | 'cmd', value: string) => {
+        setPendingFilters(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    // Handle change for DatePicker inputs (startTime, endTime)
+    const handleDateFilterChange = useCallback((field: 'startTime' | 'endTime', date: Moment | null) => {
+        setPendingFilters(prev => ({
+            ...prev,
+            [field]: date && date.isValid() ? date.format('YYYY-MM-DDTHH:mm:ss') : '' // Convert Moment to string or empty string
+        }));
     }, []);
 
     const handleApplyFilters = useCallback(() => {
-        fetchData({
-            page: 1,
-            limit: entriesPerPage,
-            sortBy: sorter.field,
-            sortOrder: sorter.order,
-            ...filterInputValues
-        });
+        setAppliedFilters(pendingFilters); // Apply pending filters
         setPagination(prev => ({ ...prev, currentPage: 1 }));
-    }, [filterInputValues, fetchData, entriesPerPage, sorter.field, sorter.order]);
+
+        const newParams = buildUrlParams(
+            pendingFilters, // Use pendingFilters to build URL
+            1, // Reset to page 1
+            entriesPerPage,
+            sorter.field,
+            sorter.order
+        );
+        navigate(`?${newParams}`);
+    }, [pendingFilters, entriesPerPage, sorter.field, sorter.order, buildUrlParams, navigate]);
 
     const handleClearFilters = useCallback(() => {
-        setFilterInputValues({});
+        setPendingFilters({});    // Clear input UI
+        setAppliedFilters({});    // Clear applied filters to trigger data fetch
         setPagination(prev => ({ ...prev, currentPage: 1 }));
-    }, []);
+
+        const newParams = buildUrlParams(
+            {}, // Empty filters for URL
+            1,  // Page 1
+            entriesPerPage,
+            sorter.field,
+            sorter.order
+        );
+        navigate(`?${newParams}`);
+    }, [entriesPerPage, sorter.field, sorter.order, buildUrlParams, navigate]);
 
     const handleSorterChange = useCallback((field: string) => {
         if (field === 'timestamp' || field === '_id') {
-            setSorter(prev => ({
-                field: field === '_id' ? 'id' : field as 'timestamp' | 'id',
-                order: prev.field === (field === '_id' ? 'id' : field) && prev.order === 'desc' ? 'asc' : 'desc',
-            }));
+            setSorter(prev => {
+                const newField = field === '_id' ? 'id' : field as 'timestamp' | 'id';
+                const newOrder = prev.field === newField && prev.order === 'desc' ? 'asc' : 'desc';
+
+                const newParams = buildUrlParams(
+                    appliedFilters,
+                    1, // Reset to page 1 on sort change
+                    entriesPerPage,
+                    newField,
+                    newOrder
+                );
+                navigate(`?${newParams}`);
+
+                return {
+                    field: newField,
+                    order: newOrder,
+                };
+            });
             setPagination(prev => ({ ...prev, currentPage: 1 }));
         } else {
             console.warn(`Sắp xếp theo cột '${field}' hiện không được hỗ trợ.`);
         }
-    }, []);
+    }, [appliedFilters, entriesPerPage, buildUrlParams, navigate]);
 
     const handlePaginationButtonClick = useCallback((page: number | 'prev' | 'next' | 'last') => {
         const totalPages = pagination.totalRecords !== undefined
@@ -634,7 +788,8 @@ const Monitor: React.FC = () => {
             targetPage = page;
         } else if (page === 'prev') {
             targetPage = pagination.currentPage - 1;
-        } else if (page === 'next') {
+        }
+        else if (page === 'next') {
             targetPage = pagination.currentPage + 1;
         } else if (page === 'last') {
             targetPage = totalPages;
@@ -643,10 +798,20 @@ const Monitor: React.FC = () => {
         targetPage = Math.max(1, Math.min(totalPages, targetPage));
 
         if (targetPage !== pagination.currentPage) {
-            setPagination(prev => ({ ...prev, currentPage: targetPage }));
+            setPagination(prev => {
+                const newPage = targetPage;
+                const newParams = buildUrlParams(
+                    appliedFilters,
+                    newPage,
+                    entriesPerPage,
+                    sorter.field,
+                    sorter.order
+                );
+                navigate(`?${newParams}`);
+                return { ...prev, currentPage: newPage };
+            });
         }
-    }, [pagination.currentPage, pagination.totalRecords, entriesPerPage]);
-
+    }, [pagination.currentPage, pagination.totalRecords, entriesPerPage, appliedFilters, sorter.field, sorter.order, buildUrlParams, navigate]);
 
     const renderPageNumbers = useCallback(() => {
         const totalPages = pagination.totalRecords !== undefined
@@ -704,12 +869,24 @@ const Monitor: React.FC = () => {
                     ...(typeof p !== 'number' ? styles.paginationButtonDisabled : {})
                 }}
                 onClick={() => typeof p === 'number' && handlePaginationButtonClick(p)}
-                disabled={typeof p !== 'number' || loading} // Chỉ phụ thuộc vào loading chính
+                disabled={typeof p !== 'number' || loading}
             >
                 {p}
             </button>
         ));
     }, [pagination.totalRecords, pagination.currentPage, entriesPerPage, loading, handlePaginationButtonClick]);
+
+    const handleColumnToggle = useCallback((columnKey: string, isChecked: boolean) => {
+        setSelectedColumnKeys(prev => {
+            const newSet = new Set(prev);
+            if (isChecked) {
+                newSet.add(columnKey);
+            } else {
+                newSet.delete(columnKey);
+            }
+            return newSet;
+        });
+    }, []);
 
     const totalRecords = pagination.totalRecords || 0;
     const startIndex = totalRecords > 0 ? (pagination.currentPage - 1) * pagination.pageSize + 1 : 0;
@@ -717,28 +894,30 @@ const Monitor: React.FC = () => {
 
     return (
         <div style={styles.container}>
-            {/* Panel Lọc Riêng Biệt */}
+            {/* Filter Panel */}
             <div style={styles.filterPanel}>
                 <div style={styles.filterGroup}>
                     <label style={styles.filterLabel} htmlFor="filterDeviceId">ID Thiết bị</label>
-                    <input
+                    <ClearableInput
                         id="filterDeviceId"
-                        type="text" // Đổi từ select sang input text vì không còn danh sách thiết bị để chọn
-                        style={styles.filterInput}
-                        value={filterInputValues.deviceId || ''}
+                        type="text"
+                        inputStyle={styles.filterInput}
+                        value={pendingFilters.deviceId || ''}
                         onChange={(e) => handleFilterInputChange('deviceId', e.target.value)}
+                        onClear={() => handleFilterInputChange('deviceId', '')}
                         placeholder="Nhập Device ID"
                         disabled={loading}
                     />
                 </div>
                 <div style={styles.filterGroup}>
                     <label style={styles.filterLabel} htmlFor="filterCmd">Lệnh (CMD)</label>
-                    <input
+                    <ClearableInput
                         id="filterCmd"
                         type="text"
-                        style={styles.filterInput}
-                        value={filterInputValues.cmd || ''}
+                        inputStyle={styles.filterInput}
+                        value={pendingFilters.cmd || ''}
                         onChange={(e) => handleFilterInputChange('cmd', e.target.value)}
+                        onClear={() => handleFilterInputChange('cmd', '')}
                         placeholder="Nhập lệnh CMD"
                         disabled={loading}
                     />
@@ -746,18 +925,25 @@ const Monitor: React.FC = () => {
                 <div style={styles.filterGroup}>
                     <label style={styles.filterLabel}>Thời gian</label>
                     <div style={styles.filterDateRange}>
-                        <input
-                            type="datetime-local"
-                            style={{ ...styles.filterInput, width: '250px' }}
-                            value={filterInputValues.startTime || ''}
-                            onChange={(e) => handleFilterInputChange('startTime', e.target.value)}
+                        <DatePicker
+                            // Convert string in state to Moment object for DatePicker, or null if empty/invalid
+                            value={pendingFilters.startTime ? moment(pendingFilters.startTime) : null}
+                            onChange={(date: Moment | null) => handleDateFilterChange('startTime', date)}
+                            showTime={{ format: 'HH:mm:ss' }} // Enable time selection with seconds
+                            format="DD-MM-YYYY HH:mm:ss"      // Display format
+                            allowClear                       // Enable the clear button
+                            style={{ ...styles.filterInput, width: '250px' }} // Apply your custom style
+                            placeholder="Thời gian bắt đầu"
                             disabled={loading}
                         />
-                        <input
-                            type="datetime-local"
+                        <DatePicker
+                            value={pendingFilters.endTime ? moment(pendingFilters.endTime) : null}
+                            onChange={(date: Moment | null) => handleDateFilterChange('endTime', date)}
+                            showTime={{ format: 'HH:mm:ss' }}
+                            format="DD-MM-YYYY HH:mm:ss"
+                            allowClear
                             style={{ ...styles.filterInput, width: '250px' }}
-                            value={filterInputValues.endTime || ''}
-                            onChange={(e) => handleFilterInputChange('endTime', e.target.value)}
+                            placeholder="Thời gian kết thúc"
                             disabled={loading}
                         />
                     </div>
@@ -780,7 +966,7 @@ const Monitor: React.FC = () => {
                 </div>
             </div>
 
-            {/* Phần điều khiển số lượng hiển thị */}
+            {/* Header Section (Entries per page, Column Picker) */}
             <div style={styles.headerSection}>
                 <div style={styles.entriesDropdown}>
                     <span>Hiển thị</span>
@@ -788,8 +974,20 @@ const Monitor: React.FC = () => {
                         style={styles.entriesSelect}
                         value={entriesPerPage}
                         onChange={(e) => {
-                            setEntriesPerPage(parseInt(e.target.value));
-                            setPagination(prev => ({ ...prev, currentPage: 1 }));
+                            const newLimit = parseInt(e.target.value);
+                            setEntriesPerPage(newLimit);
+                            setPagination(prev => {
+                                const newPage = 1; // Reset to page 1 when changing limit
+                                const newParams = buildUrlParams(
+                                    appliedFilters,
+                                    newPage,
+                                    newLimit,
+                                    sorter.field,
+                                    sorter.order
+                                );
+                                navigate(`?${newParams}`);
+                                return { ...prev, currentPage: newPage };
+                            });
                         }}
                         disabled={loading}
                     >
@@ -801,11 +999,47 @@ const Monitor: React.FC = () => {
                     </select>
                     <span>bản ghi</span>
                 </div>
+
+                <div style={styles.columnPickerContainer} ref={columnPickerRef}>
+                    <button
+                        style={{ ...styles.button }}
+                        onClick={() => setIsColumnPickerOpen(prev => !prev)}
+                        disabled={loading}
+                    >
+                        Chọn cột hiển thị
+                    </button>
+                    {isColumnPickerOpen && (
+                        <div style={styles.columnPickerDropdown}>
+                            {tableColumns
+                                .filter(col => col.hideable !== false)
+                                .map(column => (
+                                    <div
+                                        key={`col-picker-${column.key}`}
+                                        style={styles.columnPickerItem}
+                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = styles.columnPickerItemHover.backgroundColor as string)}
+                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            id={`col-toggle-${column.key}`}
+                                            style={styles.columnPickerCheckbox}
+                                            checked={selectedColumnKeys.has(column.key)}
+                                            onChange={(e) => handleColumnToggle(column.key, e.target.checked)}
+                                            disabled={loading}
+                                        />
+                                        <label htmlFor={`col-toggle-${column.key}`}>
+                                            {column.title}
+                                        </label>
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Wrapper Bảng Dữ liệu */}
+            {/* Data Table Wrapper */}
             <div style={styles.tableWrapper}>
-                {loading && ( // Chỉ kiểm tra loading chính
+                {loading && (
                     <div style={styles.loadingOverlay}>
                         Đang tải dữ liệu...
                     </div>
@@ -813,33 +1047,35 @@ const Monitor: React.FC = () => {
                 <table style={styles.table}>
                     <thead>
                     <tr>
-                        {tableColumns.map(column => (
-                            <th
-                                key={column.key}
-                                style={{
-                                    ...styles.th,
-                                    ...(column.key === 'stt' ? styles.thCentered : {}),
-                                    ...(column.sortable ? { cursor: 'pointer' } : { cursor: 'default' }),
-                                }}
-                                onClick={() => column.sortable && handleSorterChange(column.key)}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent : 'space-between' }}>
-                                    {column.title}
-                                    {column.sortable && (
-                                        <span style={styles.sorterIcon}>
+                        {tableColumns
+                            .filter(column => selectedColumnKeys.has(column.key))
+                            .map(column => (
+                                <th
+                                    key={column.key}
+                                    style={{
+                                        ...styles.th,
+                                        ...(column.key === 'stt' ? styles.thCentered : {}),
+                                        ...(column.sortable ? { cursor: 'pointer' } : { cursor: 'default' }),
+                                    }}
+                                    onClick={() => column.sortable && handleSorterChange(column.key)}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent : 'space-between' }}>
+                                        {column.title}
+                                        {column.sortable && (
+                                            <span style={styles.sorterIcon}>
                                                 {sorter.field === column.key && sorter.order === 'asc' ? '▲' :
                                                     sorter.field === column.key && sorter.order === 'desc' ? '▼' : '⇅'}
                                             </span>
-                                    )}
-                                </div>
-                            </th>
-                        ))}
+                                        )}
+                                    </div>
+                                </th>
+                            ))}
                     </tr>
                     </thead>
                     <tbody>
                     {monitorData.length === 0 && !loading ? (
                         <tr>
-                            <td colSpan={tableColumns.length} style={{ ...styles.td, textAlign: 'left' }}>
+                            <td colSpan={tableColumns.filter(column => selectedColumnKeys.has(column.key)).length} style={{ ...styles.td, textAlign: 'left' }}>
                                 Không có dữ liệu để hiển thị.
                             </td>
                         </tr>
@@ -852,35 +1088,36 @@ const Monitor: React.FC = () => {
                                     ...(item.isMissed ? styles.rowMissedPacket : (index % 2 === 0 ? {} : styles.tableRowEven))
                                 }}
                             >
-                                {tableColumns.map(column => (
-                                    <td
-                                        key={column.key}
-                                        style={{
-                                            ...styles.td,
-                                            ...(column.key === 'stt' || column.key === 'value' ? styles.tdCentered : {}),
-                                        }}
-                                    >
-                                        {(() => {
-                                            if (column.key === 'stt') {
-                                                return (pagination.currentPage - 1) * pagination.pageSize + index + 1;
-                                            }
+                                {tableColumns
+                                    .filter(column => selectedColumnKeys.has(column.key))
+                                    .map(column => (
+                                        <td
+                                            key={column.key}
+                                            style={{
+                                                ...styles.td,
+                                                ...(column.key === 'stt' || column.key === 'value' ? styles.tdCentered : {}),
+                                            }}
+                                        >
+                                            {(() => {
+                                                if (column.key === 'stt') {
+                                                    return (pagination.currentPage - 1) * pagination.pageSize + index + 1;
+                                                }
 
-                                            // Sử dụng trực tiếp item.deviceName và item.mac
-                                            const displayValue = item[column.dataIndex as keyof MonitorDataItem];
+                                                const displayValue = item[column.dataIndex as keyof MonitorDataItem];
 
-                                            if (column.key === 'timestamp' && typeof displayValue === 'number') {
-                                                return moment(displayValue * 1000).format('DD-MM-YYYY HH:mm:ss');
-                                            }
-                                            if (typeof displayValue === 'boolean') {
-                                                return <span style={{ ...styles.tag, ...(displayValue ? styles.tagGreen : styles.tagRed) }}>{displayValue ? 'TRUE' : 'FALSE'}</span>;
-                                            }
-                                            if (displayValue === null || typeof displayValue === 'undefined' || (typeof displayValue === 'string' && displayValue.trim() === '')) {
-                                                return '-';
-                                            }
-                                            return String(displayValue);
-                                        })()}
-                                    </td>
-                                ))}
+                                                if (column.key === 'timestamp' && typeof displayValue === 'number') {
+                                                    return moment(displayValue * 1000).format('DD-MM-YYYY HH:mm:ss');
+                                                }
+                                                if (typeof displayValue === 'boolean') {
+                                                    return <span style={{ ...styles.tag, ...(displayValue ? styles.tagGreen : styles.tagRed) }}>{displayValue ? 'TRUE' : 'FALSE'}</span>;
+                                                }
+                                                if (displayValue === null || typeof displayValue === 'undefined' || (typeof displayValue === 'string' && displayValue.trim() === '')) {
+                                                    return '-';
+                                                }
+                                                return String(displayValue);
+                                            })()}
+                                        </td>
+                                    ))}
                             </tr>
                         ))
                     )}
@@ -888,19 +1125,12 @@ const Monitor: React.FC = () => {
                 </table>
             </div>
 
-            {/* Phần chân trang và phân trang */}
+            {/* Footer Section (Pagination) */}
             <div style={styles.footerSection}>
                 <div style={styles.infoText}>
                     Hiển thị {startIndex} đến {endIndex} trên tổng số {totalRecords} bản ghi
                 </div>
                 <div style={styles.paginationContainer}>
-                    <button
-                        style={{ ...styles.paginationButton, ...(!pagination.hasPreviousPage || loading ? styles.paginationButtonDisabled : {}) }}
-                        onClick={() => handlePaginationButtonClick('prev')}
-                        disabled={!pagination.hasPreviousPage || loading}
-                    >
-                        Trước
-                    </button>
                     {renderPageNumbers()}
                     <button
                         style={{ ...styles.paginationButton, ...(!pagination.hasNextPage || loading ? styles.paginationButtonDisabled : {}) }}
