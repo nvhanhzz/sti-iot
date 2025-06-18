@@ -2,8 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Button, Card, Typography, Flex, Divider, message, Spin, Tooltip } from "antd";
 import { PoweroffOutlined } from "@ant-design/icons";
 import { useSocket } from "../../../../context/SocketContext.tsx";
-
 const { Title, Text } = Typography;
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Chỉ giữ lại các HEX_COMMANDS được sử dụng
 const HEX_COMMANDS = {
@@ -70,7 +71,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
         try {
-            const response = await fetch('http://192.168.1.121:3335/api/iots/server-publish', {
+            const response = await fetch(`${API_BASE_URL}/api/iots/server-publish`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mac: mac, hex: hexCommand })
@@ -146,7 +147,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
     const fetchInitialStatistics = useCallback(async (id: string) => {
         if (!id) return;
         try {
-            const response = await fetch(`http://192.168.1.121:3335/api/iots/statistics/${id}`);
+            const response = await fetch(`${API_BASE_URL}/api/iots/statistics/${id}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

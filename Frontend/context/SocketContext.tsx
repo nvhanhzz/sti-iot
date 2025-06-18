@@ -15,8 +15,7 @@ interface ClientToServerEvents {
 }
 
 // Khởi tạo socket
-// const SOCKET_URL = "http://192.168.1.37:3335";
-const SOCKET_URL = "http://192.168.1.121:3335";
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL;
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(SOCKET_URL, { autoConnect: false });
 
 // Tạo Context

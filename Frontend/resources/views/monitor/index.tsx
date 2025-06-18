@@ -58,9 +58,7 @@ type FilterInputValues = {
     endTime?: string;
 };
 
-
-// --- Hằng số ---
-const API_BASE_URL = 'http://localhost:3335/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- Inline CSS Styles ---
 const styles = {
@@ -544,7 +542,7 @@ const Monitor: React.FC = () => {
                 }
             }
 
-            const response = await fetch(`${API_BASE_URL}/iots/statistics?${params.toString()}`);
+            const response = await fetch(`${API_BASE_URL}/api/iots/statistics?${params.toString()}`);
             const result = await response.json();
 
             if (!response.ok) {

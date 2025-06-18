@@ -19,7 +19,7 @@ interface FirmwareVersion {
     updatedAt: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.121:3335';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const FirmwareList: React.FC = () => {
     const [firmwareVersions, setFirmwareVersions] = useState<FirmwareVersion[]>([]);

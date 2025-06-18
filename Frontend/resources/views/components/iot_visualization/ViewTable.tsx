@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Select, Row, Col, Input, message, Button, InputNumber, Card, Form } from "antd";
 import { FilterOutlined, CloseCircleOutlined, SendOutlined } from '@ant-design/icons';
-
 const { Option } = Select;
 const { TextArea } = Input;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- CONSTANTS ---
 const MAX_DISPLAY_RECORDS = 10;
@@ -681,7 +681,7 @@ const SerialControl: React.FC<SerialControlProps> = ({ deviceMac, onControlSucce
                 ...formValues,
             };
 
-            const response = await fetch('http://192.168.1.121:3335/api/iots/serial-command', {
+            const response = await fetch(`${API_BASE_URL}/api/iots/serial-command`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
@@ -881,7 +881,7 @@ const ModbusControl: React.FC<ModbusControlProps> = ({ deviceMac, onControlSucce
                 ...formValues,
             };
 
-            const response = await fetch('http://192.168.1.121:3335/api/iots/modbus-command', {
+            const response = await fetch(`${API_BASE_URL}/api/iots/modbus-command`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
