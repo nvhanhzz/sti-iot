@@ -363,7 +363,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
             <Row gutter={10}>
                 <Col span={12}>
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Thông tin cơ bản</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Thông tin cơ bản</Divider>
                         <Form form={basicInfoForm} layout="vertical">
                             <Row gutter={16} align="bottom">
                                 <Col span={8}>
@@ -397,7 +397,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt MQTT</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt MQTT</Divider>
                         <Form form={mqttForm} layout="vertical">
                             <Row gutter={16}>
                                 <Col span={8}>
@@ -486,7 +486,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt RS232</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt RS232</Divider>
                         <Form form={rs232Form} layout="vertical">
                             <Row gutter={16}  align="bottom">
                                 <Col span={10}>
@@ -519,7 +519,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt TCP</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt TCP</Divider>
                         <Form form={tcpForm} layout="vertical">
                             <Form.List name={['tcpConfig', 'ipAddresses']}>
                                 {(fields, { add, remove }) => (
@@ -579,7 +579,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
 
                 <Col span={12}>
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt WiFi</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt WiFi</Divider>
                         <Form form={wifiForm} layout="vertical">
                             <Row gutter={16}>
                                 <Col span={8}>
@@ -652,7 +652,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt Ethernet</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt Ethernet</Divider>
                         <Form form={ethernetForm} layout="vertical">
                             <Row gutter={16}>
                                 <Col span={8}>
@@ -689,7 +689,6 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                                         name={['ethernetConfig', 'mac']}
                                         label="Địa chỉ MAC"
                                         rules={[
-                                            { required: true, message: 'Vui lòng nhập địa chỉ MAC!' },
                                             { pattern: macRegex, message: 'Định dạng MAC không hợp lệ!' }
                                         ]}
                                         style={{ marginBottom: 0 }}
@@ -719,7 +718,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt CAN</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt CAN</Divider>
                         <Form form={canForm} layout="vertical">
                             <Row gutter={16} align="bottom">
                                 <Col span={16}>
@@ -744,7 +743,7 @@ const EditIotModal: React.FC<EditIotModalProps> = ({ isVisible, record, onCancel
                     </div>
 
                     <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-                        <Divider orientation="left" style={{marginTop: '-5px'}}>Cài đặt RS485</Divider>
+                        <Divider orientation="left" style={{marginTop: '-5px', fontWeight: 'bold'}}>Cài đặt RS485</Divider>
                         <Form form={rs485Form} layout="vertical">
                             <Row gutter={20}>
                                 <Col span={12}>

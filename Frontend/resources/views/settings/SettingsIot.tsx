@@ -132,7 +132,7 @@ const SettingsIot: React.FC = () => {
             key: 'mac',
         },
         {
-            title: 'Firmware',
+            title: 'Phiên bản',
             dataIndex: 'firmware',
             key: 'firmware',
         },

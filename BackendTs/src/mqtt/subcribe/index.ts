@@ -76,7 +76,7 @@ const subscribeToTopics = (client: MqttClient) => {
                 if (request) {
                     clearTimeout(request.timeout);
 
-                    if (status === 'success') {
+                    if (status === true) {
                         logger.info(`✅ [${request.sectionName}] Cấu hình cho thiết bị ${mac} thành công (ID: ${transactionId}).`);
                         request.resolve({
                             message: `${request.sectionName} đã cập nhật thành công.`,
