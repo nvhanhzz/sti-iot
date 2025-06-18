@@ -433,7 +433,7 @@ const Monitor: React.FC = () => {
             { title: 'STT', dataIndex: 'stt', key: 'stt', hideable: false },
             { title: 'Tên thiết bị', dataIndex: 'deviceName', key: 'deviceName', sortable: false, hideable: true },
             { title: 'MAC', dataIndex: 'mac', key: 'mac', sortable: false, hideable: true },
-            { title: 'Lệnh (CMD)', dataIndex: 'cmd', key: 'cmd', sortable: false, hideable: true },
+            { title: 'Lệnh', dataIndex: 'cmd', key: 'cmd', sortable: false, hideable: true },
             { title: 'Thời gian', dataIndex: 'timestamp', key: 'timestamp', sortable: true, hideable: true },
         ];
 
@@ -1040,7 +1040,7 @@ const Monitor: React.FC = () => {
                     />
                 </div>
                 <div style={styles.filterGroup}>
-                    <label style={styles.filterLabel} htmlFor="filterCmd">Lệnh (CMD)</label>
+                    <label style={styles.filterLabel} htmlFor="filterCmd">Lệnh</label>
                     <ClearableInput
                         id="filterCmd"
                         type="text"
@@ -1048,7 +1048,7 @@ const Monitor: React.FC = () => {
                         value={pendingFilters.cmd || ''}
                         onChange={(e) => handleFilterInputChange('cmd', e.target.value)}
                         onClear={() => handleFilterInputChange('cmd', '')}
-                        placeholder="Nhập lệnh CMD"
+                        placeholder="Nhập lệnh"
                         disabled={loading}
                     />
                 </div>
