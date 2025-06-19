@@ -12,7 +12,7 @@ const iotStatisticSchema = new Schema<IIotStatistic>({
     deviceId: { type: String, required: true },
     cmd: { type: String, required: true },
     isMissed: { type: Boolean, default: false },
-    timestamp: { type: Number, required: true },
+    timestamp: { type: Number, required: false },
 }, { strict: false });
 
 iotStatisticSchema.index({ timestamp: -1, _id: -1 });

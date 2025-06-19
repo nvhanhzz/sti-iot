@@ -143,17 +143,17 @@ export const disconnectedClients = async (req: Request, res: Response) => {
 };
 
 interface RegisterMessageRequest {
-    mac: string;
-    version: string;
+    MAC: string;
+    Version: string;
     wifi: object;
     mqtt: object;
 }
 
 export const registerClient = async (messageRequest: RegisterMessageRequest) => {
-    logger.info(`[RegisterClient] Received registration request for MAC: ${messageRequest.mac}`);
+    logger.info(`[RegisterClient] Received registration request for MAC: ${messageRequest.MAC}`);
 
     try {
-        const { mac, version, wifi, mqtt } = messageRequest;
+        const { MAC: mac, Version: version, wifi, mqtt } = messageRequest;
 
         if (!isValidMAC(mac)) {
             return;
@@ -214,10 +214,22 @@ export const registerClient = async (messageRequest: RegisterMessageRequest) => 
 
         MasterIotGlobal.update(iotDevice);
         await EmitData("iot_update_client", iotDevice);
+
+        const IotStatusObj: any =
+            {
+                iotId: iotDevice.id,
+                firm_ware: '',
+                connected: true,
+                input: false,
+                output: false,
+            }
+        await EmitData("iot_update_status", [IotStatusObj]);
+        await updateStatusClient(IotStatusObj);
+
         logger.info(`[RegisterClient] Updated MasterIotGlobal for new device ${mac}.`);
 
     } catch (error: any) {
-        logger.error(`[RegisterClient] Error processing registration for MAC ${messageRequest.mac}:`, error);
+        logger.error(`[RegisterClient] Error processing registration for MAC ${messageRequest.MAC}:`, error);
     }
 };
 

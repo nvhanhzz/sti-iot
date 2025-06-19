@@ -111,6 +111,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
+    debugger;
     const [chartData, setChartData] = useState<DataPoint[]>([]);
     const [chartDataKeys, setChartDataKeys] = useState<string[]>([]);
     const [, setLastUpdateTime] = useState<string>('');

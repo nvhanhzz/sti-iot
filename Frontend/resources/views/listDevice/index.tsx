@@ -80,7 +80,7 @@ export interface ExtendedIotInterface extends IotCMDInterface {
     };
 }
 
-const Index: React.FC = () => {
+const ListDevice: React.FC = () => {
     const socket = useSocket();
     const { t } = useTranslation();
     const [dataAll, setDataAll] = useState<ExtendedIotInterface[]>([]);
@@ -418,4 +418,4 @@ const Index: React.FC = () => {
     );
 };
 
-export default Index;
+export default ListDevice;

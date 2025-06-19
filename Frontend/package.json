@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.4.0",
     "@monaco-editor/react": "^4.7.0",
-    "antd": "^5.22.2",
+    "antd": "^5.26.1",
     "axios": "^1.7.8",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",

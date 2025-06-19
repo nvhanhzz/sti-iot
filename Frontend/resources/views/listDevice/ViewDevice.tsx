@@ -48,7 +48,6 @@ const ViewDevice: React.FC = () => {
 
     // Effect to filter dataIots based on deviceIdFromUrl
     useEffect(() => {
-        debugger;
         if (deviceIdFromUrl) {
             const filtered = dataIots.filter(item => item.id === parseInt(deviceIdFromUrl) && !item.isdelete);
             setFilteredDataIots(filtered);
@@ -59,6 +58,7 @@ const ViewDevice: React.FC = () => {
     }, [deviceIdFromUrl, dataIots]);
 
     const handleSocketEvent = useCallback((eventData: any) => {
+        debugger;
         setDataIots((prevData) => { // Update base dataIots
             return prevData.map((item) => {
                 if (item.id === eventData.device_id) {
