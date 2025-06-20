@@ -118,3 +118,11 @@ h1 {
 .offline-row {
     background-color: #fff1f0; /* Very light red for offline rows */
 }
+
+.ant-card-body {
+    padding: 10px !important;
+}
+
+.ant-card-head {
+    min-height: 45px !important;
+}

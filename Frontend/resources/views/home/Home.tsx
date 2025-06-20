@@ -6,6 +6,7 @@ import {
     ComposedChart, Line
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import "./Home.css";
 
 // =========================================================================
 // CONSTANTS
@@ -80,22 +81,19 @@ interface PieChartDataItem {
 // =========================================================================
 const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' | 'weekly'): string => {
     // timestamp nhận vào là MILISECONDS (vì đã nhân 1000 khi gọi Date)
-    const date = new Date(timestamp);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const date = dayjs(timestamp); // Sử dụng dayjs để tạo đối tượng ngày/giờ
 
     switch (interval) {
         case 'hourly':
-            return `${hours}:${minutes} ${day}/${month}`;
+            // Sử dụng dayjs.format() với 'h:mm A DD/MM'
+            // 'h': giờ (1-12), 'mm': phút, 'A': AM/PM, 'DD': ngày, 'MM': tháng
+            return date.format('HH:mm DD/MM');
         case 'daily':
-            return `${day}/${month}`;
+            return date.format('DD/MM');
         case 'weekly':
-            return `Tuần của ${day}/${month}`;
+            return `Tuần của ${date.format('DD/MM')}`;
         default:
-            return `${day}/${month}/${year}`;
+            return date.format('DD/MM/YYYY');
     }
 };
 const formatNumber = (num: number): string => {
@@ -322,7 +320,7 @@ const OverallSummaryCard: React.FC<OverallSummaryCardProps> = React.memo(({ comm
     if (loading) {
         return (
             <Col xs={24} lg={12}>
-                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
                         <Spin tip="Đang tải tổng quan..." />
                     </div>
@@ -334,7 +332,7 @@ const OverallSummaryCard: React.FC<OverallSummaryCardProps> = React.memo(({ comm
     if (error) {
         return (
             <Col xs={24} lg={12}>
-                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px' }}>
                     <Alert message="Lỗi tải Tổng quan" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -344,7 +342,7 @@ const OverallSummaryCard: React.FC<OverallSummaryCardProps> = React.memo(({ comm
     if (!data || data.totalPackets === 0) {
         return (
             <Col xs={24} lg={12}>
-                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px' }}>
                     <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu tổng quan gói tin." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -356,7 +354,7 @@ const OverallSummaryCard: React.FC<OverallSummaryCardProps> = React.memo(({ comm
             <Card
                 title="📊 Tổng quan gói tin"
                 style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }}
-                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px' }}
             >
                 <div style={{ height: 200, marginBottom: 16 }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -490,7 +488,7 @@ const CommandDistributionCard: React.FC<CommandDistributionCardProps> = React.me
     if (loading) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
                         <Spin tip="Đang tải phân phối lệnh..." />
                     </div>
@@ -502,7 +500,7 @@ const CommandDistributionCard: React.FC<CommandDistributionCardProps> = React.me
     if (error) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Lỗi tải Phân phối theo lệnh" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -512,7 +510,7 @@ const CommandDistributionCard: React.FC<CommandDistributionCardProps> = React.me
     if (!pieData.length) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu phân phối theo lệnh." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -524,7 +522,7 @@ const CommandDistributionCard: React.FC<CommandDistributionCardProps> = React.me
             <Card
                 title={cardTitle}
                 style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }}
-                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}
             >
                 <div style={{ height: `300px` }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -582,10 +580,10 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
 
             const formattedData = result.map(item => ({
                 // item.timeBucket từ API là giây, nhân 1000 để tạo Date object trong formatTimeBucketLabel
-                time: formatTimeBucketLabel(item.timeBucket, interval),
+                time: formatTimeBucketLabel(item.timeBucket * 1000, interval),
                 'Realtime': item.successfulPackets || 0,
                 'Gửi lại': item.missedPackets || 0,
-                timestamp: item.timeBucket // Giữ timestamp là mili giây cho việc sắp xếp
+                timestamp: item.timeBucket * 1000 // Giữ timestamp là mili giây cho việc sắp xếp
             })).sort((a, b) => a.timestamp - b.timestamp);
 
             // @ts-ignore
@@ -626,7 +624,7 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
     if (loading) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
                         <Spin tip="Đang tải xu hướng..." />
                     </div>
@@ -638,7 +636,7 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
     if (error) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Lỗi tải Xu hướng gói tin" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -648,7 +646,7 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
     if (!data || data.length === 0) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu xu hướng theo thời gian." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -659,10 +657,10 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
         <Col xs={24} lg={12}>
             <Card
                 title={cardTitle}
-                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }}
-                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}
             >
-                <div style={{ height: 380, paddingTop: 10 }}>
+                <div style={{ height: 330, paddingTop: 10 }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart
                             data={data}
@@ -811,7 +809,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
             render: (timestamp: number) => {
                 if (!timestamp) return 'N/A';
                 // timestamp từ BE là giây, nhân 1000 để tạo Date object
-                const date = new Date(timestamp * 1000);
+                const date = new Date(timestamp);
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = String(date.getFullYear()).slice(-2);
@@ -845,7 +843,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
     if (loading) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
                         <Spin tip="Đang tải top thiết bị..." />
                     </div>
@@ -857,7 +855,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
     if (error) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Lỗi tải Top thiết bị gửi lại" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -867,7 +865,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
     if (!data || data.length === 0) {
         return (
             <Col xs={24} lg={12}>
-                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu top thiết bị gửi lại." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
@@ -878,8 +876,8 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
         <Col xs={24} lg={12}>
             <Card
                 title={cardTitle}
-                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }}
-                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}
             >
                 <Table
                     dataSource={data}
@@ -900,9 +898,6 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
 // MAIN DASHBOARD COMPONENT
 // =========================================================================
 const Dashboard: React.FC = () => {
-    // State để điều khiển việc hiển thị/ẩn bộ lọc chung
-    const [showGlobalFilters, setShowGlobalFilters] = useState<boolean>(false);
-
     // Bộ lọc chung cho toàn bộ dashboard
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [deviceId, setDeviceId] = useState<string>(''); // deviceId là filter chung
@@ -928,79 +923,67 @@ const Dashboard: React.FC = () => {
     return (
         <div style={{ backgroundColor: '#f0f2f5', minHeight: 'calc(100vh - 80px)' }}>
             {/* Tiêu đề Dashboard và nút Filter */}
-            <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+            <Row justify="space-between" align="middle" style={{ marginBottom: 5 }}>
                 <Col>
                     <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: CHART_COLORS.textPrimary, margin: 0 }}>
                         Dashboard
                     </h1>
                 </Col>
-                <Col>
-                    <Button
-                        type="primary"
-                        onClick={() => setShowGlobalFilters(!showGlobalFilters)}
-                        style={{ borderRadius: 8 }}
-                    >
-                        {showGlobalFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
-                    </Button>
-                </Col>
             </Row>
 
-            {/* Card bộ lọc chung - Chỉ hiển thị khi showGlobalFilters là true */}
-            {showGlobalFilters && (
-                <Card style={{ marginBottom: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                    <Row gutter={[16, 16]} align="top">
-                        <Col xs={24} sm={12} md={8} lg={6}>
-                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
-                                Khoảng thời gian:
-                            </div>
-                            <RangePicker
-                                showTime={{ format: 'HH:mm' }}
-                                format="YYYY-MM-DD HH:mm"
-                                value={dateRange}
-                                onChange={(dates) => setDateRange(dates as [Dayjs | null, Dayjs | null])}
-                                style={{ width: '100%' }}
-                                placeholder={['Từ ngày', 'Đến ngày']}
-                                size="large"
-                            />
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={4}>
-                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
-                                ID thiết bị:
-                            </div>
-                            <Input
-                                placeholder="VD: 101"
-                                value={deviceId}
-                                onChange={(e) => setDeviceId(e.target.value)}
-                                allowClear
-                                size="large"
-                            />
-                        </Col>
-                        <Col xs={24} sm={12} md={8} lg={4}>
-                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
-                                Lệnh (CMD) - Chung:
-                            </div>
-                            <Input
-                                placeholder="VD: sensor_data"
-                                value={cmd}
-                                onChange={(e) => setCmd(e.target.value)}
-                                allowClear
-                                size="large"
-                                // Không có onSearch ở đây vì đây là filter chung, không tự trigger fetch cho các card khác.
-                                // Các card con sẽ tự re-fetch khi commonParams (bao gồm cmd) thay đổi.
-                                // Riêng CommandDistributionCard có input riêng cho cmd, sẽ dùng onSearch ở đó.
-                            />
-                        </Col>
-                    </Row>
-                </Card>
-            )}
+            <Card style={{ marginBottom: 5, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <Row gutter={[10, 10]} align="top">
+                    <Col xs={24} sm={12} md={8} lg={6}>
+                        <div style={{ marginBottom: 2, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                            Khoảng thời gian:
+                        </div>
+                        <RangePicker
+                            showTime={{ format: 'HH:mm' }}
+                            format="YYYY-MM-DD HH:mm"
+                            value={dateRange}
+                            onChange={(dates) => setDateRange(dates as [Dayjs | null, Dayjs | null])}
+                            style={{ width: '100%' }}
+                            placeholder={['Từ ngày', 'Đến ngày']}
+                            size="large"
+                        />
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <div style={{ marginBottom: 2, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                            ID thiết bị:
+                        </div>
+                        <Input
+                            placeholder="VD: 101"
+                            value={deviceId}
+                            onChange={(e) => setDeviceId(e.target.value)}
+                            allowClear
+                            size="large"
+                        />
+                    </Col>
+                    <Col xs={24} sm={12} md={8} lg={4}>
+                        <div style={{ marginBottom: 2, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                            Lệnh (CMD) - Chung:
+                        </div>
+                        <Input
+                            placeholder="VD: sensor_data"
+                            value={cmd}
+                            onChange={(e) => setCmd(e.target.value)}
+                            allowClear
+                            size="large"
+                            // Không có onSearch ở đây vì đây là filter chung, không tự trigger fetch cho các card khác.
+                            // Các card con sẽ tự re-fetch khi commonParams (bao gồm cmd) thay đổi.
+                            // Riêng CommandDistributionCard có input riêng cho cmd, sẽ dùng onSearch ở đó.
+                        />
+                    </Col>
+                </Row>
+            </Card>
 
             {/* Các biểu đồ/bảng sẽ tự quản lý việc tải dữ liệu và bộ lọc riêng */}
             {/* Chúng nhận commonParams và tự fetch dữ liệu */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+            <Row gutter={[5, 5]} style={{ marginBottom: 5 }}>
                 <OverallSummaryCard commonParams={commonParams} />
                 <CommandDistributionCard commonParams={commonParams} />
             </Row>
-            <Row gutter={[16, 16]}>
+            <Row gutter={[5, 5]}>
                 <TimeSeriesCard commonParams={commonParams} />
                 <TopMissedDevicesCard commonParams={commonParams} />
             </Row>

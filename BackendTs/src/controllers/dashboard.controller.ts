@@ -6,9 +6,17 @@ import { MasterIotInterface } from '../interface';
 import { MasterIotGlobal } from "../global";
 import { PipelineStage } from 'mongoose';
 import logger from "../config/logger";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc'; // Import UTC plugin
+import timezone from 'dayjs/plugin/timezone'; // Import Timezone plugin
+import weekOfYear from 'dayjs/plugin/weekOfYear'; // Import weekOfYear for %U
 
-// === INTERFACES ===
-// Frontend và Backend đều dùng giây cho timestamp
+// Extend dayjs with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(weekOfYear); // Make sure weekOfYear is also extended
+
+// === INTERFACES === (Giữ nguyên)
 interface DashboardQueryBase {
     startTime?: string; // Nhận từ FE là seconds string
     endTime?: string;   // Nhận từ FE là seconds string
@@ -28,7 +36,7 @@ interface HourlyPerformanceMetricQuery extends DashboardQueryBase {
     deviceId?: string;
 }
 
-// Interfaces cho dữ liệu trả về (cập nhật để timeBucket/lastSeen là giây, FE sẽ xử lý)
+// Interfaces cho dữ liệu trả về (Đã xác nhận timeBucket/lastSeen là GIÂY)
 interface OverallSummaryData {
     totalPackets: number;
     successfulPackets: number;
@@ -40,7 +48,7 @@ interface OverallSummaryData {
 }
 
 interface PacketCountOverTimeData {
-    timeBucket: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
+    timeBucket: number; // Unix timestamp in SECONDS
     successfulPackets: number;
     missedPackets: number;
     missRatePercentage: number;
@@ -53,7 +61,7 @@ interface TopMissedDeviceData {
     totalPackets: number;
     missedPackets: number;
     missRatePercentage: number;
-    lastSeen: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
+    lastSeen: number; // Unix timestamp in SECONDS
 }
 
 interface PacketCountsByCommandData {
@@ -69,20 +77,20 @@ interface DeviceConnectivityData {
     deviceName: string;
     mac: string;
     isOnline: boolean;
-    lastConnected: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
+    lastConnected: number; // Unix timestamp in SECONDS
     disconnectCount: number;
     averageLatencyMs?: number;
 }
 
 interface HourlyPerformanceMetricData {
-    timeBucket: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
+    timeBucket: number; // Unix timestamp in SECONDS
     deviceId: string;
     avgCpuUsagePercentage?: number;
     avgRamUsageMB?: number;
     avgBatteryLevelPercentage?: number;
 }
 
-// === HELPER FUNCTIONS ===
+// === HELPER FUNCTIONS === (Sửa đổi `prepareMatchQuery` nếu cần, và `getDeviceMapping`)
 
 const getDeviceMapping = (): Map<string, { deviceName: string; mac: string }> => {
     try {
@@ -112,14 +120,12 @@ const prepareMatchQuery = (query: DashboardQueryBase) => {
     let parsedEndTimeSeconds: number | undefined;
 
     if (query.startTime) {
-        // NHẬN TỪ FRONTEND LÀ GIÂY, SỬ DỤNG TRỰC TIẾP
         parsedStartTimeSeconds = parseInt(query.startTime);
         if (isNaN(parsedStartTimeSeconds)) {
             throw new Error("Tham số 'startTime' không hợp lệ. Phải là Unix timestamp (giây).");
         }
     }
     if (query.endTime) {
-        // NHẬN TỪ FRONTEND LÀ GIÂY, SỬ DỤNG TRỰC TIẾP
         parsedEndTimeSeconds = parseInt(query.endTime);
         if (isNaN(parsedEndTimeSeconds)) {
             throw new Error("Tham số 'endTime' không hợp lệ. Phải là Unix timestamp (giây).");
@@ -144,13 +150,44 @@ const prepareMatchQuery = (query: DashboardQueryBase) => {
 
 // === CÁC CONTROLLER ===
 
-// 1. Controller cho Tổng quan gói tin
+interface DeviceListItem {
+    id: string;
+    name: string;
+    mac?: string; // MAC address có thể là tùy chọn
+}
+
+export const getDeviceList = async (req: Request, res: Response) => {
+    try {
+        const allIots: MasterIotInterface[] = MasterIotGlobal.getAll(); // Lấy tất cả thiết bị từ MasterIotGlobal
+
+        if (!allIots || !Array.isArray(allIots)) {
+            return res.status(200).json([]); // Trả về mảng rỗng nếu không có thiết bị
+        }
+
+        // Map dữ liệu để trả về chỉ id, name và mac (nếu có)
+        const deviceList: DeviceListItem[] = allIots.map(device => ({
+            id: device.id ? device.id.toString() : 'Unknown ID', // Đảm bảo ID là string
+            name: device.name || 'Unknown Device',
+            mac: device.mac || undefined // Thêm MAC nếu cần thiết
+        }));
+
+        // Sắp xếp theo tên thiết bị hoặc ID
+        deviceList.sort((a, b) => a.name.localeCompare(b.name));
+
+        res.status(200).json(deviceList);
+    } catch (error: any) {
+        logger.error("Error in getDeviceList:", error.message);
+        res.status(500).json({ message: error.message || "Failed to get device list." });
+    }
+};
+
+// 1. Controller cho Tổng quan gói tin (Không thay đổi)
 export const getOverallSummary = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
         const matchQuery = prepareMatchQuery(req.query);
 
         const result = await IotStatistic.aggregate<OverallSummaryData>([
-            { $match: matchQuery }, // matchQuery.timestamp giờ là giây
+            { $match: matchQuery },
             {
                 $group: {
                     _id: null,
@@ -197,7 +234,7 @@ export const getOverallSummary = async (req: Request<{}, {}, {}, DashboardQueryB
 export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCountsOverTimeQuery>, res: Response) => {
     try {
         const { interval = 'daily' } = req.query;
-        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const matchQuery = prepareMatchQuery(req.query);
 
         const validIntervals = ['hourly', 'daily', 'weekly'];
         if (!validIntervals.includes(interval)) {
@@ -205,15 +242,18 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
         }
 
         let groupFormat: string;
+        // Sử dụng múi giờ +07:00 (Asia/Ho_Chi_Minh) cho aggregation
+        const targetTimezone = "Asia/Ho_Chi_Minh"; // Hoặc "+07:00"
+
         switch (interval) {
             case 'hourly':
-                groupFormat = "%Y-%m-%d %H";
+                groupFormat = "%Y-%m-%d %H"; // Format: "2024-06-20 15"
                 break;
             case 'daily':
-                groupFormat = "%Y-%m-%d";
+                groupFormat = "%Y-%m-%d"; // Format: "2024-06-20"
                 break;
             case 'weekly':
-                groupFormat = "%Y-%U";
+                groupFormat = "%Y-%U"; // Format: "2024-25" (year-week number, Sunday start)
                 break;
             default:
                 groupFormat = "%Y-%m-%d %H";
@@ -226,17 +266,8 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
                     _id: {
                         $dateToString: {
                             format: groupFormat,
-                            // $timestamp trong DB là giây, CHUYỂN THẲNG SANG DATE (MONGODB SẼ HIỂU LÀ MILISECONDS NẾU KHÔNG CÓ $multiply)
-                            // ĐỂ $toDate HIỂU ĐÚNG GIÂY THÌ NÊN DÙNG $convert VỚI unit: 'seconds' HOẶC $multiply MỚI CHUYỂN
-                            // Nhưng nếu dữ liệu DB thực sự là giây, và bạn muốn group theo ngày/giờ,
-                            // thì MongoDB aggregation thường mong đợi mili giây cho $toDate.
-                            // Cách tốt nhất là sử dụng $convert để chỉ định rõ đơn vị.
-
-                            // CẬP NHẬT: VỚI MongoDB version 4.0+ có $toDate chuyển đổi từ int sang Date.
-                            // Tuy nhiên, nó sẽ coi int là miliseconds. Để chuyển từ GIÂY, bạn PHẢI nhân 1000.
-                            // Vậy nên, logic $multiply vẫn cần thiết cho aggregation để $toDate hoạt động đúng.
-                            // Sau đó, đầu ra của timeBucket sẽ là milliseconds, và FE sẽ dùng trực tiếp.
-                            date: { $toDate: { $multiply: ["$timestamp", 1000] } }
+                            date: { $toDate: { $multiply: ["$timestamp", 1000] } },
+                            timezone: targetTimezone // Đảm bảo output của MongoDB theo +07:00
                         }
                     },
                     successfulPackets: { $sum: { $cond: [{ $eq: ["$isMissed", false] }, 1, 0] } },
@@ -264,18 +295,44 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
         const rawResults = await IotStatistic.aggregate(pipeline);
 
         const results = rawResults.map(item => {
-            let date: Date;
+            let parsedDate: dayjs.Dayjs;
+
             if (interval === 'weekly') {
                 const [year, weekStr] = item.timeBucketString.split('-');
                 const week = parseInt(weekStr);
-                const d = new Date(parseInt(year), 0, 1 + (week * 7));
-                date = new Date(d.setDate(d.getDate() - d.getDay()));
-            } else {
-                date = new Date(item.timeBucketString);
+
+                // Dùng dayjs.tz() để parse chuỗi ở múi giờ đích (Asia/Ho_Chi_Minh)
+                // và tính toán tuần dựa trên Chủ Nhật.
+                // firstDayOfYear: Jan 1st of the year, in the target timezone
+                const jan1st = dayjs.tz(`${year}-01-01`, targetTimezone);
+                // Find the first Sunday of the year (which could be Jan 1st or later), in the target timezone
+                const firstSundayOfYear = jan1st.day() === 0 ? jan1st : jan1st.day(7);
+
+                // Add `week` weeks to find the Sunday of the target week.
+                // This aligns with MongoDB's %U which is Sunday-based and 0-indexed for the first week.
+                parsedDate = firstSundayOfYear.add(week, 'weeks');
+
+            } else if (interval === 'hourly') {
+                // Parse chuỗi "YYYY-MM-DD HH" và xác định nó ở múi giờ đích
+                parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD HH", targetTimezone);
+            } else { // daily
+                // Parse chuỗi "YYYY-MM-DD" và xác định nó ở múi giờ đích
+                parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD", targetTimezone);
             }
+
+            if (!parsedDate.isValid()) {
+                logger.error(`Failed to parse date string "<span class="math-inline">\{item\.timeBucketString\}" for interval "</span>{interval}" in timezone ${targetTimezone}`);
+                return {
+                    timeBucket: null,
+                    successfulPackets: item.successfulPackets,
+                    missedPackets: item.missedPackets,
+                    missRatePercentage: item.missRatePercentage
+                };
+            }
+
+            // Trả về Unix timestamp (giây) của thời điểm đó (đã ở múi giờ +07:00)
             return {
-                // date.getTime() trả về miliseconds. FE sẽ sử dụng miliseconds.
-                timeBucket: date.getTime(),
+                timeBucket: parsedDate.unix(),
                 successfulPackets: item.successfulPackets,
                 missedPackets: item.missedPackets,
                 missRatePercentage: parseFloat(item.missRatePercentage.toFixed(2))
@@ -290,7 +347,7 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
     }
 };
 
-// 3. Controller cho Top N thiết bị có tỷ lệ gửi lại cao nhất
+// 3. Controller cho Top N thiết bị có tỷ lệ gửi lại cao nhất (Không thay đổi)
 export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevicesQuery>, res: Response) => {
     try {
         const { topLimit = '5' } = req.query;
@@ -299,7 +356,7 @@ export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevi
             return res.status(400).send({ message: "Tham số 'topLimit' không hợp lệ. Phải là số dương." });
         }
 
-        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const matchQuery = prepareMatchQuery(req.query);
         const deviceMap = getDeviceMapping();
 
         const pipeline: PipelineStage[] = [
@@ -343,8 +400,7 @@ export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevi
                 totalPackets: deviceStat.totalPackets,
                 missedPackets: deviceStat.missedPackets,
                 missRatePercentage: parseFloat(deviceStat.missRatePercentage.toFixed(2)),
-                //lastSeenTimestamp đã là giây, NHÂN 1000 ĐỂ TRẢ VỀ MILISECONDS CHO FRONTEND
-                lastSeen: deviceStat.lastSeenTimestamp * 1000
+                lastSeen: deviceStat.lastSeenTimestamp // lastSeenTimestamp đã là giây, TRẢ VỀ TRỰC TIẾP
             };
         });
 
@@ -356,10 +412,10 @@ export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevi
     }
 };
 
-// 4. Controller cho thống kê gói tin theo loại lệnh
+// 4. Controller cho thống kê gói tin theo loại lệnh (Không thay đổi)
 export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
-        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const matchQuery = prepareMatchQuery(req.query);
 
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
@@ -404,10 +460,10 @@ export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, Dashboar
     }
 };
 
-// 5. Controller cho thống kê kết nối thiết bị
+// 5. Controller cho thống kê kết nối thiết bị (Không thay đổi, vẫn trả về giây)
 export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
-        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const matchQuery = prepareMatchQuery(req.query);
         const deviceMap = getDeviceMapping();
 
         const pipeline: PipelineStage[] = [
@@ -436,8 +492,7 @@ export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQu
                 deviceName: deviceInfo?.deviceName || 'Unknown Device',
                 mac: deviceInfo?.mac || 'Unknown MAC',
                 isOnline: true,
-                // lastConnectedTimestamp đã là giây, NHÂN 1000 ĐỂ TRẢ VỀ MILISECONDS CHO FRONTEND
-                lastConnected: item.lastConnectedTimestamp * 1000,
+                lastConnected: item.lastConnectedTimestamp, // lastConnectedTimestamp đã là giây, TRẢ VỀ TRỰC TIẾP
                 disconnectCount: 0,
                 averageLatencyMs: undefined
             };
@@ -451,7 +506,7 @@ export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQu
                     deviceName: info.deviceName,
                     mac: info.mac,
                     isOnline: false,
-                    lastConnected: 0, // hoặc một timestamp last_seen từ MasterIotGlobal (cũng nhân 1000)
+                    lastConnected: 0, // hoặc một timestamp last_seen từ MasterIotGlobal (cũng là giây)
                     disconnectCount: 0,
                     averageLatencyMs: undefined
                 });
@@ -467,10 +522,10 @@ export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQu
     }
 };
 
-// 6. Controller cho hiệu suất theo giờ (nếu có dữ liệu CPU/RAM/Pin)
+// 6. Controller cho hiệu suất theo giờ (Đã sửa đổi logic parsing date và lỗi typo)
 export const getHourlyPerformanceMetrics = async (req: Request<{}, {}, {}, HourlyPerformanceMetricQuery>, res: Response) => {
     try {
-        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const matchQuery = prepareMatchQuery(req.query);
 
         if (!matchQuery.deviceId) {
             return res.status(400).json({ message: "Vui lòng cung cấp 'deviceId' để xem hiệu suất theo giờ." });
@@ -483,7 +538,8 @@ export const getHourlyPerformanceMetrics = async (req: Request<{}, {}, {}, Hourl
                     _id: {
                         deviceId: "$deviceId",
                         // $timestamp trong DB là giây, NHÂN 1000 để $toDate xử lý thành mili giây
-                        date: { $toDate: { $multiply: ["$timestamp", 1000] } }
+                        date: { $toDate: { $multiply: ["$timestamp", 1000] } },
+                        timezone: "Asia/Ho_Chi_Minh" // Đảm bảo output của MongoDB theo +07:00
                     },
                     avgCpu: { $avg: "$cpuUsage" },
                     avgRam: { $avg: "$ramUsage" },
@@ -494,24 +550,38 @@ export const getHourlyPerformanceMetrics = async (req: Request<{}, {}, {}, Hourl
                 $project: {
                     _id: 0,
                     deviceId: "$_id.deviceId",
-                    timeBucket: { $toDate: "$_id.date" }, // timeBucket ở đây đã là Date object
+                    timeBucketString: "$_id.date", // Lấy chuỗi định dạng từ group
                     avgCpuUsagePercentage: "$avgCpu",
                     avgRamUsageMB: "$avgRam",
                     avgBatteryLevelPercentage: "$avgBattery"
                 }
             },
-            { $sort: { "timeBucket": 1, "deviceId": 1 } }
+            { $sort: { "timeBucketString": 1, "deviceId": 1 } }
         ];
 
-        const results = await IotStatistic.aggregate(pipeline);
-        const mappedResults = results.map(item => ({
-            ...item,
-            // .getTime() trả về mili giây từ Date object, phù hợp cho frontend
-            timeBucket: item.timeBucket.getTime(),
-            avgCpuUsagePercentage: item.avgCpuUsagePercentage !== undefined && item.avgCpuUsagePercentage !== null ? parseFloat(item.avgCpuUsagePercentage.toFixed(2)) : undefined,
-            avgRamUsageMB: item.avgRamUsageMB !== undefined && item.avgRamUsageMB !== null ? parseFloat(item.avgRamUsageMB.toFixed(2)) : undefined,
-            avgBatteryLevelPercentage: item.avgBatteryLevelPercentage !== undefined && item.avgBatteryLevelPercentage !== null ? parseFloat(item.avgBatteryLevelPercentage.toFixed(2)) : undefined,
-        }));
+        const rawResults = await IotStatistic.aggregate(pipeline);
+        const mappedResults = rawResults.map(item => {
+            const parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD HH", "Asia/Ho_Chi_Minh"); // Parse as +07:00
+
+            if (!parsedDate.isValid()) {
+                logger.error(`Failed to parse hourly date string "${item.timeBucketString}"`);
+                return {
+                    timeBucket: null,
+                    deviceId: item.deviceId,
+                    avgCpuUsagePercentage: undefined,
+                    avgRamUsageMB: undefined,
+                    avgBatteryLevelPercentage: undefined,
+                };
+            }
+
+            return {
+                timeBucket: parsedDate.unix(), // Trả về giây
+                deviceId: item.deviceId,
+                avgCpuUsagePercentage: item.avgCpuUsagePercentage !== undefined && item.avgCpuUsagePercentage !== null ? parseFloat(item.avgCpuUsagePercentage.toFixed(2)) : undefined,
+                avgRamUsageMB: item.avgRamUsageMB !== undefined && item.avgRamUsageMB !== null ? parseFloat(item.avgRamUsageMB.toFixed(2)) : undefined,
+                avgBatteryLevelPercentage: item.avgBatteryLevelPercentage !== undefined && item.avgBatteryLevelPercentage !== null ? parseFloat(item.avgBatteryLevelPercentage.toFixed(2)) : undefined,
+            };
+        });
 
         res.status(200).json(mappedResults);
 
