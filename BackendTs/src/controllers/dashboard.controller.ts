@@ -1,22 +1,34 @@
-// src/api/dashboard.ts
+// src/controllers/dashboard.controller.ts
 
-import { Request, Response, Router } from 'express';
+import { Request, Response } from 'express';
 import IotStatistic from '../models/nosql/iot_statistic.models';
 import { MasterIotInterface } from '../interface';
-import {MasterIotGlobal} from "../global";
+import { MasterIotGlobal } from "../global";
 import { PipelineStage } from 'mongoose';
 import logger from "../config/logger";
 
-interface DashboardQuery {
-    startTime?: string;
-    endTime?: string;
+// === INTERFACES ===
+// Frontend và Backend đều dùng giây cho timestamp
+interface DashboardQueryBase {
+    startTime?: string; // Nhận từ FE là seconds string
+    endTime?: string;   // Nhận từ FE là seconds string
     deviceId?: string;
     cmd?: string;
-    interval?: 'hourly' | 'daily' | 'weekly';
-    topLimit?: string;
-    dataTypes?: string; // "summary,packetCountsOverTime,..."
 }
 
+interface PacketCountsOverTimeQuery extends DashboardQueryBase {
+    interval?: 'hourly' | 'daily' | 'weekly';
+}
+
+interface TopMissedDevicesQuery extends DashboardQueryBase {
+    topLimit?: string;
+}
+
+interface HourlyPerformanceMetricQuery extends DashboardQueryBase {
+    deviceId?: string;
+}
+
+// Interfaces cho dữ liệu trả về (cập nhật để timeBucket/lastSeen là giây, FE sẽ xử lý)
 interface OverallSummaryData {
     totalPackets: number;
     successfulPackets: number;
@@ -28,7 +40,7 @@ interface OverallSummaryData {
 }
 
 interface PacketCountOverTimeData {
-    timeBucket: number; // Unix timestamp
+    timeBucket: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
     successfulPackets: number;
     missedPackets: number;
     missRatePercentage: number;
@@ -41,7 +53,7 @@ interface TopMissedDeviceData {
     totalPackets: number;
     missedPackets: number;
     missRatePercentage: number;
-    lastSeen: number; // Unix timestamp
+    lastSeen: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
 }
 
 interface PacketCountsByCommandData {
@@ -57,42 +69,21 @@ interface DeviceConnectivityData {
     deviceName: string;
     mac: string;
     isOnline: boolean;
-    lastConnected: number; // Unix timestamp
+    lastConnected: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
     disconnectCount: number;
     averageLatencyMs?: number;
 }
 
 interface HourlyPerformanceMetricData {
-    timeBucket: number; // Unix timestamp
+    timeBucket: number; // Unix timestamp in seconds for FE (FE sẽ tự nhân 1000 khi dùng Date object)
     deviceId: string;
     avgCpuUsagePercentage?: number;
     avgRamUsageMB?: number;
     avgBatteryLevelPercentage?: number;
 }
 
-interface DashboardResponse {
-    metadata: {
-        requestedStartTime?: number;
-        requestedEndTime?: number;
-        appliedDeviceId?: string;
-        appliedCmd?: string;
-        appliedInterval?: 'hourly' | 'daily' | 'weekly';
-        appliedTopLimit?: number;
-        generatedAt: number;
-    };
-    overallSummary?: OverallSummaryData | { error: string }; // Có thể trả về lỗi nếu phần này thất bại
-    packetCountsOverTime?: PacketCountOverTimeData[] | { error: string };
-    topMissedDevices?: TopMissedDeviceData[] | { error: string };
-    packetCountsByCommand?: PacketCountsByCommandData[] | { error: string };
-    deviceConnectivity?: DeviceConnectivityData[] | { error: string };
-    hourlyPerformanceMetrics?: HourlyPerformanceMetricData[] | { error: string };
-}
+// === HELPER FUNCTIONS ===
 
-// =========================================================================
-// HELPER FUNCTIONS CHO TỪNG LOẠI THỐNG KÊ (Đã thêm try-catch)
-// =========================================================================
-
-// Helper để lấy map thông tin thiết bị (tên, mac)
 const getDeviceMapping = (): Map<string, { deviceName: string; mac: string }> => {
     try {
         const allIots: MasterIotInterface[] = MasterIotGlobal.getAll();
@@ -110,16 +101,56 @@ const getDeviceMapping = (): Map<string, { deviceName: string; mac: string }> =>
         return deviceMap;
     } catch (err) {
         logger.error("Error getting device mapping:", err);
-        // Ném lỗi để hàm gọi nó có thể xử lý (hoặc trả về map rỗng nếu chấp nhận được)
         throw new Error("Failed to load device information.");
     }
 };
 
-// 1. Hàm tổng quan gói tin
-async function _getOverallSummary(matchQuery: any): Promise<OverallSummaryData> {
+// Hàm tiện ích để chuẩn bị matchQuery và xử lý parse thời gian
+// Giả định timestamp trong DB và từ FE đều LÀ GIÂY
+const prepareMatchQuery = (query: DashboardQueryBase) => {
+    let parsedStartTimeSeconds: number | undefined;
+    let parsedEndTimeSeconds: number | undefined;
+
+    if (query.startTime) {
+        // NHẬN TỪ FRONTEND LÀ GIÂY, SỬ DỤNG TRỰC TIẾP
+        parsedStartTimeSeconds = parseInt(query.startTime);
+        if (isNaN(parsedStartTimeSeconds)) {
+            throw new Error("Tham số 'startTime' không hợp lệ. Phải là Unix timestamp (giây).");
+        }
+    }
+    if (query.endTime) {
+        // NHẬN TỪ FRONTEND LÀ GIÂY, SỬ DỤNG TRỰC TIẾP
+        parsedEndTimeSeconds = parseInt(query.endTime);
+        if (isNaN(parsedEndTimeSeconds)) {
+            throw new Error("Tham số 'endTime' không hợp lệ. Phải là Unix timestamp (giây).");
+        }
+    }
+
+    if (parsedStartTimeSeconds && parsedEndTimeSeconds && parsedStartTimeSeconds >= parsedEndTimeSeconds) {
+        throw new Error("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.");
+    }
+
+    const matchQuery: any = {};
+    if (parsedStartTimeSeconds || parsedEndTimeSeconds) {
+        matchQuery.timestamp = {};
+        if (parsedStartTimeSeconds) matchQuery.timestamp.$gte = parsedStartTimeSeconds;
+        if (parsedEndTimeSeconds) matchQuery.timestamp.$lte = parsedEndTimeSeconds;
+    }
+    if (query.deviceId) matchQuery.deviceId = query.deviceId;
+    if (query.cmd) matchQuery.cmd = query.cmd;
+
+    return matchQuery;
+};
+
+// === CÁC CONTROLLER ===
+
+// 1. Controller cho Tổng quan gói tin
+export const getOverallSummary = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
+        const matchQuery = prepareMatchQuery(req.query);
+
         const result = await IotStatistic.aggregate<OverallSummaryData>([
-            { $match: matchQuery },
+            { $match: matchQuery }, // matchQuery.timestamp giờ là giây
             {
                 $group: {
                     _id: null,
@@ -149,19 +180,30 @@ async function _getOverallSummary(matchQuery: any): Promise<OverallSummaryData> 
             }
         ]);
 
-        return result.length > 0 ? result[0] : {
+        const summaryData = result.length > 0 ? result[0] : {
             totalPackets: 0, successfulPackets: 0, missedPackets: 0, missRatePercentage: 0,
             totalUniqueDevices: 0, totalUniqueCommands: 0
         };
-    } catch (err) {
-        logger.error("Error in _getOverallSummary aggregation:", err);
-        throw new Error("Failed to calculate overall summary.");
-    }
-}
 
-// 2. Hàm đếm gói tin theo thời gian
-async function _getPacketCountsOverTime(matchQuery: any, interval: 'hourly' | 'daily' | 'weekly'): Promise<PacketCountOverTimeData[]> {
+        res.status(200).json(summaryData);
+
+    } catch (error: any) {
+        logger.error("Error in getOverallSummary:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get overall summary." });
+    }
+};
+
+// 2. Controller cho đếm gói tin theo thời gian
+export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCountsOverTimeQuery>, res: Response) => {
     try {
+        const { interval = 'daily' } = req.query;
+        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+
+        const validIntervals = ['hourly', 'daily', 'weekly'];
+        if (!validIntervals.includes(interval)) {
+            return res.status(400).send({ message: `Tham số 'interval' không hợp lệ. Phải là một trong: ${validIntervals.join(', ')}.` });
+        }
+
         let groupFormat: string;
         switch (interval) {
             case 'hourly':
@@ -171,14 +213,12 @@ async function _getPacketCountsOverTime(matchQuery: any, interval: 'hourly' | 'd
                 groupFormat = "%Y-%m-%d";
                 break;
             case 'weekly':
-                groupFormat = "%Y-%U"; // %U: Week number of the year (Sunday as the first day of the week)
+                groupFormat = "%Y-%U";
                 break;
             default:
-                groupFormat = "%Y-%m-%d %H"; // Default
+                groupFormat = "%Y-%m-%d %H";
         }
 
-        // Import PipelineStage để khai báo kiểu tường minh, khắc phục lỗi TypeScript
-         // Hoặc import { PipelineStage } from 'mongoose';
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
             {
@@ -186,7 +226,17 @@ async function _getPacketCountsOverTime(matchQuery: any, interval: 'hourly' | 'd
                     _id: {
                         $dateToString: {
                             format: groupFormat,
-                            date: { $toDate: "$timestamp" }
+                            // $timestamp trong DB là giây, CHUYỂN THẲNG SANG DATE (MONGODB SẼ HIỂU LÀ MILISECONDS NẾU KHÔNG CÓ $multiply)
+                            // ĐỂ $toDate HIỂU ĐÚNG GIÂY THÌ NÊN DÙNG $convert VỚI unit: 'seconds' HOẶC $multiply MỚI CHUYỂN
+                            // Nhưng nếu dữ liệu DB thực sự là giây, và bạn muốn group theo ngày/giờ,
+                            // thì MongoDB aggregation thường mong đợi mili giây cho $toDate.
+                            // Cách tốt nhất là sử dụng $convert để chỉ định rõ đơn vị.
+
+                            // CẬP NHẬT: VỚI MongoDB version 4.0+ có $toDate chuyển đổi từ int sang Date.
+                            // Tuy nhiên, nó sẽ coi int là miliseconds. Để chuyển từ GIÂY, bạn PHẢI nhân 1000.
+                            // Vậy nên, logic $multiply vẫn cần thiết cho aggregation để $toDate hoạt động đúng.
+                            // Sau đó, đầu ra của timeBucket sẽ là milliseconds, và FE sẽ dùng trực tiếp.
+                            date: { $toDate: { $multiply: ["$timestamp", 1000] } }
                         }
                     },
                     successfulPackets: { $sum: { $cond: [{ $eq: ["$isMissed", false] }, 1, 0] } },
@@ -219,11 +269,12 @@ async function _getPacketCountsOverTime(matchQuery: any, interval: 'hourly' | 'd
                 const [year, weekStr] = item.timeBucketString.split('-');
                 const week = parseInt(weekStr);
                 const d = new Date(parseInt(year), 0, 1 + (week * 7));
-                date = new Date(d.setDate(d.getDate() - d.getDay())); // Chỉnh về Chủ Nhật đầu tuần
+                date = new Date(d.setDate(d.getDate() - d.getDay()));
             } else {
                 date = new Date(item.timeBucketString);
             }
             return {
+                // date.getTime() trả về miliseconds. FE sẽ sử dụng miliseconds.
                 timeBucket: date.getTime(),
                 successfulPackets: item.successfulPackets,
                 missedPackets: item.missedPackets,
@@ -231,17 +282,26 @@ async function _getPacketCountsOverTime(matchQuery: any, interval: 'hourly' | 'd
             };
         });
 
-        return results;
-    } catch (err) {
-        logger.error("Error in _getPacketCountsOverTime aggregation:", err);
-        throw new Error("Failed to calculate packet counts over time.");
-    }
-}
+        res.status(200).json(results);
 
-// 3. Hàm Top N thiết bị có tỷ lệ miss cao nhất
-async function _getTopMissedDevices(matchQuery: any, limit: number, deviceMap: Map<string, { deviceName: string; mac: string }>): Promise<TopMissedDeviceData[]> {
+    } catch (error: any) {
+        logger.error("Error in getPacketCountsOverTime:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get packet counts over time." });
+    }
+};
+
+// 3. Controller cho Top N thiết bị có tỷ lệ gửi lại cao nhất
+export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevicesQuery>, res: Response) => {
     try {
-        
+        const { topLimit = '5' } = req.query;
+        const limitNumber = parseInt(topLimit);
+        if (isNaN(limitNumber) || limitNumber < 1) {
+            return res.status(400).send({ message: "Tham số 'topLimit' không hợp lệ. Phải là số dương." });
+        }
+
+        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const deviceMap = getDeviceMapping();
+
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
             {
@@ -249,7 +309,7 @@ async function _getTopMissedDevices(matchQuery: any, limit: number, deviceMap: M
                     _id: "$deviceId",
                     totalPackets: { $count: {} },
                     missedPackets: { $sum: { $cond: [{ $eq: ["$isMissed", true] }, 1, 0] } },
-                    lastSeenTimestamp: { $max: "$timestamp" } // Lấy thời gian gần nhất
+                    lastSeenTimestamp: { $max: "$timestamp" } // lastSeenTimestamp ở đây là giây từ DB
                 }
             },
             {
@@ -258,7 +318,7 @@ async function _getTopMissedDevices(matchQuery: any, limit: number, deviceMap: M
                     deviceId: "$_id",
                     totalPackets: 1,
                     missedPackets: 1,
-                    lastSeenTimestamp: 1,
+                    lastSeenTimestamp: 1, // Đây là giây
                     missRatePercentage: {
                         $cond: {
                             if: { $gt: ["$totalPackets", 0] },
@@ -269,7 +329,7 @@ async function _getTopMissedDevices(matchQuery: any, limit: number, deviceMap: M
                 }
             },
             { $sort: { "missRatePercentage": -1, "missedPackets": -1 } },
-            { $limit: limit }
+            { $limit: limitNumber }
         ];
 
         const topDevices = await IotStatistic.aggregate(pipeline);
@@ -278,26 +338,29 @@ async function _getTopMissedDevices(matchQuery: any, limit: number, deviceMap: M
             const deviceInfo = deviceMap.get(deviceStat.deviceId);
             return {
                 deviceId: deviceStat.deviceId,
-                deviceName: deviceInfo?.deviceName || 'Unknown Device',
-                mac: deviceInfo?.mac || 'Unknown MAC',
+                deviceName: deviceInfo?.deviceName || 'Unknown',
+                mac: deviceInfo?.mac || 'Unknown',
                 totalPackets: deviceStat.totalPackets,
                 missedPackets: deviceStat.missedPackets,
                 missRatePercentage: parseFloat(deviceStat.missRatePercentage.toFixed(2)),
-                lastSeen: deviceStat.lastSeenTimestamp
+                //lastSeenTimestamp đã là giây, NHÂN 1000 ĐỂ TRẢ VỀ MILISECONDS CHO FRONTEND
+                lastSeen: deviceStat.lastSeenTimestamp * 1000
             };
         });
 
-        return mappedTopDevices;
-    } catch (err) {
-        logger.error("Error in _getTopMissedDevices aggregation:", err);
-        throw new Error("Failed to calculate top missed devices.");
-    }
-}
+        res.status(200).json(mappedTopDevices);
 
-// 4. Hàm thống kê gói tin theo loại lệnh
-async function _getPacketCountsByCommand(matchQuery: any): Promise<PacketCountsByCommandData[]> {
+    } catch (error: any) {
+        logger.error("Error in getTopMissedDevices:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get top missed devices." });
+    }
+};
+
+// 4. Controller cho thống kê gói tin theo loại lệnh
+export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
-        
+        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
             {
@@ -328,34 +391,38 @@ async function _getPacketCountsByCommand(matchQuery: any): Promise<PacketCountsB
         ];
 
         const results = await IotStatistic.aggregate(pipeline);
-        return results.map(item => ({
+        const mappedResults = results.map(item => ({
             ...item,
             missRatePercentage: parseFloat(item.missRatePercentage.toFixed(2))
         }));
-    } catch (err) {
-        logger.error("Error in _getPacketCountsByCommand aggregation:", err);
-        throw new Error("Failed to calculate packet counts by command.");
-    }
-}
 
-// 5. Hàm thống kê kết nối thiết bị
-async function _getDeviceConnectivity(matchQuery: any, deviceMap: Map<string, { deviceName: string; mac: string }>): Promise<DeviceConnectivityData[]> {
+        res.status(200).json(mappedResults);
+
+    } catch (error: any) {
+        logger.error("Error in getPacketCountsByCommand:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get packet counts by command." });
+    }
+};
+
+// 5. Controller cho thống kê kết nối thiết bị
+export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
-        
+        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+        const deviceMap = getDeviceMapping();
+
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
             {
                 $group: {
                     _id: "$deviceId",
-                    lastConnectedTimestamp: { $max: "$timestamp" },
-                    // Giả định disconnectCount hoặc averageLatencyMs được tính/lưu trữ ở đâu đó
+                    lastConnectedTimestamp: { $max: "$timestamp" }, // lastConnectedTimestamp ở đây là giây từ DB
                 }
             },
             {
                 $project: {
                     _id: 0,
                     deviceId: "$_id",
-                    lastConnectedTimestamp: 1,
+                    lastConnectedTimestamp: 1, // Đây là giây
                 }
             }
         ];
@@ -368,14 +435,14 @@ async function _getDeviceConnectivity(matchQuery: any, deviceMap: Map<string, { 
                 deviceId: item.deviceId,
                 deviceName: deviceInfo?.deviceName || 'Unknown Device',
                 mac: deviceInfo?.mac || 'Unknown MAC',
-                isOnline: true, // Placeholder: cần logic thực tế để xác định online/offline
-                lastConnected: item.lastConnectedTimestamp,
-                disconnectCount: 0, // Placeholder: cần logic thực tế để đếm số lần ngắt kết nối
-                averageLatencyMs: undefined // Placeholder: cần logic thực tế nếu có trường latencyMs
+                isOnline: true,
+                // lastConnectedTimestamp đã là giây, NHÂN 1000 ĐỂ TRẢ VỀ MILISECONDS CHO FRONTEND
+                lastConnected: item.lastConnectedTimestamp * 1000,
+                disconnectCount: 0,
+                averageLatencyMs: undefined
             };
         });
 
-        // Lấy các thiết bị được biết nhưng không có dữ liệu trong khoảng thời gian (có thể offline)
         const activeDeviceIds = new Set(results.map(d => d.deviceId));
         deviceMap.forEach((info, id) => {
             if (!activeDeviceIds.has(id)) {
@@ -383,41 +450,41 @@ async function _getDeviceConnectivity(matchQuery: any, deviceMap: Map<string, { 
                     deviceId: id,
                     deviceName: info.deviceName,
                     mac: info.mac,
-                    isOnline: false, // Giả định offline nếu không có dữ liệu gần đây
-                    lastConnected: 0, // hoặc một timestamp last_seen từ MasterIotGlobal
-                    disconnectCount: 0, // Placeholder
+                    isOnline: false,
+                    lastConnected: 0, // hoặc một timestamp last_seen từ MasterIotGlobal (cũng nhân 1000)
+                    disconnectCount: 0,
                     averageLatencyMs: undefined
                 });
             }
         });
 
-        return deviceConnectivityData.sort((a, b) => (a.isOnline === b.isOnline) ? 0 : a.isOnline ? -1 : 1);
-    } catch (err) {
-        logger.error("Error in _getDeviceConnectivity aggregation:", err);
-        throw new Error("Failed to calculate device connectivity.");
-    }
-}
+        const sortedData = deviceConnectivityData.sort((a, b) => (a.isOnline === b.isOnline) ? 0 : a.isOnline ? -1 : 1);
+        res.status(200).json(sortedData);
 
-// 6. Hàm hiệu suất theo giờ (nếu có dữ liệu CPU/RAM/Pin)
-async function _getHourlyPerformanceMetrics(matchQuery: any): Promise<HourlyPerformanceMetricData[]> {
+    } catch (err: any) {
+        logger.error("Error in getDeviceConnectivity:", err.message);
+        res.status(400).json({ message: err.message || "Failed to get device connectivity." });
+    }
+};
+
+// 6. Controller cho hiệu suất theo giờ (nếu có dữ liệu CPU/RAM/Pin)
+export const getHourlyPerformanceMetrics = async (req: Request<{}, {}, {}, HourlyPerformanceMetricQuery>, res: Response) => {
     try {
-        // Kiểm tra xem matchQuery có lọc theo deviceId hay không
-        // Biểu đồ hiệu suất theo giờ thường chỉ có ý nghĩa khi lọc cho 1 thiết bị cụ thể
+        const matchQuery = prepareMatchQuery(req.query); // matchQuery.timestamp giờ là giây
+
         if (!matchQuery.deviceId) {
-            // Không ném lỗi mà trả về mảng rỗng để API chính không bị lỗi
-            return [];
+            return res.status(400).json({ message: "Vui lòng cung cấp 'deviceId' để xem hiệu suất theo giờ." });
         }
 
-        
         const pipeline: PipelineStage[] = [
             { $match: matchQuery },
             {
                 $group: {
                     _id: {
                         deviceId: "$deviceId",
-                        hour: { $dateToString: { format: "%Y-%m-%d %H", date: { $toDate: "$timestamp" } } }
+                        // $timestamp trong DB là giây, NHÂN 1000 để $toDate xử lý thành mili giây
+                        date: { $toDate: { $multiply: ["$timestamp", 1000] } }
                     },
-                    // Đảm bảo các trường này tồn tại trong IIotStatistic và dữ liệu thực
                     avgCpu: { $avg: "$cpuUsage" },
                     avgRam: { $avg: "$ramUsage" },
                     avgBattery: { $avg: "$batteryLevel" }
@@ -427,7 +494,7 @@ async function _getHourlyPerformanceMetrics(matchQuery: any): Promise<HourlyPerf
                 $project: {
                     _id: 0,
                     deviceId: "$_id.deviceId",
-                    timeBucket: { $toDate: "$_id.hour" },
+                    timeBucket: { $toDate: "$_id.date" }, // timeBucket ở đây đã là Date object
                     avgCpuUsagePercentage: "$avgCpu",
                     avgRamUsageMB: "$avgRam",
                     avgBatteryLevelPercentage: "$avgBattery"
@@ -437,185 +504,19 @@ async function _getHourlyPerformanceMetrics(matchQuery: any): Promise<HourlyPerf
         ];
 
         const results = await IotStatistic.aggregate(pipeline);
-        return results.map(item => ({
+        const mappedResults = results.map(item => ({
             ...item,
+            // .getTime() trả về mili giây từ Date object, phù hợp cho frontend
             timeBucket: item.timeBucket.getTime(),
             avgCpuUsagePercentage: item.avgCpuUsagePercentage !== undefined && item.avgCpuUsagePercentage !== null ? parseFloat(item.avgCpuUsagePercentage.toFixed(2)) : undefined,
             avgRamUsageMB: item.avgRamUsageMB !== undefined && item.avgRamUsageMB !== null ? parseFloat(item.avgRamUsageMB.toFixed(2)) : undefined,
             avgBatteryLevelPercentage: item.avgBatteryLevelPercentage !== undefined && item.avgBatteryLevelPercentage !== null ? parseFloat(item.avgBatteryLevelPercentage.toFixed(2)) : undefined,
         }));
-    } catch (err) {
-        logger.error("Error in _getHourlyPerformanceMetrics aggregation:", err);
-        throw new Error("Failed to calculate hourly performance metrics.");
-    }
-}
 
+        res.status(200).json(mappedResults);
 
-// =========================================================================
-// API CHÍNH: getDashboardData (Đã thêm validate và try-catch toàn diện)
-// =========================================================================
-
-export const getDashboardData = async (req: Request<{}, {}, {}, DashboardQuery>, res: Response) => {
-    let parsedStartTime: number | undefined;
-    let parsedEndTime: number | undefined;
-    let limitNumber: number;
-    let requestedDataTypes: string[];
-
-    try {
-        const {
-            startTime,
-            endTime,
-            deviceId,
-            cmd,
-            interval = 'daily',
-            topLimit = '5',
-            dataTypes
-        } = req.query;
-
-        // --- 1. Validation đầu vào ---
-
-        // Validate topLimit
-        limitNumber = parseInt(topLimit as string);
-        if (isNaN(limitNumber) || limitNumber < 1) {
-            return res.status(400).send({ message: "Tham số 'topLimit' không hợp lệ. Phải là số dương." });
-        }
-
-        // Validate startTime & endTime
-        if (startTime) {
-            parsedStartTime = parseInt(startTime as string) / 1000;
-            if (isNaN(parsedStartTime)) {
-                return res.status(400).send({ message: "Tham số 'startTime' không hợp lệ. Phải là Unix timestamp (ms)." });
-            }
-        }
-        if (endTime) {
-            parsedEndTime = parseInt(endTime as string) / 1000;
-            if (isNaN(parsedEndTime)) {
-                return res.status(400).send({ message: "Tham số 'endTime' không hợp lệ. Phải là Unix timestamp (ms)." });
-            }
-        }
-
-        if (parsedStartTime && parsedEndTime && parsedStartTime >= parsedEndTime) {
-            return res.status(400).send({ message: "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc." });
-        }
-
-        // Validate interval
-        const validIntervals = ['hourly', 'daily', 'weekly'];
-        if (!validIntervals.includes(interval)) {
-            return res.status(400).send({ message: `Tham số 'interval' không hợp lệ. Phải là một trong: ${validIntervals.join(', ')}.` });
-        }
-
-        // Validate dataTypes
-        const allPossibleDataTypes = [
-            'summary', 'packetCountsOverTime', 'topMissedDevices',
-            'packetCountsByCommand', 'deviceConnectivity', 'hourlyPerformanceMetrics'
-        ];
-        requestedDataTypes = dataTypes ? (dataTypes as string).split(',').map(s => s.trim()) : allPossibleDataTypes;
-
-        for (const type of requestedDataTypes) {
-            if (!allPossibleDataTypes.includes(type)) {
-                return res.status(400).send({ message: `Loại dữ liệu thống kê '${type}' không hợp lệ. Các loại hợp lệ: ${allPossibleDataTypes.join(', ')}.` });
-            }
-        }
-
-        // --- 2. Xây dựng baseMatchQuery ---
-        let baseMatchQuery: any = {};
-        if (parsedStartTime || parsedEndTime) {
-            baseMatchQuery.timestamp = {};
-            if (parsedStartTime) baseMatchQuery.timestamp.$gte = parsedStartTime;
-            if (parsedEndTime) baseMatchQuery.timestamp.$lte = parsedEndTime;
-        }
-        if (deviceId) baseMatchQuery.deviceId = deviceId;
-        if (cmd) baseMatchQuery.cmd = cmd;
-
-        // --- 3. Lấy deviceMap (cần handle lỗi nếu MasterIotGlobal có vấn đề) ---
-        let deviceMap: Map<string, { deviceName: string; mac: string }>;
-        try {
-            deviceMap = getDeviceMapping();
-        } catch (err) {
-            logger.error("Failed to get device mapping:", err);
-            // Vẫn cho phép API tiếp tục nhưng không có thông tin deviceName/mac
-            deviceMap = new Map();
-        }
-
-        // --- 4. Khởi tạo đối tượng phản hồi ---
-        const responseData: DashboardResponse = {
-            metadata: {
-                requestedStartTime: parsedStartTime,
-                requestedEndTime: parsedEndTime,
-                appliedDeviceId: deviceId,
-                appliedCmd: cmd,
-                appliedInterval: interval,
-                appliedTopLimit: limitNumber,
-                generatedAt: Date.now()
-            }
-        };
-
-        // --- 5. Thực hiện các truy vấn dựa trên dataTypes yêu cầu (với try-catch riêng) ---
-
-        if (requestedDataTypes.includes('summary')) {
-            try {
-                responseData.overallSummary = await _getOverallSummary(baseMatchQuery);
-            } catch (err: any) {
-                logger.error("Error fetching overallSummary:", err.message);
-                responseData.overallSummary = { error: "Không thể tải tổng quan gói tin: " + err.message };
-            }
-        }
-
-        if (requestedDataTypes.includes('packetCountsOverTime')) {
-            try {
-                responseData.packetCountsOverTime = await _getPacketCountsOverTime(baseMatchQuery, interval);
-            } catch (err: any) {
-                logger.error("Error fetching packetCountsOverTime:", err.message);
-                responseData.packetCountsOverTime = { error: "Không thể tải xu hướng gói tin theo thời gian: " + err.message };
-            }
-        }
-
-        if (requestedDataTypes.includes('topMissedDevices')) {
-            try {
-                responseData.topMissedDevices = await _getTopMissedDevices(baseMatchQuery, limitNumber, deviceMap);
-            } catch (err: any) {
-                logger.error("Error fetching topMissedDevices:", err.message);
-                responseData.topMissedDevices = { error: "Không thể tải top thiết bị bị miss: " + err.message };
-            }
-        }
-
-        if (requestedDataTypes.includes('packetCountsByCommand')) {
-            try {
-                responseData.packetCountsByCommand = await _getPacketCountsByCommand(baseMatchQuery);
-            } catch (err: any) {
-                logger.error("Error fetching packetCountsByCommand:", err.message);
-                responseData.packetCountsByCommand = { error: "Không thể tải gói tin theo lệnh: " + err.message };
-            }
-        }
-
-        if (requestedDataTypes.includes('deviceConnectivity')) {
-            try {
-                responseData.deviceConnectivity = await _getDeviceConnectivity(baseMatchQuery, deviceMap);
-            } catch (err: any) {
-                logger.error("Error fetching deviceConnectivity:", err.message);
-                responseData.deviceConnectivity = { error: "Không thể tải trạng thái kết nối thiết bị: " + err.message };
-            }
-        }
-
-        if (requestedDataTypes.includes('hourlyPerformanceMetrics')) {
-            try {
-                responseData.hourlyPerformanceMetrics = await _getHourlyPerformanceMetrics(baseMatchQuery);
-            } catch (err: any) {
-                logger.error("Error fetching hourlyPerformanceMetrics:", err.message);
-                responseData.hourlyPerformanceMetrics = { error: "Không thể tải hiệu suất theo giờ: " + err.message };
-            }
-        }
-
-        // --- 6. Gửi phản hồi thành công ---
-        res.status(200).send(responseData);
-
-    } catch (error: any) {
-        // --- Xử lý lỗi toàn cục nếu có lỗi validate hoặc lỗi không mong muốn khác ---
-        logger.error("Global error in getDashboardData:", error);
-        // Gửi lỗi 500 nếu là lỗi server không xác định
-        // hoặc lỗi 400 nếu là lỗi validate chưa được bắt trước đó
-        res.status(error.message.includes("không hợp lệ") || error.message.includes("phải nhỏ hơn") ? 400 : 500).send({
-            message: "Internal Server Error"
-        });
+    } catch (err: any) {
+        logger.error("Error in getHourlyPerformanceMetrics:", err.message);
+        res.status(400).json({ message: err.message || "Failed to get hourly performance metrics." });
     }
 };

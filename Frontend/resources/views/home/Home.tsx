@@ -1,11 +1,43 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Col, Row, Statistic, DatePicker, Select, Input, Spin, Alert, Button, Table } from 'antd';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import dayjs, { Dayjs } from 'dayjs'; // Thêm import dayjs
+import {
+    PieChart, Pie, Cell,
+    Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    ComposedChart, Line
+} from 'recharts';
+import dayjs, { Dayjs } from 'dayjs';
+
+// =========================================================================
+// CONSTANTS
+// =========================================================================
+const API_DASHBOARD_PREFIX = 'http://localhost:3335/api/dashboard';
+const { RangePicker } = DatePicker;
+const { Option } = Select;
+
+const CHART_COLORS = {
+    success: '#4680ff', // Xanh cho Realtime
+    missed: '#ff4d4f', // Đỏ cho Gửi lại (missed)
+    missedLine: '#ff7875', // Màu đỏ nhạt hơn cho đường Gửi lại
+    pieColors: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff7f', '#ff1493', '#1e90ff', '#ffa500'],
+    grid: '#e0e0e0',
+    tooltipBg: 'rgba(255, 255, 255, 0.95)',
+    textPrimary: '#333',
+    textSecondary: '#666',
+    otherCommands: '#cccccc' // Màu cho "Các lệnh khác"
+};
 
 // =========================================================================
 // INTERFACES
 // =========================================================================
+// Query params chung để truyền xuống các component con
+interface CommonDashboardQueryParams {
+    startTime: number | null; // Unix timestamp in SECONDS
+    endTime: number | null;   // Unix timestamp in SECONDS
+    deviceId?: string;
+    cmd?: string;
+}
+
+// Data interfaces cho từng loại dữ liệu trả về từ API
 interface OverallSummaryData {
     totalPackets: number;
     successfulPackets: number;
@@ -16,7 +48,7 @@ interface OverallSummaryData {
     totalUniqueCommands: number;
 }
 interface PacketCountOverTimeData {
-    timeBucket: number;
+    timeBucket: number; // Unix timestamp in SECONDS (từ BE)
     successfulPackets: number;
     missedPackets: number;
     missRatePercentage: number;
@@ -28,7 +60,7 @@ interface TopMissedDeviceData {
     totalPackets: number;
     missedPackets: number;
     missRatePercentage: number;
-    lastSeen: number;
+    lastSeen: number; // Unix timestamp in SECONDS (từ BE)
 }
 interface PacketCountsByCommandData {
     cmd: string;
@@ -37,39 +69,18 @@ interface PacketCountsByCommandData {
     missedPackets: number;
     missRatePercentage: number;
 }
-interface DashboardResponse {
-    metadata: {
-        requestedStartTime?: number;
-        requestedEndTime?: number;
-        appliedDeviceId?: string;
-        appliedCmd?: string;
-        appliedInterval?: 'hourly' | 'daily' | 'weekly';
-        appliedTopLimit?: number;
-        generatedAt: number;
-    };
-    overallSummary?: OverallSummaryData;
-    overallSummaryError?: string;
-    packetCountsOverTime?: PacketCountOverTimeData[] | { error: string };
-    topMissedDevices?: TopMissedDeviceData[] | { error: string };
-    packetCountsByCommand?: PacketCountsByCommandData[] | { error: string };
+interface PieChartDataItem {
+    name: string;
+    value: number;
+    percentage?: string;
 }
-// =========================================================================
-// CONSTANTS
-// =========================================================================
-const API_BASE_URL = 'http://localhost:3335/api/dashboard/getData';
-const { RangePicker } = DatePicker;
-const { Option } = Select;
-// Màu sắc cho biểu đồ
-const COLORS = {
-    success: '#52c41a',
-    missed: '#ff4d4f',
-    pieColors: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff7f', '#ff1493', '#1e90ff', '#ffa500']
-};
+
 // =========================================================================
 // UTILITY FUNCTIONS
 // =========================================================================
 const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' | 'weekly'): string => {
-    const date = new Date(timestamp * 1000);
+    // timestamp nhận vào là MILISECONDS (vì đã nhân 1000 khi gọi Date)
+    const date = new Date(timestamp);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -82,7 +93,7 @@ const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' |
         case 'daily':
             return `${day}/${month}`;
         case 'weekly':
-            return `${day}/${month}/${year}`;
+            return `Tuần của ${day}/${month}`;
         default:
             return `${day}/${month}/${year}`;
     }
@@ -93,78 +104,203 @@ const formatNumber = (num: number): string => {
 const formatPercentage = (num: number): string => {
     return `${(num || 0).toFixed(2)}%`;
 };
+
+const groupPieData = (data: PieChartDataItem[], thresholdPercentage: number = 2): PieChartDataItem[] => {
+    if (!data || data.length === 0) return [];
+
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    if (total === 0) return [];
+
+    const filteredData: PieChartDataItem[] = [];
+    let otherValue = 0;
+    let otherCount = 0;
+
+    data.forEach(item => {
+        const itemPercentage = (item.value / total) * 100;
+        if (itemPercentage < thresholdPercentage) {
+            otherValue += item.value;
+            otherCount++;
+        } else {
+            filteredData.push(item);
+        }
+    });
+
+    if (otherValue > 0) {
+        filteredData.push({
+            name: `Các lệnh khác (${otherCount})`,
+            value: otherValue,
+            percentage: ((otherValue / total) * 100).toFixed(1)
+        });
+    }
+
+    return filteredData.sort((a, b) => {
+        if (a.name === "Các lệnh khác" && b.name !== "Các lệnh khác") return 1;
+        if (a.name !== "Các lệnh khác" && b.name === "Các lệnh khác") return -1;
+        return b.value - a.value;
+    });
+};
+
+// Custom Tooltip cho biểu đồ cột/đường
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div style={{
+                backgroundColor: CHART_COLORS.tooltipBg,
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                fontSize: '13px',
+            }}>
+                <p style={{ margin: 0, fontWeight: 'bold', color: CHART_COLORS.textPrimary, marginBottom: '6px' }}>{`${label}`}</p>
+                {payload.map((entry: any, index: number) => (
+                    <p key={index} style={{ margin: '3px 0', color: entry.color, display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{`${entry.dataKey}:`}</span>
+                        <span style={{ fontWeight: 'bold', marginLeft: '10px' }}>{formatNumber(entry.value)}</span>
+                    </p>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
+// Custom Tooltip cho biểu đồ tròn
+const CustomPieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+        const data = payload[0].payload;
+        return (
+            <div style={{
+                backgroundColor: CHART_COLORS.tooltipBg,
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                fontSize: '13px',
+            }}>
+                <p style={{ margin: 0, fontWeight: 'bold', color: CHART_COLORS.textPrimary, marginBottom: '6px' }}>{data.name}</p>
+                <p style={{ margin: '3px 0', color: payload[0].color, display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{`Số lượng:`}</span>
+                    <span style={{ fontWeight: 'bold', marginLeft: '10px' }}>{formatNumber(data.value)}</span>
+                </p>
+                {data.percentage && (
+                    <p style={{ margin: '3px 0', color: payload[0].color, display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{`Tỷ lệ:`}</span>
+                        <span style={{ fontWeight: 'bold', marginLeft: '10px' }}>{`${data.percentage}%`}</span>
+                    </p>
+                )}
+            </div>
+        );
+    }
+    return null;
+};
+
 // =========================================================================
-// MAIN COMPONENT
+// API FUNCTIONS
 // =========================================================================
-const Dashboard: React.FC = () => {
-    // States - Đổi type của dateRange từ Date sang Dayjs
-    const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
-    const [deviceId, setDeviceId] = useState<string>('');
-    const [cmd, setCmd] = useState<string>('');
-    const [interval, setInterval] = useState<'hourly' | 'daily' | 'weekly'>('daily');
-    const [topLimit, setTopLimit] = useState<string>('5');
-    const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+// Helper để tạo URLSearchParams từ object
+const createSearchParams = (params: Record<string, any>): URLSearchParams => {
+    const sp = new URLSearchParams();
+    for (const key in params) {
+        if (params[key] !== undefined && params[key] !== null && String(params[key]).trim() !== '') {
+            sp.append(key, params[key].toString());
+        }
+    }
+    return sp;
+};
+
+// Helper để xử lý response
+const handleResponse = async (res: Response) => {
+    if (!res.ok) {
+        const errorBody = await res.json().catch(() => ({}));
+        if (res.status === 400 && errorBody.message) {
+            throw new Error(errorBody.message);
+        }
+        throw new Error(errorBody.message || res.statusText);
+    }
+    return res.json();
+};
+
+const fetchOverallSummaryApi = async (params: CommonDashboardQueryParams): Promise<OverallSummaryData> => {
+    // FE và BE đều dùng GIÂY, nên không cần nhân/chia 1000
+    const queryParams = createSearchParams(params);
+    const url = `${API_DASHBOARD_PREFIX}/summary?${queryParams.toString()}`;
+    return handleResponse(await fetch(url));
+};
+
+interface PacketCountsOverTimeApiParams extends CommonDashboardQueryParams {
+    interval: 'hourly' | 'daily' | 'weekly';
+}
+const fetchPacketCountsOverTimeApi = async (params: PacketCountsOverTimeApiParams): Promise<PacketCountOverTimeData[]> => {
+    // FE và BE đều dùng GIÂY, nên không cần nhân/chia 1000
+    const queryParams = createSearchParams(params);
+    const url = `${API_DASHBOARD_PREFIX}/packet-counts-over-time?${queryParams.toString()}`;
+    const rawData = await handleResponse(await fetch(url));
+    // BE trả về GIÂY, FE nhận GIÂY. Không cần nhân 1000 ở đây nữa.
+    // Việc nhân 1000 để tạo Date object sẽ làm trong formatTimeBucketLabel
+    return rawData;
+};
+
+interface TopMissedDevicesApiParams extends CommonDashboardQueryParams {
+    topLimit: string;
+}
+const fetchTopMissedDevicesApi = async (params: TopMissedDevicesApiParams): Promise<TopMissedDeviceData[]> => {
+    // FE và BE đều dùng GIÂY, nên không cần nhân/chia 1000
+    const queryParams = createSearchParams(params);
+    const url = `${API_DASHBOARD_PREFIX}/top-missed-devices?${queryParams.toString()}`;
+    const rawData = await handleResponse(await fetch(url));
+    // BE trả về GIÂY, FE nhận GIÂY. Không cần nhân 1000 ở đây nữa.
+    // Việc nhân 1000 để tạo Date object sẽ làm trong render function của Table
+    return rawData;
+};
+
+const fetchPacketCountsByCommandApi = async (params: CommonDashboardQueryParams): Promise<PacketCountsByCommandData[]> => {
+    // FE và BE đều dùng GIÂY, nên không cần nhân/chia 1000
+    const queryParams = createSearchParams(params);
+    const url = `${API_DASHBOARD_PREFIX}/packet-counts-by-command?${queryParams.toString()}`;
+    return handleResponse(await fetch(url));
+};
+
+
+// =========================================================================
+// SUB-COMPONENTS CHO TỪNG BIỂU ĐỒ (Sử dụng React.memo)
+// =========================================================================
+
+// 1. OverallSummaryCard
+interface OverallSummaryCardProps {
+    commonParams: CommonDashboardQueryParams;
+}
+const OverallSummaryCard: React.FC<OverallSummaryCardProps> = React.memo(({ commonParams }) => {
+    const [data, setData] = useState<OverallSummaryData | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    // Initialize date range - Sử dụng dayjs thay vì Date
-    useEffect(() => {
-        const now = dayjs();
-        const sevenDaysAgo = dayjs().subtract(7, 'day').startOf('day');
-        const endOfToday = now.endOf('day');
 
-        setDateRange([sevenDaysAgo, endOfToday]);
-    }, []);
-    // =========================================================================
-    // API FUNCTIONS
-    // =========================================================================
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            if (!dateRange || !dateRange[0] || !dateRange[1]) {
-                throw new Error("Vui lòng chọn khoảng thời gian.");
+            if (!commonParams.startTime || !commonParams.endTime) {
+                setData(null); // Clear data if no time range
+                return;
             }
-            // Chuyển đổi dayjs objects thành timestamps
-            const startTimestamp = dateRange[0].valueOf();
-            const endTimestamp = dateRange[1].valueOf();
-            const queryParams = new URLSearchParams({
-                startTime: startTimestamp.toString(),
-                endTime: endTimestamp.toString(),
-                interval: interval,
-                topLimit: topLimit,
-                dataTypes: 'summary,packetCountsOverTime,topMissedDevices,packetCountsByCommand',
-            });
-            if (deviceId.trim()) queryParams.append('deviceId', deviceId.trim());
-            if (cmd.trim()) queryParams.append('cmd', cmd.trim());
-            const url = `${API_BASE_URL}?${queryParams.toString()}`;
-            console.log('🔄 Fetching data from:', url);
-            const response = await fetch(url);
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({}));
-                throw new Error(errorBody.message || `HTTP ${response.status}: ${response.statusText}`);
-            }
-            const data: DashboardResponse = await response.json();
-            console.log('📊 Received data:', data);
-            setDashboardData(data);
-        } catch (err) {
-            console.error('❌ Error fetching dashboard data:', err);
-            setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
-            setDashboardData(null);
+            const result = await fetchOverallSummaryApi(commonParams);
+            setData(result);
+        } catch (err: any) {
+            console.error("Error fetching OverallSummary:", err);
+            setError(err.message || "Lỗi tải tổng quan gói tin.");
+            setData(null);
         } finally {
             setLoading(false);
         }
-    }, [dateRange, deviceId, cmd, interval, topLimit]);
+    }, [commonParams]);
+
     useEffect(() => {
-        if (dateRange && dateRange[0] && dateRange[1]) {
-            fetchData();
-        }
+        fetchData();
     }, [fetchData]);
-    // =========================================================================
-    // DATA PROCESSING
-    // =========================================================================
-    const getOverallSummaryPieData = () => {
-        if (!dashboardData?.overallSummary) return [];
-        const { successfulPackets, missedPackets } = dashboardData.overallSummary;
+
+    const pieData = useMemo(() => {
+        if (!data) return [];
+        const { successfulPackets, missedPackets, totalPackets } = data;
         const total = (successfulPackets || 0) + (missedPackets || 0);
 
         if (total === 0) return [];
@@ -172,560 +308,704 @@ const Dashboard: React.FC = () => {
             {
                 name: 'Realtime',
                 value: successfulPackets || 0,
-                percentage: ((successfulPackets || 0) / total * 100).toFixed(1)
+                percentage: ((successfulPackets || 0) / totalPackets * 100).toFixed(1)
             },
             {
                 name: 'Gửi lại',
                 value: missedPackets || 0,
-                percentage: ((missedPackets || 0) / total * 100).toFixed(1)
+                percentage: ((missedPackets || 0) / totalPackets * 100).toFixed(1)
             },
         ].filter(item => item.value > 0);
-    };
-    const getCommandPieData = () => {
-        const packetCountsByCommand = dashboardData?.packetCountsByCommand;
+    }, [data]);
 
-        if (!packetCountsByCommand || !Array.isArray(packetCountsByCommand)) return [];
-        return packetCountsByCommand.map(item => ({
-            name: item.cmd || 'Unknown',
-            value: item.totalPackets || 0
-        })).filter(item => item.value > 0);
-    };
-    const getTimeSeriesData = () => {
-        const packetCountsOverTime = dashboardData?.packetCountsOverTime;
 
-        if (!packetCountsOverTime || !Array.isArray(packetCountsOverTime)) return [];
-        return packetCountsOverTime.map(item => ({
-            time: formatTimeBucketLabel(item.timeBucket, interval),
-            'Thành công': item.successfulPackets || 0,
-            'Bị Miss': item.missedPackets || 0,
-            timestamp: item.timeBucket
-        })).sort((a, b) => a.timestamp - b.timestamp);
-    };
-    // =========================================================================
-    // CUSTOM TOOLTIP COMPONENTS
-    // =========================================================================
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '10px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                    <p style={{ margin: 0, fontWeight: 'bold' }}>{`${label}`}</p>
-                    {payload.map((entry: any, index: number) => (
-                        <p key={index} style={{ margin: '4px 0', color: entry.color }}>
-                            {`${entry.dataKey}: ${formatNumber(entry.value)}`}
-                        </p>
-                    ))}
-                </div>
-            );
-        }
-        return null;
-    };
-    const CustomPieTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-            return (
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '10px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                    <p style={{ margin: 0, fontWeight: 'bold' }}>{data.name}</p>
-                    <p style={{ margin: 0, color: payload[0].color }}>
-                        {`Số lượng: ${formatNumber(data.value)}`}
-                    </p>
-                    {data.percentage && (
-                        <p style={{ margin: 0, color: payload[0].color }}>
-                            {`Tỷ lệ: ${data.percentage}%`}
-                        </p>
-                    )}
-                </div>
-            );
-        }
-        return null;
-    };
-    // =========================================================================
-    // RENDER FUNCTIONS
-    // =========================================================================
-    const renderFilters = () => (
-        <Card title="🔧 Bộ lọc Dashboard" style={{ marginBottom: 24 }}>
-            <Row gutter={[16, 16]} align="top">
-                <Col xs={24} sm={12} md={8} lg={6}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>Khoảng thời gian:</strong>
-                    </div>
-                    <RangePicker
-                        showTime={{ format: 'HH:mm' }}
-                        format="YYYY-MM-DD HH:mm"
-                        value={dateRange}
-                        onChange={(dates) => {
-                            // Không cần chuyển đổi sang Date, giữ nguyên dayjs objects
-                            setDateRange(dates as [Dayjs | null, Dayjs | null]);
-                        }}
-                        style={{ width: '100%' }}
-                        placeholder={['Từ ngày', 'Đến ngày']}
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>ID thiết bị:</strong>
-                    </div>
-                    <Input
-                        placeholder="VD: 101"
-                        value={deviceId}
-                        onChange={(e) => setDeviceId(e.target.value)}
-                        allowClear
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>Lệnh (CMD):</strong>
-                    </div>
-                    <Input
-                        placeholder="VD: sensor_data"
-                        value={cmd}
-                        onChange={(e) => setCmd(e.target.value)}
-                        allowClear
-                    />
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>Khoảng thời gian:</strong>
-                    </div>
-                    <Select
-                        value={interval}
-                        onChange={(value) => setInterval(value)}
-                        style={{ width: '100%' }}
-                    >
-                        <Option value="hourly">Theo giờ</Option>
-                        <Option value="daily">Theo ngày</Option>
-                        <Option value="weekly">Theo tuần</Option>
-                    </Select>
-                </Col>
-                <Col xs={24} sm={12} md={8} lg={4}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>Top N:</strong>
-                    </div>
-                    <Input
-                        type="number"
-                        min={1}
-                        max={50}
-                        value={topLimit}
-                        onChange={(e) => setTopLimit(e.target.value)}
-                    />
-                </Col>
-                {/*<Col xs={24}>*/}
-                {/*    <Button*/}
-                {/*        type="primary"*/}
-                {/*        onClick={fetchData}*/}
-                {/*        loading={loading}*/}
-                {/*        size="large"*/}
-                {/*        style={{ minWidth: 120 }}*/}
-                {/*    >*/}
-                {/*        {loading ? 'Đang tải...' : '🔄 Áp dụng bộ lọc'}*/}
-                {/*    </Button>*/}
-                {/*</Col>*/}
-            </Row>
-        </Card>
-    );
-    const renderOverallSummaryCard = () => {
-        const { overallSummary, overallSummaryError } = dashboardData || {};
-        if (overallSummaryError) {
-            return (
-                <Col xs={24} lg={12}>
-                    <Alert
-                        message="Lỗi tải Tổng quan"
-                        description={overallSummaryError}
-                        type="warning"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        if (!overallSummary || overallSummary.totalPackets === 0) {
-            return (
-                <Col xs={24} lg={12}>
-                    <Alert
-                        message="Không có dữ liệu"
-                        description="Không tìm thấy dữ liệu tổng quan gói tin."
-                        type="info"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        const pieData = getOverallSummaryPieData();
+    if (loading) {
         return (
             <Col xs={24} lg={12}>
-                <Card title="📊 Tổng quan gói tin" style={{ height: 500 }}>
-                    <div style={{ height: 250, marginBottom: 16 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={100}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    label={({ name, percentage }) => `${name}: ${percentage}%`}
-                                >
-                                    {pieData.map((_entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={index === 0 ? COLORS.success : COLORS.missed}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<CustomPieTooltip />} />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <Spin tip="Đang tải tổng quan..." />
                     </div>
-                    <Row gutter={[8, 8]}>
-                        <Col span={5}>
-                            <Statistic
-                                title="Tổng gói"
-                                value={overallSummary.totalPackets}
-                                formatter={(value) => formatNumber(Number(value))}
+                </Card>
+            </Col>
+        );
+    }
+
+    if (error) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                    <Alert message="Lỗi tải Tổng quan" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    if (!data || data.totalPackets === 0) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title="📊 Tổng quan gói tin" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}>
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu tổng quan gói tin." type="info" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    return (
+        <Col xs={24} lg={12}>
+            <Card
+                title="📊 Tổng quan gói tin"
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px' }}
+            >
+                <div style={{ height: 200, marginBottom: 16 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={50}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                                label={({ name, percentage }) => `${name}: ${percentage}%`}
+                                labelLine={false}
+                            >
+                                {pieData.map((_entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={index === 0 ? CHART_COLORS.success : CHART_COLORS.missed}
+                                        stroke="#fff"
+                                        strokeWidth={2}
+                                    />
+                                ))}
+                            </Pie>
+                            <Tooltip content={<CustomPieTooltip />} />
+                            <Legend layout="horizontal" align="center" verticalAlign="bottom" wrapperStyle={{ paddingTop: '10px' }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <Row gutter={[8, 8]}>
+                    <Col span={6}>
+                        <Statistic
+                            title="Tổng gói"
+                            value={data.totalPackets}
+                            formatter={(value) => formatNumber(Number(value))}
+                            valueStyle={{ color: CHART_COLORS.textPrimary }}
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <Statistic
+                            title="Realtime"
+                            value={data.successfulPackets}
+                            valueStyle={{ color: CHART_COLORS.success }}
+                            formatter={(value) => formatNumber(Number(value))}
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <Statistic
+                            title="Gửi lại"
+                            value={data.missedPackets}
+                            valueStyle={{ color: CHART_COLORS.missed }}
+                            formatter={(value) => formatNumber(Number(value))}
+                        />
+                    </Col>
+                    <Col span={6}>
+                        <Statistic
+                            title="Tỷ lệ gửi lại"
+                            value={data.missRatePercentage}
+                            precision={2}
+                            suffix="%"
+                            valueStyle={{ color: data.missRatePercentage > 5 ? CHART_COLORS.missed : CHART_COLORS.success }}
+                        />
+                    </Col>
+                </Row>
+            </Card>
+        </Col>
+    );
+});
+
+// 2. CommandDistributionCard
+interface CommandDistributionCardProps {
+    commonParams: CommonDashboardQueryParams;
+}
+const CommandDistributionCard: React.FC<CommandDistributionCardProps> = React.memo(({ commonParams }) => {
+    const [data, setData] = useState<PacketCountsByCommandData[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [cmdFilter, setCmdFilter] = useState<string>(commonParams.cmd || '');
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            if (!commonParams.startTime || !commonParams.endTime) {
+                setData(null);
+                return;
+            }
+            const paramsWithCmd = { ...commonParams, cmd: cmdFilter.trim() || undefined };
+            const result = await fetchPacketCountsByCommandApi(paramsWithCmd);
+            setData(result);
+        } catch (err: any) {
+            console.error("Error fetching CommandDistribution:", err);
+            setError(err.message || "Lỗi tải phân phối gói tin theo lệnh.");
+            setData(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [commonParams, cmdFilter]);
+
+    useEffect(() => {
+        // Fetch dữ liệu lần đầu và khi commonParams thay đổi
+        fetchData();
+    }, [fetchData]); // Chỉ re-run khi fetchData thay đổi (do commonParams hoặc cmdFilter thay đổi)
+
+
+    const pieData = useMemo(() => {
+        if (!data) return [];
+        return groupPieData(
+            data.map(item => ({ name: item.cmd || 'Unknown', value: item.totalPackets || 0 })),
+            3
+        );
+    }, [data]);
+
+    const cardTitle = (
+        <Row align="middle" justify="space-between" style={{ width: '100%' }}>
+            <Col>📋 Phân phối gói tin theo lệnh</Col>
+            <Col>
+                <Input.Search
+                    placeholder="Lọc theo lệnh"
+                    value={cmdFilter}
+                    onChange={(e) => setCmdFilter(e.target.value)}
+                    onSearch={fetchData} // Bắt sự kiện nhấn Enter hoặc click Search icon
+                    style={{ width: 200 }}
+                    allowClear
+                    size="small"
+                />
+            </Col>
+        </Row>
+    );
+
+    if (loading) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <Spin tip="Đang tải phân phối lệnh..." />
+                    </div>
+                </Card>
+            </Col>
+        );
+    }
+
+    if (error) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Lỗi tải Phân phối theo lệnh" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    if (!pieData.length) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu phân phối theo lệnh." type="info" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    return (
+        <Col xs={24} lg={12}>
+            <Card
+                title={cardTitle}
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 350 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+            >
+                <div style={{ height: `300px` }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={120}
+                                paddingAngle={5}
+                                dataKey="value"
+                                label={({ name, percent }) => `${name}\n${(percent * 100).toFixed(0)}%`}
+                                labelLine={false}
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={entry.name.includes("Các lệnh khác") ? CHART_COLORS.otherCommands : CHART_COLORS.pieColors[index % CHART_COLORS.pieColors.length]}
+                                        stroke="#fff"
+                                        strokeWidth={2}
+                                    />
+                                ))}
+                            </Pie>
+                            <Tooltip content={<CustomPieTooltip />} />
+                            <Legend layout="vertical" align="right" verticalAlign="middle" />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+        </Col>
+    );
+});
+
+// 3. TimeSeriesCard
+interface TimeSeriesCardProps {
+    commonParams: CommonDashboardQueryParams;
+    initialInterval?: 'hourly' | 'daily' | 'weekly';
+}
+const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams, initialInterval = 'daily' }) => {
+    const [data, setData] = useState<PacketCountOverTimeData[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [interval, setInterval] = useState<'hourly' | 'daily' | 'weekly'>(initialInterval);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            if (!commonParams.startTime || !commonParams.endTime) {
+                setData(null);
+                return;
+            }
+            const paramsWithInterval: PacketCountsOverTimeApiParams = { ...commonParams, interval: interval };
+            const result = await fetchPacketCountsOverTimeApi(paramsWithInterval);
+
+            const formattedData = result.map(item => ({
+                // item.timeBucket từ API là giây, nhân 1000 để tạo Date object trong formatTimeBucketLabel
+                time: formatTimeBucketLabel(item.timeBucket, interval),
+                'Realtime': item.successfulPackets || 0,
+                'Gửi lại': item.missedPackets || 0,
+                timestamp: item.timeBucket // Giữ timestamp là mili giây cho việc sắp xếp
+            })).sort((a, b) => a.timestamp - b.timestamp);
+
+            // @ts-ignore
+            setData(formattedData);
+        } catch (err: any) {
+            console.error("Error fetching TimeSeriesData:", err);
+            setError(err.message || "Lỗi tải xu hướng gói tin.");
+            setData(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [commonParams, interval]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const intervalLabel = interval === 'hourly' ? 'giờ' : interval === 'daily' ? 'ngày' : 'tuần';
+
+    const cardTitle = (
+        <Row align="middle" justify="space-between" style={{ width: '100%' }}>
+            <Col>📈 Xu hướng gói tin theo {intervalLabel}</Col>
+            <Col>
+                <Select
+                    value={interval}
+                    onChange={(value) => setInterval(value as 'hourly' | 'daily' | 'weekly')}
+                    style={{ width: 120 }}
+                    size="small"
+                >
+                    <Option value="hourly">Theo giờ</Option>
+                    <Option value="daily">Theo ngày</Option>
+                    <Option value="weekly">Theo tuần</Option>
+                </Select>
+            </Col>
+        </Row>
+    );
+
+    if (loading) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <Spin tip="Đang tải xu hướng..." />
+                    </div>
+                </Card>
+            </Col>
+        );
+    }
+
+    if (error) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Lỗi tải Xu hướng gói tin" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    if (!data || data.length === 0) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu xu hướng theo thời gian." type="info" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    return (
+        <Col xs={24} lg={12}>
+            <Card
+                title={cardTitle}
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+            >
+                <div style={{ height: 380, paddingTop: 10 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart
+                            data={data}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+                            <XAxis
+                                dataKey="time"
+                                angle={-30}
+                                textAnchor="end"
+                                height={50}
+                                tickFormatter={(tick) => {
+                                    const index = data.findIndex(d => d.timeBucket === tick);
+                                    if (data.length > 15 && index % 3 !== 0) return '';
+                                    if (data.length > 7 && index % 2 !== 0) return '';
+                                    return tick;
+                                }}
+                            />
+                            <YAxis yAxisId="left" orientation="left" stroke={CHART_COLORS.success} />
+                            <YAxis yAxisId="right" orientation="right" stroke={CHART_COLORS.missedLine} />
+
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend wrapperStyle={{ paddingTop: 0 }} />
+
+                            <Bar yAxisId="left" dataKey="Realtime" fill={CHART_COLORS.success} barSize={20} />
+                            <Line
+                                yAxisId="right"
+                                type="monotone"
+                                dataKey="Gửi lại"
+                                stroke={CHART_COLORS.missedLine}
+                                strokeWidth={3}
+                                dot={{ stroke: CHART_COLORS.missedLine, strokeWidth: 2, r: 4 }}
+                                activeDot={{ r: 6, fill: CHART_COLORS.missedLine, stroke: CHART_COLORS.missedLine, strokeWidth: 2 }}
+                            />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+        </Col>
+    );
+});
+
+// 4. TopMissedDevicesCard
+interface TopMissedDevicesCardProps {
+    commonParams: CommonDashboardQueryParams;
+    initialTopLimit?: string;
+}
+const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ commonParams, initialTopLimit = '5' }) => {
+    const [data, setData] = useState<TopMissedDeviceData[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [topLimit, setTopLimit] = useState<string>(initialTopLimit);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const limitNum = parseInt(topLimit);
+            if (isNaN(limitNum) || limitNum < 1) {
+                throw new Error("Tham số 'Top N' không hợp lệ. Phải là số dương.");
+            }
+            if (!commonParams.startTime || !commonParams.endTime) {
+                setData(null);
+                return;
+            }
+
+            const paramsWithLimit: TopMissedDevicesApiParams = { ...commonParams, topLimit: topLimit };
+            const result = await fetchTopMissedDevicesApi(paramsWithLimit);
+            setData(result);
+        } catch (err: any) {
+            console.error("Error fetching TopMissedDevices:", err);
+            setError(err.message || "Lỗi tải top thiết bị gửi lại.");
+            setData(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [commonParams, topLimit]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const columns = useMemo(() => [
+        {
+            title: 'ID',
+            dataIndex: 'deviceId',
+            key: 'deviceId',
+            width: 60,
+            fixed: 'left' as const,
+            render: (text: string) => <span style={{ fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>{text}</span>
+        },
+        {
+            title: 'Tên Thiết bị',
+            dataIndex: 'deviceName',
+            key: 'deviceName',
+            ellipsis: true,
+            render: (text: string) => <span style={{ color: CHART_COLORS.textSecondary }}>{text}</span>
+        },
+        {
+            title: 'MAC Address',
+            dataIndex: 'mac',
+            key: 'mac',
+            width: 170,
+            render: (mac: string) => <code style={{ backgroundColor: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>{mac}</code>
+        },
+        {
+            title: 'Tổng gói',
+            dataIndex: 'totalPackets',
+            key: 'totalPackets',
+            width: 100,
+            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.totalPackets - b.totalPackets,
+            render: (value: number) => formatNumber(value)
+        },
+        {
+            title: 'Gửi lại',
+            dataIndex: 'missedPackets',
+            key: 'missedPackets',
+            width: 80,
+            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missedPackets - b.missedPackets,
+            render: (value: number) => (
+                <span style={{ color: CHART_COLORS.missed, fontWeight: 'bold' }}>
+                    {formatNumber(value)}
+                </span>
+            )
+        },
+        {
+            title: '% Gửi lại',
+            dataIndex: 'missRatePercentage',
+            key: 'missRatePercentage',
+            width: 100,
+            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missRatePercentage - b.missRatePercentage,
+            render: (value: number) => (
+                <span style={{
+                    color: value > 5 ? CHART_COLORS.missed : CHART_COLORS.success,
+                    fontWeight: 'bold'
+                }}>
+                    {formatPercentage(value)}
+                </span>
+            )
+        },
+        {
+            title: 'Lần cuối gửi',
+            dataIndex: 'lastSeen',
+            key: 'lastSeen',
+            width: 150,
+            render: (timestamp: number) => {
+                if (!timestamp) return 'N/A';
+                // timestamp từ BE là giây, nhân 1000 để tạo Date object
+                const date = new Date(timestamp * 1000);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = String(date.getFullYear()).slice(-2);
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+            }
+        }
+    ], []);
+
+    const cardTitle = (
+        <Row align="middle" justify="space-between" style={{ width: '100%' }}>
+            <Col>🔝 Top {topLimit} thiết bị có tỷ lệ gửi lại cao nhất</Col>
+            <Col>
+                <Input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={topLimit}
+                    onChange={(e) => setTopLimit(e.target.value)}
+                    onPressEnter={fetchData} // Trigger fetch khi nhấn Enter
+                    style={{ width: 80 }}
+                    size="small"
+                />
+                <Button onClick={fetchData} size="small" style={{ marginLeft: 8 }}>Áp dụng</Button>
+            </Col>
+        </Row>
+    );
+
+    if (loading) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <Spin tip="Đang tải top thiết bị..." />
+                    </div>
+                </Card>
+            </Col>
+        );
+    }
+
+    if (error) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Lỗi tải Top thiết bị gửi lại" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    if (!data || data.length === 0) {
+        return (
+            <Col xs={24} lg={12}>
+                <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}>
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu top thiết bị gửi lại." type="info" showIcon style={{ borderRadius: 8 }} />
+                </Card>
+            </Col>
+        );
+    }
+
+    return (
+        <Col xs={24} lg={12}>
+            <Card
+                title={cardTitle}
+                style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 450 }}
+                headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '18px', paddingRight: '12px' }}
+            >
+                <Table
+                    dataSource={data}
+                    columns={columns}
+                    rowKey="deviceId"
+                    pagination={false}
+                    size="small"
+                    scroll={{ x: 800 }}
+                    bordered
+                    style={{ border: '1px solid #f0f0f0', borderRadius: 8 }}
+                />
+            </Card>
+        </Col>
+    );
+});
+
+// =========================================================================
+// MAIN DASHBOARD COMPONENT
+// =========================================================================
+const Dashboard: React.FC = () => {
+    // State để điều khiển việc hiển thị/ẩn bộ lọc chung
+    const [showGlobalFilters, setShowGlobalFilters] = useState<boolean>(false);
+
+    // Bộ lọc chung cho toàn bộ dashboard
+    const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
+    const [deviceId, setDeviceId] = useState<string>(''); // deviceId là filter chung
+    const [cmd, setCmd] = useState<string>(''); // cmd cũng là filter chung
+
+    // Khởi tạo dateRange mặc định khi component mount
+    useEffect(() => {
+        const now = dayjs();
+        const sevenDaysAgo = dayjs().subtract(7, 'day').startOf('day');
+        const endOfToday = now.endOf('day');
+        setDateRange([sevenDaysAgo, endOfToday]);
+    }, []);
+
+    // Tạo commonParams để truyền xuống các component con.
+    const commonParams: CommonDashboardQueryParams = useMemo(() => ({
+        startTime: dateRange[0]?.unix() || null, // Convert Dayjs to SECONDS
+        endTime: dateRange[1]?.unix() || null,   // Convert Dayjs to SECONDS
+        deviceId: deviceId.trim() || undefined,
+        cmd: cmd.trim() || undefined
+    }), [dateRange, deviceId, cmd]);
+
+
+    return (
+        <div style={{ backgroundColor: '#f0f2f5', minHeight: 'calc(100vh - 80px)' }}>
+            {/* Tiêu đề Dashboard và nút Filter */}
+            <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+                <Col>
+                    <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: CHART_COLORS.textPrimary, margin: 0 }}>
+                        Dashboard
+                    </h1>
+                </Col>
+                <Col>
+                    <Button
+                        type="primary"
+                        onClick={() => setShowGlobalFilters(!showGlobalFilters)}
+                        style={{ borderRadius: 8 }}
+                    >
+                        {showGlobalFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+                    </Button>
+                </Col>
+            </Row>
+
+            {/* Card bộ lọc chung - Chỉ hiển thị khi showGlobalFilters là true */}
+            {showGlobalFilters && (
+                <Card style={{ marginBottom: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <Row gutter={[16, 16]} align="top">
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                                Khoảng thời gian:
+                            </div>
+                            <RangePicker
+                                showTime={{ format: 'HH:mm' }}
+                                format="YYYY-MM-DD HH:mm"
+                                value={dateRange}
+                                onChange={(dates) => setDateRange(dates as [Dayjs | null, Dayjs | null])}
+                                style={{ width: '100%' }}
+                                placeholder={['Từ ngày', 'Đến ngày']}
+                                size="large"
                             />
                         </Col>
-                        <Col span={5}>
-                            <Statistic
-                                title="Realtime"
-                                value={overallSummary.successfulPackets}
-                                valueStyle={{ color: COLORS.success }}
-                                formatter={(value) => formatNumber(Number(value))}
+                        <Col xs={24} sm={12} md={8} lg={4}>
+                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                                ID thiết bị:
+                            </div>
+                            <Input
+                                placeholder="VD: 101"
+                                value={deviceId}
+                                onChange={(e) => setDeviceId(e.target.value)}
+                                allowClear
+                                size="large"
                             />
                         </Col>
-                        <Col span={5}>
-                            <Statistic
-                                title="Gửi lại"
-                                value={overallSummary.missedPackets}
-                                valueStyle={{ color: COLORS.missed }}
-                                formatter={(value) => formatNumber(Number(value))}
-                            />
-                        </Col>
-                        <Col span={5}>
-                            <Statistic
-                                title="Tỷ lệ gửi lại"
-                                value={overallSummary.missRatePercentage}
-                                precision={2}
-                                suffix="%"
-                                valueStyle={{ color: overallSummary.missRatePercentage > 5 ? COLORS.missed : COLORS.success }}
-                            />
-                        </Col>
-                        <Col span={4}>
-                            <Statistic
-                                title="Thiết bị"
-                                value={overallSummary.totalUniqueDevices}
-                                formatter={(value) => formatNumber(Number(value))}
+                        <Col xs={24} sm={12} md={8} lg={4}>
+                            <div style={{ marginBottom: 8, fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>
+                                Lệnh (CMD) - Chung:
+                            </div>
+                            <Input
+                                placeholder="VD: sensor_data"
+                                value={cmd}
+                                onChange={(e) => setCmd(e.target.value)}
+                                allowClear
+                                size="large"
+                                // Không có onSearch ở đây vì đây là filter chung, không tự trigger fetch cho các card khác.
+                                // Các card con sẽ tự re-fetch khi commonParams (bao gồm cmd) thay đổi.
+                                // Riêng CommandDistributionCard có input riêng cho cmd, sẽ dùng onSearch ở đó.
                             />
                         </Col>
                     </Row>
                 </Card>
-            </Col>
-        );
-    };
-    const renderCommandDistributionCard = () => {
-        const packetCountsByCommand = dashboardData?.packetCountsByCommand;
-        if (packetCountsByCommand && !Array.isArray(packetCountsByCommand)) {
-            return (
-                <Col xs={24} lg={12}>
-                    <Alert
-                        message="Lỗi tải Phân phối theo lệnh"
-                        description={(packetCountsByCommand as any).error}
-                        type="warning"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        const pieData = getCommandPieData();
-        if (!pieData.length) {
-            return (
-                <Col xs={24} lg={12}>
-                    <Alert
-                        message="Không có dữ liệu"
-                        description="Không tìm thấy dữ liệu phân phối theo lệnh."
-                        type="info"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        return (
-            <Col xs={24} lg={12}>
-                <Card title="📋 Phân phối gói tin theo lệnh" style={{ height: 500 }}>
-                    <div style={{ height: 400 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={120}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                >
-                                    {pieData.map((_entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={COLORS.pieColors[index % COLORS.pieColors.length]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<CustomPieTooltip />} />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                </Card>
-            </Col>
-        );
-    };
-    const renderTimeSeriesCard = () => {
-        const packetCountsOverTime = dashboardData?.packetCountsOverTime;
-        if (packetCountsOverTime && !Array.isArray(packetCountsOverTime)) {
-            return (
-                <Col xs={12}>
-                    <Alert
-                        message="Lỗi tải Xu hướng gói tin"
-                        description={(packetCountsOverTime as any).error}
-                        type="warning"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        const timeSeriesData = getTimeSeriesData();
-        if (!timeSeriesData.length) {
-            return (
-                <Col xs={12}>
-                    <Alert
-                        message="Không có dữ liệu"
-                        description="Không tìm thấy dữ liệu xu hướng theo thời gian."
-                        type="info"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        const intervalLabel = interval === 'hourly' ? 'giờ' : interval === 'daily' ? 'ngày' : 'tuần';
-        return (
-            <Col xs={24}>
-                <Card title={`📈 Xu hướng gói tin theo ${intervalLabel}`}>
-                    <div style={{ height: 400 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={timeSeriesData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="time" />
-                                <YAxis />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend />
-                                <Bar dataKey="Thành công" fill={COLORS.success} />
-                                <Bar dataKey="Bị Miss" fill={COLORS.missed} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </Card>
-            </Col>
-        );
-    };
-    const renderTopMissedDevicesCard = () => {
-        const topMissedDevices = dashboardData?.topMissedDevices;
-        if (topMissedDevices && !Array.isArray(topMissedDevices)) {
-            return (
-                <Col xs={12}>
-                    <Alert
-                        message="Lỗi tải Top thiết bị Miss"
-                        description={(topMissedDevices as any).error}
-                        type="warning"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        if (!Array.isArray(topMissedDevices) || !topMissedDevices.length) {
-            return (
-                <Col xs={12}>
-                    <Alert
-                        message="Không có dữ liệu"
-                        description="Không tìm thấy dữ liệu top thiết bị miss."
-                        type="info"
-                        showIcon
-                    />
-                </Col>
-            );
-        }
-        const columns = [
-            {
-                title: 'ID Thiết bị',
-                dataIndex: 'deviceId',
-                key: 'deviceId',
-                width: 120,
-                fixed: 'left' as const,
-            },
-            {
-                title: 'Tên Thiết bị',
-                dataIndex: 'deviceName',
-                key: 'deviceName',
-                ellipsis: true,
-            },
-            {
-                title: 'MAC Address',
-                dataIndex: 'mac',
-                key: 'mac',
-                width: 150,
-                render: (mac: string) => <code>{mac}</code>
-            },
-            {
-                title: 'Tổng gói',
-                dataIndex: 'totalPackets',
-                key: 'totalPackets',
-                width: 100,
-                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.totalPackets - b.totalPackets,
-                render: (value: number) => formatNumber(value)
-            },
-            {
-                title: 'Miss',
-                dataIndex: 'missedPackets',
-                key: 'missedPackets',
-                width: 80,
-                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missedPackets - b.missedPackets,
-                render: (value: number) => (
-                    <span style={{ color: COLORS.missed, fontWeight: 'bold' }}>
-                        {formatNumber(value)}
-                    </span>
-                )
-            },
-            {
-                title: 'Tỷ lệ Miss',
-                dataIndex: 'missRatePercentage',
-                key: 'missRatePercentage',
-                width: 100,
-                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missRatePercentage - b.missRatePercentage,
-                render: (value: number) => (
-                    <span style={{
-                        color: value > 5 ? COLORS.missed : COLORS.success,
-                        fontWeight: 'bold'
-                    }}>
-                        {formatPercentage(value)}
-                    </span>
-                )
-            },
-            {
-                title: 'Lần cuối thấy',
-                dataIndex: 'lastSeen',
-                key: 'lastSeen',
-                width: 150,
-                render: (timestamp: number) => {
-                    if (!timestamp) return 'N/A';
-                    const date = new Date(timestamp * 1000);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = String(date.getFullYear()).slice(-2);
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${hours}:${minutes} ${day}/${month}/${year}`;
-                }
-            }
-        ];
-        return (
-            <Col xs={12}>
-                <Card title={`🔝 Top ${topLimit} thiết bị có tỷ lệ gửi lại cao nhất`}>
-                    <Table
-                        dataSource={topMissedDevices}
-                        columns={columns}
-                        rowKey="deviceId"
-                        pagination={false}
-                        size="small"
-                        scroll={{ x: 800 }}
-                        bordered
-                    />
-                </Card>
-            </Col>
-        );
-    };
-    const renderContent = () => {
-        if (loading) {
-            return (
-                <div style={{ textAlign: 'center', padding: '100px 0' }}>
-                    <Spin size="large" tip="Đang tải dữ liệu dashboard..." />
-                </div>
-            );
-        }
-        if (error) {
-            return (
-                <Alert
-                    message="❌ Lỗi tải dữ liệu"
-                    description={error}
-                    type="error"
-                    showIcon
-                    action={
-                        <Button onClick={fetchData} type="primary" ghost>
-                            Thử lại
-                        </Button>
-                    }
-                />
-            );
-        }
-        if (!dashboardData) {
-            return (
-                <Alert
-                    message="📭 Không có dữ liệu"
-                    description="Không có dữ liệu để hiển thị với các bộ lọc hiện tại."
-                    type="info"
-                    showIcon
-                />
-            );
-        }
-        return (
-            <div style={{ marginTop: 24 }}>
-                {/* Row 1: Overall Summary + Command Distribution */}
-                <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-                    {renderOverallSummaryCard()}
-                    {renderCommandDistributionCard()}
-                </Row>
-                {/* Row 2: Time Series */}
-                <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-                    {renderTimeSeriesCard()}
-                    {renderTopMissedDevicesCard()}
-                </Row>
-                {/*/!* Row 3: Top Missed Devices *!/*/}
-                {/*<Row gutter={[16, 16]}>*/}
-                {/*</Row>*/}
-            </div>
-        );
-    };
-    return (
-        <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-            <div style={{ margin: '0 auto' }}>
-                {/*<div style={{ marginBottom: 24, textAlign: 'center' }}>*/}
-                {/*    <h1 style={{*/}
-                {/*        fontSize: '28px',*/}
-                {/*        fontWeight: 'bold',*/}
-                {/*        color: '#1890ff',*/}
-                {/*        margin: 0*/}
-                {/*    }}>*/}
-                {/*        🚀 IoT Gateway Dashboard*/}
-                {/*    </h1>*/}
-                {/*    <p style={{ color: '#666', margin: '8px 0 0 0' }}>*/}
-                {/*        Thống kê và phân tích dữ liệu gói tin IoT*/}
-                {/*    </p>*/}
-                {/*</div>*/}
-                {renderFilters()}
-                {renderContent()}
-            </div>
+            )}
+
+            {/* Các biểu đồ/bảng sẽ tự quản lý việc tải dữ liệu và bộ lọc riêng */}
+            {/* Chúng nhận commonParams và tự fetch dữ liệu */}
+            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                <OverallSummaryCard commonParams={commonParams} />
+                <CommandDistributionCard commonParams={commonParams} />
+            </Row>
+            <Row gutter={[16, 16]}>
+                <TimeSeriesCard commonParams={commonParams} />
+                <TopMissedDevicesCard commonParams={commonParams} />
+            </Row>
         </div>
     );
 };
+
 export default Dashboard;
