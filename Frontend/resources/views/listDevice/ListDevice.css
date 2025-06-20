@@ -85,3 +85,23 @@
     position: absolute;
     font-size: 13px;
 }
+
+.ant-form-item {
+    margin-bottom: 10px !important;
+}
+
+.ant-form-item-label {
+    padding: 0 !important;
+}
+
+.ant-divider {
+    margin-bottom: 2px !important;
+}
+
+.ant-divider-inner-text {
+    font-size: 15px;
+}
+
+.ant-row {
+    margin-bottom: 3px;
+}

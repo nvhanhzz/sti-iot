@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Col, Row, Statistic, DatePicker, Select, Input, Spin, Alert, Table, Tag } from 'antd';
-import {
-    Line as AntdLineChart,
-    Pie as AntdPieChart,
-    Column as AntdColumnChart,
-} from '@ant-design/charts'; // Import các loại biểu đồ từ Ant Design Charts
-import dayjs from 'dayjs'; // Thư viện để làm việc với DatePicker của Antd
-import './Home.css'; // Dùng để styling tùy chỉnh nếu cần
+import { Card, Col, Row, Statistic, DatePicker, Select, Input, Spin, Alert, Button, Table } from 'antd';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import dayjs, { Dayjs } from 'dayjs'; // Thêm import dayjs
 
 // =========================================================================
-// INTERFACES CHO DỮ LIỆU TỪ API (GIỮ NGUYÊN)
+// INTERFACES
 // =========================================================================
-
 interface OverallSummaryData {
     totalPackets: number;
     successfulPackets: number;
@@ -21,14 +15,12 @@ interface OverallSummaryData {
     totalUniqueDevices: number;
     totalUniqueCommands: number;
 }
-
 interface PacketCountOverTimeData {
-    timeBucket: number; // Unix timestamp
+    timeBucket: number;
     successfulPackets: number;
     missedPackets: number;
     missRatePercentage: number;
 }
-
 interface TopMissedDeviceData {
     deviceId: string;
     deviceName: string;
@@ -36,9 +28,8 @@ interface TopMissedDeviceData {
     totalPackets: number;
     missedPackets: number;
     missRatePercentage: number;
-    lastSeen: number; // Unix timestamp
+    lastSeen: number;
 }
-
 interface PacketCountsByCommandData {
     cmd: string;
     totalPackets: number;
@@ -46,25 +37,6 @@ interface PacketCountsByCommandData {
     missedPackets: number;
     missRatePercentage: number;
 }
-
-interface DeviceConnectivityData {
-    deviceId: string;
-    deviceName: string;
-    mac: string;
-    isOnline: boolean;
-    lastConnected: number; // Unix timestamp
-    disconnectCount: number;
-    averageLatencyMs?: number;
-}
-
-interface HourlyPerformanceMetricData {
-    timeBucket: number; // Unix timestamp
-    deviceId: string;
-    avgCpuUsagePercentage?: number;
-    avgRamUsageMB?: number;
-    avgBatteryLevelPercentage?: number;
-}
-
 interface DashboardResponse {
     metadata: {
         requestedStartTime?: number;
@@ -76,156 +48,259 @@ interface DashboardResponse {
         generatedAt: number;
     };
     overallSummary?: OverallSummaryData;
-    packetCountsOverTime?: PacketCountOverTimeData[];
-    topMissedDevices?: TopMissedDeviceData[];
-    packetCountsByCommand?: PacketCountsByCommandData[];
-    deviceConnectivity?: DeviceConnectivityData[];
-    hourlyPerformanceMetrics?: HourlyPerformanceMetricData[];
+    overallSummaryError?: string;
+    packetCountsOverTime?: PacketCountOverTimeData[] | { error: string };
+    topMissedDevices?: TopMissedDeviceData[] | { error: string };
+    packetCountsByCommand?: PacketCountsByCommandData[] | { error: string };
 }
-
 // =========================================================================
-// HẰNG SỐ & TIỆN ÍCH
+// CONSTANTS
 // =========================================================================
-
 const API_BASE_URL = 'http://localhost:3335/api/dashboard/getData';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
-
-// Hàm tiện ích để định dạng nhãn thời gian cho biểu đồ
+// Màu sắc cho biểu đồ
+const COLORS = {
+    success: '#52c41a',
+    missed: '#ff4d4f',
+    pieColors: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff7f', '#ff1493', '#1e90ff', '#ffa500']
+};
+// =========================================================================
+// UTILITY FUNCTIONS
+// =========================================================================
 const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' | 'weekly'): string => {
-    const date = dayjs(timestamp);
+    const date = new Date(timestamp * 1000);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
     switch (interval) {
         case 'hourly':
-            return date.format('HH:mm DD/MM');
+            return `${hours}:${minutes} ${day}/${month}`;
         case 'daily':
-            return date.format('DD/MM');
+            return `${day}/${month}`;
         case 'weekly':
-            return date.format('DD/MM/YYYY [Tuần] WW'); // WW: week of year
+            return `${day}/${month}/${year}`;
         default:
-            return date.format('DD/MM/YYYY');
+            return `${day}/${month}/${year}`;
     }
 };
-
+const formatNumber = (num: number): string => {
+    return num?.toLocaleString() || '0';
+};
+const formatPercentage = (num: number): string => {
+    return `${(num || 0).toFixed(2)}%`;
+};
 // =========================================================================
-// DASHBOARD COMPONENT CHÍNH
+// MAIN COMPONENT
 // =========================================================================
-
 const Dashboard: React.FC = () => {
-    // ---------------------------------------------------
-    // State quản lý bộ lọc
-    // ---------------------------------------------------
-    const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
-        dayjs().subtract(7, 'day').startOf('day'),
-        dayjs().endOf('day')
-    ]);
+    // States - Đổi type của dateRange từ Date sang Dayjs
+    const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [deviceId, setDeviceId] = useState<string>('');
     const [cmd, setCmd] = useState<string>('');
     const [interval, setInterval] = useState<'hourly' | 'daily' | 'weekly'>('daily');
     const [topLimit, setTopLimit] = useState<string>('5');
-    const [dataTypes] = useState<string>('summary,packetCountsOverTime,topMissedDevices,packetCountsByCommand,deviceConnectivity,hourlyPerformanceMetrics');
-
-    // ---------------------------------------------------
-    // State quản lý dữ liệu, trạng thái loading, lỗi
-    // ---------------------------------------------------
     const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    // Initialize date range - Sử dụng dayjs thay vì Date
+    useEffect(() => {
+        const now = dayjs();
+        const sevenDaysAgo = dayjs().subtract(7, 'day').startOf('day');
+        const endOfToday = now.endOf('day');
 
-    // ---------------------------------------------------
-    // Hàm fetchData: Gửi request đến API backend
-    // ---------------------------------------------------
+        setDateRange([sevenDaysAgo, endOfToday]);
+    }, []);
+    // =========================================================================
+    // API FUNCTIONS
+    // =========================================================================
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
-        setDashboardData(null); // Xóa dữ liệu cũ khi bắt đầu tải mới
-
         try {
             if (!dateRange || !dateRange[0] || !dateRange[1]) {
                 throw new Error("Vui lòng chọn khoảng thời gian.");
             }
-
-            // Chuyển đổi Dayjs object sang Unix timestamp (milliseconds)
+            // Chuyển đổi dayjs objects thành timestamps
             const startTimestamp = dateRange[0].valueOf();
             const endTimestamp = dateRange[1].valueOf();
-
-            // Xây dựng query parameters
             const queryParams = new URLSearchParams({
                 startTime: startTimestamp.toString(),
                 endTime: endTimestamp.toString(),
                 interval: interval,
                 topLimit: topLimit,
-                dataTypes: dataTypes,
+                dataTypes: 'summary,packetCountsOverTime,topMissedDevices,packetCountsByCommand',
             });
-
-            // Thêm các bộ lọc tùy chọn nếu có giá trị
-            if (deviceId) queryParams.append('deviceId', deviceId);
-            if (cmd) queryParams.append('cmd', cmd);
-
+            if (deviceId.trim()) queryParams.append('deviceId', deviceId.trim());
+            if (cmd.trim()) queryParams.append('cmd', cmd.trim());
             const url = `${API_BASE_URL}?${queryParams.toString()}`;
-            console.log('Đang tải dữ liệu từ:', url);
-
+            console.log('🔄 Fetching data from:', url);
             const response = await fetch(url);
-
             if (!response.ok) {
-                const errorBody = await response.json();
-                throw new Error(errorBody.message || 'Lỗi khi tải dữ liệu dashboard');
+                const errorBody = await response.json().catch(() => ({}));
+                throw new Error(errorBody.message || `HTTP ${response.status}: ${response.statusText}`);
             }
-
             const data: DashboardResponse = await response.json();
+            console.log('📊 Received data:', data);
             setDashboardData(data);
         } catch (err) {
-            console.error('Lỗi khi tải dữ liệu dashboard:', err);
+            console.error('❌ Error fetching dashboard data:', err);
             setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
+            setDashboardData(null);
         } finally {
             setLoading(false);
         }
-    }, [dateRange, deviceId, cmd, interval, topLimit, dataTypes]);
-
+    }, [dateRange, deviceId, cmd, interval, topLimit]);
     useEffect(() => {
-        fetchData();
+        if (dateRange && dateRange[0] && dateRange[1]) {
+            fetchData();
+        }
     }, [fetchData]);
+    // =========================================================================
+    // DATA PROCESSING
+    // =========================================================================
+    const getOverallSummaryPieData = () => {
+        if (!dashboardData?.overallSummary) return [];
+        const { successfulPackets, missedPackets } = dashboardData.overallSummary;
+        const total = (successfulPackets || 0) + (missedPackets || 0);
 
-    // ---------------------------------------------------
-    // Render Filters (Sử dụng Ant Design components)
-    // ---------------------------------------------------
+        if (total === 0) return [];
+        return [
+            {
+                name: 'Realtime',
+                value: successfulPackets || 0,
+                percentage: ((successfulPackets || 0) / total * 100).toFixed(1)
+            },
+            {
+                name: 'Gửi lại',
+                value: missedPackets || 0,
+                percentage: ((missedPackets || 0) / total * 100).toFixed(1)
+            },
+        ].filter(item => item.value > 0);
+    };
+    const getCommandPieData = () => {
+        const packetCountsByCommand = dashboardData?.packetCountsByCommand;
+
+        if (!packetCountsByCommand || !Array.isArray(packetCountsByCommand)) return [];
+        return packetCountsByCommand.map(item => ({
+            name: item.cmd || 'Unknown',
+            value: item.totalPackets || 0
+        })).filter(item => item.value > 0);
+    };
+    const getTimeSeriesData = () => {
+        const packetCountsOverTime = dashboardData?.packetCountsOverTime;
+
+        if (!packetCountsOverTime || !Array.isArray(packetCountsOverTime)) return [];
+        return packetCountsOverTime.map(item => ({
+            time: formatTimeBucketLabel(item.timeBucket, interval),
+            'Thành công': item.successfulPackets || 0,
+            'Bị Miss': item.missedPackets || 0,
+            timestamp: item.timeBucket
+        })).sort((a, b) => a.timestamp - b.timestamp);
+    };
+    // =========================================================================
+    // CUSTOM TOOLTIP COMPONENTS
+    // =========================================================================
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div style={{
+                    backgroundColor: 'white',
+                    padding: '10px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>{`${label}`}</p>
+                    {payload.map((entry: any, index: number) => (
+                        <p key={index} style={{ margin: '4px 0', color: entry.color }}>
+                            {`${entry.dataKey}: ${formatNumber(entry.value)}`}
+                        </p>
+                    ))}
+                </div>
+            );
+        }
+        return null;
+    };
+    const CustomPieTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div style={{
+                    backgroundColor: 'white',
+                    padding: '10px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>{data.name}</p>
+                    <p style={{ margin: 0, color: payload[0].color }}>
+                        {`Số lượng: ${formatNumber(data.value)}`}
+                    </p>
+                    {data.percentage && (
+                        <p style={{ margin: 0, color: payload[0].color }}>
+                            {`Tỷ lệ: ${data.percentage}%`}
+                        </p>
+                    )}
+                </div>
+            );
+        }
+        return null;
+    };
+    // =========================================================================
+    // RENDER FUNCTIONS
+    // =========================================================================
     const renderFilters = () => (
-        <Card title="Bộ lọc Dashboard" className="dashboard-filters-card">
-            <Row gutter={[16, 16]} align="bottom">
+        <Card title="🔧 Bộ lọc Dashboard" style={{ marginBottom: 24 }}>
+            <Row gutter={[16, 16]} align="top">
                 <Col xs={24} sm={12} md={8} lg={6}>
-                    <label htmlFor="dateRange">Khoảng thời gian:</label>
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>Khoảng thời gian:</strong>
+                    </div>
                     <RangePicker
-                        id="dateRange"
                         showTime={{ format: 'HH:mm' }}
                         format="YYYY-MM-DD HH:mm"
                         value={dateRange}
-                        onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
+                        onChange={(dates) => {
+                            // Không cần chuyển đổi sang Date, giữ nguyên dayjs objects
+                            setDateRange(dates as [Dayjs | null, Dayjs | null]);
+                        }}
                         style={{ width: '100%' }}
+                        placeholder={['Từ ngày', 'Đến ngày']}
                     />
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
-                    <label htmlFor="deviceId">ID thiết bị:</label>
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>ID thiết bị:</strong>
+                    </div>
                     <Input
-                        id="deviceId"
                         placeholder="VD: 101"
                         value={deviceId}
                         onChange={(e) => setDeviceId(e.target.value)}
+                        allowClear
                     />
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
-                    <label htmlFor="cmd">Lệnh (CMD):</label>
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>Lệnh (CMD):</strong>
+                    </div>
                     <Input
-                        id="cmd"
                         placeholder="VD: sensor_data"
                         value={cmd}
                         onChange={(e) => setCmd(e.target.value)}
+                        allowClear
                     />
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
-                    <label htmlFor="interval">Khoảng thời gian (Xu hướng):</label>
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>Khoảng thời gian:</strong>
+                    </div>
                     <Select
-                        id="interval"
                         value={interval}
-                        onChange={(value) => setInterval(value as any)}
+                        onChange={(value) => setInterval(value)}
                         style={{ width: '100%' }}
                     >
                         <Option value="hourly">Theo giờ</Option>
@@ -234,220 +309,423 @@ const Dashboard: React.FC = () => {
                     </Select>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={4}>
-                    <label htmlFor="topLimit">Giới hạn Top N:</label>
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>Top N:</strong>
+                    </div>
                     <Input
-                        id="topLimit"
                         type="number"
                         min={1}
+                        max={50}
                         value={topLimit}
                         onChange={(e) => setTopLimit(e.target.value)}
                     />
                 </Col>
+                {/*<Col xs={24}>*/}
+                {/*    <Button*/}
+                {/*        type="primary"*/}
+                {/*        onClick={fetchData}*/}
+                {/*        loading={loading}*/}
+                {/*        size="large"*/}
+                {/*        style={{ minWidth: 120 }}*/}
+                {/*    >*/}
+                {/*        {loading ? 'Đang tải...' : '🔄 Áp dụng bộ lọc'}*/}
+                {/*    </Button>*/}
+                {/*</Col>*/}
             </Row>
         </Card>
     );
-
-    // ---------------------------------------------------
-    // Render Dashboard Content (Sử dụng Ant Design components)
-    // ---------------------------------------------------
-    const renderDashboardContent = () => {
+    const renderOverallSummaryCard = () => {
+        const { overallSummary, overallSummaryError } = dashboardData || {};
+        if (overallSummaryError) {
+            return (
+                <Col xs={24} lg={12}>
+                    <Alert
+                        message="Lỗi tải Tổng quan"
+                        description={overallSummaryError}
+                        type="warning"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        if (!overallSummary || overallSummary.totalPackets === 0) {
+            return (
+                <Col xs={24} lg={12}>
+                    <Alert
+                        message="Không có dữ liệu"
+                        description="Không tìm thấy dữ liệu tổng quan gói tin."
+                        type="info"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        const pieData = getOverallSummaryPieData();
+        return (
+            <Col xs={24} lg={12}>
+                <Card title="📊 Tổng quan gói tin" style={{ height: 500 }}>
+                    <div style={{ height: 250, marginBottom: 16 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={100}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                                >
+                                    {pieData.map((_entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={index === 0 ? COLORS.success : COLORS.missed}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip content={<CustomPieTooltip />} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <Row gutter={[8, 8]}>
+                        <Col span={5}>
+                            <Statistic
+                                title="Tổng gói"
+                                value={overallSummary.totalPackets}
+                                formatter={(value) => formatNumber(Number(value))}
+                            />
+                        </Col>
+                        <Col span={5}>
+                            <Statistic
+                                title="Realtime"
+                                value={overallSummary.successfulPackets}
+                                valueStyle={{ color: COLORS.success }}
+                                formatter={(value) => formatNumber(Number(value))}
+                            />
+                        </Col>
+                        <Col span={5}>
+                            <Statistic
+                                title="Gửi lại"
+                                value={overallSummary.missedPackets}
+                                valueStyle={{ color: COLORS.missed }}
+                                formatter={(value) => formatNumber(Number(value))}
+                            />
+                        </Col>
+                        <Col span={5}>
+                            <Statistic
+                                title="Tỷ lệ gửi lại"
+                                value={overallSummary.missRatePercentage}
+                                precision={2}
+                                suffix="%"
+                                valueStyle={{ color: overallSummary.missRatePercentage > 5 ? COLORS.missed : COLORS.success }}
+                            />
+                        </Col>
+                        <Col span={4}>
+                            <Statistic
+                                title="Thiết bị"
+                                value={overallSummary.totalUniqueDevices}
+                                formatter={(value) => formatNumber(Number(value))}
+                            />
+                        </Col>
+                    </Row>
+                </Card>
+            </Col>
+        );
+    };
+    const renderCommandDistributionCard = () => {
+        const packetCountsByCommand = dashboardData?.packetCountsByCommand;
+        if (packetCountsByCommand && !Array.isArray(packetCountsByCommand)) {
+            return (
+                <Col xs={24} lg={12}>
+                    <Alert
+                        message="Lỗi tải Phân phối theo lệnh"
+                        description={(packetCountsByCommand as any).error}
+                        type="warning"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        const pieData = getCommandPieData();
+        if (!pieData.length) {
+            return (
+                <Col xs={24} lg={12}>
+                    <Alert
+                        message="Không có dữ liệu"
+                        description="Không tìm thấy dữ liệu phân phối theo lệnh."
+                        type="info"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        return (
+            <Col xs={24} lg={12}>
+                <Card title="📋 Phân phối gói tin theo lệnh" style={{ height: 500 }}>
+                    <div style={{ height: 400 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={120}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                >
+                                    {pieData.map((_entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={COLORS.pieColors[index % COLORS.pieColors.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip content={<CustomPieTooltip />} />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+            </Col>
+        );
+    };
+    const renderTimeSeriesCard = () => {
+        const packetCountsOverTime = dashboardData?.packetCountsOverTime;
+        if (packetCountsOverTime && !Array.isArray(packetCountsOverTime)) {
+            return (
+                <Col xs={12}>
+                    <Alert
+                        message="Lỗi tải Xu hướng gói tin"
+                        description={(packetCountsOverTime as any).error}
+                        type="warning"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        const timeSeriesData = getTimeSeriesData();
+        if (!timeSeriesData.length) {
+            return (
+                <Col xs={12}>
+                    <Alert
+                        message="Không có dữ liệu"
+                        description="Không tìm thấy dữ liệu xu hướng theo thời gian."
+                        type="info"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        const intervalLabel = interval === 'hourly' ? 'giờ' : interval === 'daily' ? 'ngày' : 'tuần';
+        return (
+            <Col xs={24}>
+                <Card title={`📈 Xu hướng gói tin theo ${intervalLabel}`}>
+                    <div style={{ height: 400 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={timeSeriesData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="time" />
+                                <YAxis />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend />
+                                <Bar dataKey="Thành công" fill={COLORS.success} />
+                                <Bar dataKey="Bị Miss" fill={COLORS.missed} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+            </Col>
+        );
+    };
+    const renderTopMissedDevicesCard = () => {
+        const topMissedDevices = dashboardData?.topMissedDevices;
+        if (topMissedDevices && !Array.isArray(topMissedDevices)) {
+            return (
+                <Col xs={12}>
+                    <Alert
+                        message="Lỗi tải Top thiết bị Miss"
+                        description={(topMissedDevices as any).error}
+                        type="warning"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        if (!Array.isArray(topMissedDevices) || !topMissedDevices.length) {
+            return (
+                <Col xs={12}>
+                    <Alert
+                        message="Không có dữ liệu"
+                        description="Không tìm thấy dữ liệu top thiết bị miss."
+                        type="info"
+                        showIcon
+                    />
+                </Col>
+            );
+        }
+        const columns = [
+            {
+                title: 'ID Thiết bị',
+                dataIndex: 'deviceId',
+                key: 'deviceId',
+                width: 120,
+                fixed: 'left' as const,
+            },
+            {
+                title: 'Tên Thiết bị',
+                dataIndex: 'deviceName',
+                key: 'deviceName',
+                ellipsis: true,
+            },
+            {
+                title: 'MAC Address',
+                dataIndex: 'mac',
+                key: 'mac',
+                width: 150,
+                render: (mac: string) => <code>{mac}</code>
+            },
+            {
+                title: 'Tổng gói',
+                dataIndex: 'totalPackets',
+                key: 'totalPackets',
+                width: 100,
+                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.totalPackets - b.totalPackets,
+                render: (value: number) => formatNumber(value)
+            },
+            {
+                title: 'Miss',
+                dataIndex: 'missedPackets',
+                key: 'missedPackets',
+                width: 80,
+                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missedPackets - b.missedPackets,
+                render: (value: number) => (
+                    <span style={{ color: COLORS.missed, fontWeight: 'bold' }}>
+                        {formatNumber(value)}
+                    </span>
+                )
+            },
+            {
+                title: 'Tỷ lệ Miss',
+                dataIndex: 'missRatePercentage',
+                key: 'missRatePercentage',
+                width: 100,
+                sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missRatePercentage - b.missRatePercentage,
+                render: (value: number) => (
+                    <span style={{
+                        color: value > 5 ? COLORS.missed : COLORS.success,
+                        fontWeight: 'bold'
+                    }}>
+                        {formatPercentage(value)}
+                    </span>
+                )
+            },
+            {
+                title: 'Lần cuối thấy',
+                dataIndex: 'lastSeen',
+                key: 'lastSeen',
+                width: 150,
+                render: (timestamp: number) => {
+                    if (!timestamp) return 'N/A';
+                    const date = new Date(timestamp * 1000);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = String(date.getFullYear()).slice(-2);
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return `${hours}:${minutes} ${day}/${month}/${year}`;
+                }
+            }
+        ];
+        return (
+            <Col xs={12}>
+                <Card title={`🔝 Top ${topLimit} thiết bị có tỷ lệ gửi lại cao nhất`}>
+                    <Table
+                        dataSource={topMissedDevices}
+                        columns={columns}
+                        rowKey="deviceId"
+                        pagination={false}
+                        size="small"
+                        scroll={{ x: 800 }}
+                        bordered
+                    />
+                </Card>
+            </Col>
+        );
+    };
+    const renderContent = () => {
         if (loading) {
             return (
-                <div style={{ textAlign: 'center', padding: '50px' }}>
-                    <Spin size="large" tip="Đang tải dữ liệu..." />
+                <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                    <Spin size="large" tip="Đang tải dữ liệu dashboard..." />
                 </div>
             );
         }
         if (error) {
-            return <Alert message="Lỗi" description={error} type="error" showIcon style={{ margin: '20px 0' }} />;
+            return (
+                <Alert
+                    message="❌ Lỗi tải dữ liệu"
+                    description={error}
+                    type="error"
+                    showIcon
+                    action={
+                        <Button onClick={fetchData} type="primary" ghost>
+                            Thử lại
+                        </Button>
+                    }
+                />
+            );
         }
-        if (!dashboardData || Object.keys(dashboardData).length <= 1) {
-            return <Alert message="Không có dữ liệu" description="Không có dữ liệu thống kê để hiển thị với các bộ lọc hiện tại." type="info" showIcon style={{ margin: '20px 0' }} />;
+        if (!dashboardData) {
+            return (
+                <Alert
+                    message="📭 Không có dữ liệu"
+                    description="Không có dữ liệu để hiển thị với các bộ lọc hiện tại."
+                    type="info"
+                    showIcon
+                />
+            );
         }
-
-        const {overallSummary, packetCountsOverTime, topMissedDevices, packetCountsByCommand, deviceConnectivity, hourlyPerformanceMetrics } = dashboardData;
-
         return (
-            <div className="dashboard-content-grid">
-                {/* 1. Tổng quan gói tin (Overall Summary) */}
-                {overallSummary && (
-                    <Card title="Tổng quan gói tin" className="dashboard-card summary-card">
-                        <Row gutter={[16, 16]}>
-                            <Col xs={24} sm={12} lg={8}>
-                                <Statistic title="Tổng số gói tin" value={overallSummary.totalPackets} />
-                            </Col>
-                            <Col xs={24} sm={12} lg={8}>
-                                <Statistic title="Thành công" value={overallSummary.successfulPackets} valueStyle={{ color: '#3f8600' }} />
-                            </Col>
-                            <Col xs={24} sm={12} lg={8}>
-                                <Statistic title="Bị Miss" value={overallSummary.missedPackets} valueStyle={{ color: '#cf1322' }} />
-                            </Col>
-                            <Col xs={24} sm={12} lg={8}>
-                                <Statistic title="Tỷ lệ Miss" value={overallSummary.missRatePercentage} precision={2} suffix="%" />
-                            </Col>
-                            {overallSummary.totalUniqueDevices > 0 && (
-                                <Col xs={24} sm={12} lg={8}>
-                                    <Statistic title="Tổng thiết bị độc nhất" value={overallSummary.totalUniqueDevices} />
-                                </Col>
-                            )}
-                            {overallSummary.totalUniqueCommands > 0 && (
-                                <Col xs={24} sm={12} lg={8}>
-                                    <Statistic title="Tổng lệnh độc nhất" value={overallSummary.totalUniqueCommands} />
-                                </Col>
-                            )}
-                        </Row>
-                    </Card>
-                )}
-
-                {/* 2. Xu hướng gói tin theo thời gian (Line Chart) */}
-                {packetCountsOverTime && packetCountsOverTime.length > 0 && (
-                    <Card title={`Xu hướng gói tin theo ${interval === 'hourly' ? 'giờ' : interval === 'daily' ? 'ngày' : 'tuần'}`} className="dashboard-card chart-card">
-                        <AntdLineChart
-                            data={packetCountsOverTime.flatMap(d => [
-                                { timeBucket: formatTimeBucketLabel(d.timeBucket, interval), type: 'Thành công', value: d.successfulPackets },
-                                { timeBucket: formatTimeBucketLabel(d.timeBucket, interval), type: 'Bị Miss', value: d.missedPackets },
-                            ])}
-                            xField="timeBucket"
-                            yField="value"
-                            seriesField="type"
-                            color={['#3f8600', '#cf1322']}
-                            lineStyle={{ lineWidth: 2 }}
-                            point={{ size: 4, shape: 'circle' }}
-                            tooltip={{
-                                formatter: (datum: any) => ({ name: datum.type, value: datum.value.toLocaleString() + ' gói' }),
-                                showTitle: true,
-                                title: (_title: string, items: any[]) => items[0]?.data?.timeBucket,
-                            }}
-                            slider={{ start: 0, end: 1 }}
-                        />
-                    </Card>
-                )}
-
-                {/* 3. Top N thiết bị có tỷ lệ Miss cao nhất (Table) */}
-                {topMissedDevices && topMissedDevices.length > 0 && (
-                    <Card title={`Top ${topLimit} thiết bị có tỷ lệ Miss cao nhất`} className="dashboard-card table-card">
-                        <Table
-                            dataSource={topMissedDevices}
-                            rowKey="deviceId"
-                            pagination={false}
-                            size="small"
-                        >
-                            <Table.Column title="ID" dataIndex="deviceId" key="deviceId" />
-                            <Table.Column title="Tên Thiết bị" dataIndex="deviceName" key="deviceName" />
-                            <Table.Column title="MAC" dataIndex="mac" key="mac" />
-                            <Table.Column title="Tổng gói" dataIndex="totalPackets" key="totalPackets" sorter={(a: TopMissedDeviceData, b: TopMissedDeviceData) => a.totalPackets - b.totalPackets} />
-                            <Table.Column title="Miss" dataIndex="missedPackets" key="missedPackets" sorter={(a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missedPackets - b.missedPackets} />
-                            <Table.Column
-                                title="Tỷ lệ Miss"
-                                dataIndex="missRatePercentage"
-                                key="missRatePercentage"
-                                render={(text: number) => <span style={{ color: text > 5 ? '#cf1322' : '#3f8600' }}>{text.toFixed(2)}%</span>}
-                                sorter={(a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missRatePercentage - b.missRatePercentage}
-                            />
-                            <Table.Column
-                                title="Lần cuối thấy"
-                                dataIndex="lastSeen"
-                                key="lastSeen"
-                                render={(timestamp: number) => timestamp ? dayjs(timestamp).format('HH:mm DD/MM/YY') : 'N/A'}
-                            />
-                        </Table>
-                    </Card>
-                )}
-
-                {/* 4. Phân phối gói tin theo loại lệnh (Pie Chart) */}
-                {packetCountsByCommand && packetCountsByCommand.length > 0 && (
-                    <Card title="Phân phối gói tin theo loại lệnh" className="dashboard-card chart-card">
-                        <AntdPieChart
-                            data={packetCountsByCommand}
-                            angleField="totalPackets"
-                            colorField="cmd"
-                            radius={0.8}
-                            innerRadius={0.6} // Tạo biểu đồ donut
-                            label={{ type: 'inner', formatter: (datum: any) => `${datum.cmd}\n${(datum.percent * 100).toFixed(1)}%` }}
-                            interactions={[{ type: 'element-selected' }, { type: 'element-active' }]}
-                            legend={{ position: 'bottom' }}
-                            tooltip={{
-                                formatter: (datum: any) => ({ name: datum.cmd, value: datum.totalPackets.toLocaleString() + ' gói' }),
-                            }}
-                        />
-                    </Card>
-                )}
-
-                {/* 5. Trạng thái kết nối thiết bị (Table) */}
-                {deviceConnectivity && deviceConnectivity.length > 0 && (
-                    <Card title="Trạng thái kết nối thiết bị" className="dashboard-card table-card">
-                        <Table
-                            dataSource={deviceConnectivity}
-                            rowKey="deviceId"
-                            pagination={false}
-                            size="small"
-                        >
-                            <Table.Column title="ID" dataIndex="deviceId" key="deviceId" />
-                            <Table.Column title="Tên Thiết bị" dataIndex="deviceName" key="deviceName" />
-                            <Table.Column title="MAC" dataIndex="mac" key="mac" />
-                            <Table.Column
-                                title="Trạng thái"
-                                dataIndex="isOnline"
-                                key="isOnline"
-                                render={(isOnline: boolean) => (
-                                    <Tag color={isOnline ? 'green' : 'red'}>
-                                        {isOnline ? 'Online' : 'Offline'}
-                                    </Tag>
-                                )}
-                            />
-                            <Table.Column
-                                title="Lần cuối Online"
-                                dataIndex="lastConnected"
-                                key="lastConnected"
-                                render={(timestamp: number) => timestamp ? dayjs(timestamp).format('HH:mm DD/MM/YY') : 'N/A'}
-                            />
-                            <Table.Column title="Ngắt kết nối" dataIndex="disconnectCount" key="disconnectCount" sorter={(a: DeviceConnectivityData, b: DeviceConnectivityData) => a.disconnectCount - b.disconnectCount}/>
-                            {/* Bạn có thể thêm cột độ trễ trung bình nếu có dữ liệu */}
-                            {/* <Table.Column title="Độ trễ TB (ms)" dataIndex="averageLatencyMs" key="averageLatencyMs" render={(text) => text !== undefined ? text.toFixed(2) : 'N/A'} /> */}
-                        </Table>
-                    </Card>
-                )}
-
-                {/* 6. Hiệu suất theo giờ (Column Chart) */}
-                {hourlyPerformanceMetrics && hourlyPerformanceMetrics.length > 0 && (
-                    <Card title="Hiệu suất thiết bị theo giờ" className="dashboard-card chart-card">
-                        <p className="chart-note">*Chỉ hiển thị khi lọc theo một Device ID cụ thể*</p>
-                        {!deviceId ? (
-                            <div className="placeholder-message">Vui lòng chọn một ID thiết bị để xem hiệu suất chi tiết theo giờ.</div>
-                        ) : (
-                            <AntdColumnChart
-                                data={hourlyPerformanceMetrics.flatMap(d => [
-                                    { timeBucket: formatTimeBucketLabel(d.timeBucket, 'hourly'), type: 'CPU (%)', value: d.avgCpuUsagePercentage },
-                                    { timeBucket: formatTimeBucketLabel(d.timeBucket, 'hourly'), type: 'RAM (MB)', value: d.avgRamUsageMB },
-                                    { timeBucket: formatTimeBucketLabel(d.timeBucket, 'hourly'), type: 'Pin (%)', value: d.avgBatteryLevelPercentage },
-                                ]).filter(d => d.value !== undefined && d.value !== null)} // Filter out undefined/null values
-                                xField="timeBucket"
-                                yField="value"
-                                seriesField="type"
-                                isGroup={true}
-                                columnStyle={{ fillOpacity: 0.8 }}
-                                color={['#0088FE', '#82ca9d', '#FFBB28']}
-                                tooltip={{
-                                    formatter: (datum: any) => ({ name: datum.type, value: datum.value.toFixed(2) }),
-                                    showTitle: true,
-                                    title: (_title: string, items: any[]) => items[0]?.data?.timeBucket,
-                                }}
-                                slider={{ start: 0, end: 1 }}
-                            />
-                        )}
-                    </Card>
-                )}
+            <div style={{ marginTop: 24 }}>
+                {/* Row 1: Overall Summary + Command Distribution */}
+                <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                    {renderOverallSummaryCard()}
+                    {renderCommandDistributionCard()}
+                </Row>
+                {/* Row 2: Time Series */}
+                <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                    {renderTimeSeriesCard()}
+                    {renderTopMissedDevicesCard()}
+                </Row>
+                {/*/!* Row 3: Top Missed Devices *!/*/}
+                {/*<Row gutter={[16, 16]}>*/}
+                {/*</Row>*/}
             </div>
         );
     };
-
     return (
-        <div className="dashboard-container">
-            <h1>IoT Gateway Dashboard Thống kê</h1>
-            {renderFilters()}
-            {renderDashboardContent()}
+        <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+            <div style={{ margin: '0 auto' }}>
+                {/*<div style={{ marginBottom: 24, textAlign: 'center' }}>*/}
+                {/*    <h1 style={{*/}
+                {/*        fontSize: '28px',*/}
+                {/*        fontWeight: 'bold',*/}
+                {/*        color: '#1890ff',*/}
+                {/*        margin: 0*/}
+                {/*    }}>*/}
+                {/*        🚀 IoT Gateway Dashboard*/}
+                {/*    </h1>*/}
+                {/*    <p style={{ color: '#666', margin: '8px 0 0 0' }}>*/}
+                {/*        Thống kê và phân tích dữ liệu gói tin IoT*/}
+                {/*    </p>*/}
+                {/*</div>*/}
+                {renderFilters()}
+                {renderContent()}
+            </div>
         </div>
     );
 };
-
 export default Dashboard;

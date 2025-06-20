@@ -1274,7 +1274,7 @@ export async function updateIotSection(
                 data: finalUpdatedIotRecord,
             });
 
-        } else { // Xử lý tất cả các cấu hình khác (wifi, ethernet, mqtt, rs485, rs232, tcp, CAN) qua MQTT
+        } else { // Xử lý tất cả các cấu hình khác (wifi, ethernet, mqtt, rs485, rs232, tcp, CAN, digitalInput) qua MQTT
             const configTopic = `device/config/${deviceMAC}`;
             const transactionId = uuidv4();
 
@@ -1480,7 +1480,12 @@ export const updateCanSettings = async (req: Request, res: Response) => {
     await updateIotSection(req, res, "can");
 };
 
-// 9. Phiên bản Firmware
+// 9. Cài đặt CAN
+export const updateInputSettings = async (req: Request, res: Response) => {
+    await updateIotSection(req, res, "digitalInput");
+};
+
+// 10. Phiên bản Firmware
 export const updateFirmwareVersion = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;

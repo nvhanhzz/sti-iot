@@ -103,6 +103,9 @@ class ApiManager {
     ApiUpdateIotFirmwareVersion(id: string) {
         return `${API_URLMASTERDATA}/api/iots/${id}/firmware-version`;
     }
+    ApiUpdateIotInputSettings(id: string) {
+        return `${API_URLMASTERDATA}/api/iots/${id}/input-settings`;
+    }
 
     // Api Cài đặt payload
     // ApiGetDataPayloadType() {

@@ -482,13 +482,13 @@ export const getDashboardData = async (req: Request<{}, {}, {}, DashboardQuery>,
 
         // Validate startTime & endTime
         if (startTime) {
-            parsedStartTime = parseInt(startTime as string);
+            parsedStartTime = parseInt(startTime as string) / 1000;
             if (isNaN(parsedStartTime)) {
                 return res.status(400).send({ message: "Tham số 'startTime' không hợp lệ. Phải là Unix timestamp (ms)." });
             }
         }
         if (endTime) {
-            parsedEndTime = parseInt(endTime as string);
+            parsedEndTime = parseInt(endTime as string) / 1000;
             if (isNaN(parsedEndTime)) {
                 return res.status(400).send({ message: "Tham số 'endTime' không hợp lệ. Phải là Unix timestamp (ms)." });
             }

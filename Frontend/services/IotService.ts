@@ -261,6 +261,21 @@ class IotService {
         }
     }
 
+    async updateIotInputSettings(id: string, data: TcpConfig) {
+        try {
+            const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotInputSettings(id), {
+                headers: {
+                    Authorization: this.getAuthHeader(),
+                },
+                data: data,
+            });
+            return response;
+        } catch (error) {
+            console.error("Lỗi cập nhật Cài đặt TCP:", error);
+            throw error;
+        }
+    }
+
     async updateIotFirmwareVersion(id: string, data: { version?: string; }) {
         try {
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotFirmwareVersion(id), {

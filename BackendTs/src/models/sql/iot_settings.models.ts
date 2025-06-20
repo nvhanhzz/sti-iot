@@ -72,6 +72,12 @@ export function initializeIotSettings(sequelizeInstance: any) {
                 comment: 'Cấu hình RS232 (baudrate, serialConfig, ID, Address)'
             },
 
+            digitalInputConfig: {
+                type: JSON,
+                allowNull: true,
+                comment: 'Cấu hình digitalInput (modeDigitalInput)'
+            },
+
             firmware_version_id: {
                 type: INTEGER,
                 allowNull: true,
