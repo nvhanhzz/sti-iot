@@ -79,6 +79,23 @@ services:
       - mysql
     restart: always
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myts-backend
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_started
+      mongodb:
+        condition: service_healthy
+    restart: always
+
 #  nginx:
 #    image: nginx:stable-alpine # Sử dụng image Nginx
 #    container_name: firmware_nginx

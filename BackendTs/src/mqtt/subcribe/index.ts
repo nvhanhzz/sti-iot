@@ -1,4 +1,4 @@
-import { MqttClient } from "mqtt";
+import { MqttClient, IClientSubscribeOptions } from "mqtt"; // <-- Import IClientSubscribeOptions
 import logger from "../../config/logger";
 import { deviceUpdateData } from "../../controllers/iots.controller";
 import { MasterIotGlobal, IotStatusGlobal } from "../../global";
@@ -19,11 +19,14 @@ interface PendingRequest {
 export const pendingDeviceRequests = new Map<string, PendingRequest>();
 
 const subscribeToTopics = (client: MqttClient) => {
-    client.subscribe(subscribeTopics, (err) => {
+    // Định nghĩa options cho QoS 1 với kiểu IClientSubscribeOptions
+    const subscribeOptions: IClientSubscribeOptions = { qos: 1 }; // <-- Thêm kiểu dữ liệu
+
+    client.subscribe(subscribeTopics, subscribeOptions, (err) => {
         if (err) {
             logger.error("❌ Error subscribing:", err);
         } else {
-            logger.info("✅ Subscribed to topics:", subscribeTopics);
+            logger.info("✅ Subscribed to topics:", subscribeTopics, "with QoS 1");
         }
     });
 

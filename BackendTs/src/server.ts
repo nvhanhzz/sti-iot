@@ -17,6 +17,8 @@ import { initWatcher } from "./watcher";
 import initMqtt from "./mqtt";
 import subscribeToTopics from "./mqtt/subcribe";
 import {updateCmdStatisticsFromDB} from "./services/iot_statistics.services";
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger.config';
 
 const app = express();
 const server = http.createServer(app);
@@ -39,6 +41,7 @@ app.use(
 );
 app.use(express.json());
 app.use("/api", routes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const startServer = async () => {
     try {
