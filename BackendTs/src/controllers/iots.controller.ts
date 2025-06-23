@@ -608,110 +608,115 @@ export const calculateCRC8 = (data: Buffer): number => {
     return crc;
 };
 
-export const deviceUpdateData = async (topic: string, message: Buffer) => {
-    const mergedPayloads: any = {
-        isMissed: false
-    };
-    if (message[0] === MISSED_PACKET) {
-        mergedPayloads.isMissed = true;
-        message = message.slice(1);
-    }
-
-    const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
-    if (message[0] === CMD_RESPOND_TIMESTAMP) {
-        const currentEpochTimestamp = Math.floor(Date.now() / 1000);
-
-        const timestampDataHex = ConvertDatatoHex(currentEpochTimestamp, 'int32');
-
-        const cmdHex = CMD_RESPOND_TIMESTAMP.toString(16).toUpperCase().padStart(2, '0');
-        const lengthHex = '04';
-        const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0');
-
-        const payloadPart = `${lengthHex}${typeHex}${timestampDataHex}`;
-
-        const dataForCrcCalculation = Buffer.from(`${cmdHex}${payloadPart}`, 'hex');
-        const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
-        const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
-
-        const hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
-
-        logger.info(`Generated Timestamp Response for ${mac}: ${hexToSend}`);
-
-        publishMessage(client, `device/response/${mac}`, hexToSend);
-        return;
-    }
-
-    const dataJson: any = await ConvertDataHextoJson(message);
-
-    if (dataJson.status) {
-        dataJson.mac = mac;
-        const dataIot = MasterIotGlobal.findByMac(dataJson.mac);
-        if (dataIot) {
-            dataJson.topic = topic;
-            dataJson.status = 'in';
-            dataJson.type = 2;
-
-            for (const payload of dataJson.payload) {
-                if (payload.payload_name === 'timestamp') {
-                    dataJson.time = payload.timestamp;
-                } else {
-                    const dataMsgDetail = {
-                        device_id: dataIot.id,
-                        CMD: dataJson.CMD,
-                        CMD_Decriptions: dataJson.CMD_Decriptions,
-                        dataName: `${dataJson.CMD_Decriptions} : ${payload.payload_name}`,
-                        payload_name: payload.payload_name,
-                        data: payload[payload.payload_name],
-                        unit: payload.payload_unit,
-                        time: dataJson.time
-                    };
-                    DataMsgGlobal.replaceByMultipleKeys(dataMsgDetail, ['device_id', 'dataName']);
-                }
-            }
-            DataMsgGlobal.replaceByMultipleKeys({
-                device_id: dataIot.id,
-                CMD: dataJson.CMD,
-                CMD_Decriptions: dataJson.CMD_Decriptions,
-                dataName: `${dataJson.CMD_Decriptions} : isMissed`,
-                payload_name: 'isMissed',
-                data: mergedPayloads.isMissed,
-                time: dataJson.time
-            }, ['device_id', 'dataName']);
-
-            mergedPayloads.cmd = dataJson.CMD;
-            mergedPayloads.deviceId = dataIot.id;
-            for (const payload of dataJson.payload) {
-                if (payload.payload_name === 'timestamp') {
-                    mergedPayloads.timestamp = payload.timestamp;
-                } else {
-                    mergedPayloads[payload.payload_name] = payload[payload.payload_name];
-                }
-            }
-            const iotStatistic = new IotStatistic(mergedPayloads);
-            await iotStatistic.save();
-            incrementCmdStat(mergedPayloads.deviceId, mergedPayloads.cmd, mergedPayloads.isMissed);
-            await sendStatistics(mergedPayloads.deviceId);
-            mergedPayloads.deviceName = dataIot.name || 'Unknow device';
-            mergedPayloads.mac = dataIot.mac || 'Unknow MAC';
-            await sendToMonitor(mergedPayloads);
-
-            if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
-                const iotDevice = await models.IotSettings.findOne({
-                    where: { mac: mac }
-                });
-
-                if (iotDevice) {
-                    const updateField = message[0] === CMD_NOTIFY_TCP ? 'tcp_status' : 'udp_status';
-                    const updateStatus = dataJson.payload[0][dataJson.payload[0].payload_name] === 1 ? 'opened' : 'closed';
-
-                    iotDevice.set(updateField, updateStatus);
-                    await iotDevice.save();
-
-                    MasterIotGlobal.update(iotDevice.toJSON());
-                }
-            }
-            await sendDataRealTime(dataIot.id as number);
+export const deviceUpdateData = async (topic: string, message: Buffer, messageId: number) => {
+    try {
+        const mergedPayloads: any = {
+            isMissed: false,
+            messageId: messageId
+        };
+        if (message[0] === MISSED_PACKET) {
+            mergedPayloads.isMissed = true;
+            message = message.slice(1);
         }
+
+        const mac = (topic.split('/')).length > 1 ? (topic.split('/'))[1] : '';
+        if (message[0] === CMD_RESPOND_TIMESTAMP) {
+            const currentEpochTimestamp = Math.floor(Date.now() / 1000);
+
+            const timestampDataHex = ConvertDatatoHex(currentEpochTimestamp, 'int32');
+
+            const cmdHex = CMD_RESPOND_TIMESTAMP.toString(16).toUpperCase().padStart(2, '0');
+            const lengthHex = '04';
+            const typeHex = PAYLOAD_I32.toString(16).toUpperCase().padStart(2, '0');
+
+            const payloadPart = `${lengthHex}${typeHex}${timestampDataHex}`;
+
+            const dataForCrcCalculation = Buffer.from(`${cmdHex}${payloadPart}`, 'hex');
+            const calculatedCrcValue = calculateCRC8(dataForCrcCalculation);
+            const crcHex = calculatedCrcValue.toString(16).toUpperCase().padStart(2, '0');
+
+            const hexToSend = `${cmdHex}${payloadPart}${crcHex}`;
+
+            logger.info(`Generated Timestamp Response for ${mac}: ${hexToSend}`);
+
+            publishMessage(client, `device/response/${mac}`, hexToSend);
+            return;
+        }
+
+        const dataJson: any = await ConvertDataHextoJson(message);
+
+        if (dataJson.status) {
+            dataJson.mac = mac;
+            const dataIot = MasterIotGlobal.findByMac(dataJson.mac);
+            if (dataIot) {
+                dataJson.topic = topic;
+                dataJson.status = 'in';
+                dataJson.type = 2;
+
+                for (const payload of dataJson.payload) {
+                    if (payload.payload_name === 'timestamp') {
+                        dataJson.time = payload.timestamp;
+                    } else {
+                        const dataMsgDetail = {
+                            device_id: dataIot.id,
+                            CMD: dataJson.CMD,
+                            CMD_Decriptions: dataJson.CMD_Decriptions,
+                            dataName: `${dataJson.CMD_Decriptions} : ${payload.payload_name}`,
+                            payload_name: payload.payload_name,
+                            data: payload[payload.payload_name],
+                            unit: payload.payload_unit,
+                            time: dataJson.time
+                        };
+                        DataMsgGlobal.replaceByMultipleKeys(dataMsgDetail, ['device_id', 'dataName']);
+                    }
+                }
+                DataMsgGlobal.replaceByMultipleKeys({
+                    device_id: dataIot.id,
+                    CMD: dataJson.CMD,
+                    CMD_Decriptions: dataJson.CMD_Decriptions,
+                    dataName: `${dataJson.CMD_Decriptions} : isMissed`,
+                    payload_name: 'isMissed',
+                    data: mergedPayloads.isMissed,
+                    time: dataJson.time
+                }, ['device_id', 'dataName']);
+
+                mergedPayloads.cmd = dataJson.CMD;
+                mergedPayloads.deviceId = dataIot.id;
+                for (const payload of dataJson.payload) {
+                    if (payload.payload_name === 'timestamp') {
+                        mergedPayloads.timestamp = payload.timestamp;
+                    } else {
+                        mergedPayloads[payload.payload_name] = payload[payload.payload_name];
+                    }
+                }
+                const iotStatistic = new IotStatistic(mergedPayloads);
+                await iotStatistic.save();
+                incrementCmdStat(mergedPayloads.deviceId, mergedPayloads.cmd, mergedPayloads.isMissed);
+                await sendStatistics(mergedPayloads.deviceId);
+                mergedPayloads.deviceName = dataIot.name || 'Unknow device';
+                mergedPayloads.mac = dataIot.mac || 'Unknow MAC';
+                await sendToMonitor(mergedPayloads);
+
+                if (message[0] === CMD_NOTIFY_TCP || message[0] === CMD_NOTIFY_UDP) {
+                    const iotDevice = await models.IotSettings.findOne({
+                        where: {mac: mac}
+                    });
+
+                    if (iotDevice) {
+                        const updateField = message[0] === CMD_NOTIFY_TCP ? 'tcp_status' : 'udp_status';
+                        const updateStatus = dataJson.payload[0][dataJson.payload[0].payload_name] === 1 ? 'opened' : 'closed';
+
+                        iotDevice.set(updateField, updateStatus);
+                        await iotDevice.save();
+
+                        MasterIotGlobal.update(iotDevice.toJSON());
+                    }
+                }
+                await sendDataRealTime(dataIot.id as number);
+            }
+        }
+    } catch (error) {
+        console.log(error);
     }
 };
 

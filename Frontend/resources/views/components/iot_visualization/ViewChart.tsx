@@ -173,7 +173,8 @@ const ViewChart: React.FC<ConfigIotsProps> = ({ dataIotsDetail }) => {
             const validRecords = newRecordsFromProps.filter((record: any) => {
                 return record.time &&
                     (record.CMD === 'CMD_ADC_CHANNEL1' || record.CMD === 'CMD_ADC_CHANNEL2') &&
-                    record.data !== undefined;
+                    record.data !== undefined &&
+                    record.payload_name === 'value';;
             });
 
             if (validRecords.length === 0) {

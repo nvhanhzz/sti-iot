@@ -30,8 +30,11 @@ const subscribeToTopics = (client: MqttClient) => {
         }
     });
 
-    client.on("message", async (topic, message) => {
+    client.on("message", async (topic, message, packet) => {
         logger.info(`📩 Received on [${topic}]: ${message.toString()}`);
+
+        let messageId: number | undefined = packet.messageId;
+        console.log(messageId);
 
         const topicParts = topic.split('/');
         const mac = topicParts[topicParts.length - 1];
@@ -68,7 +71,7 @@ const subscribeToTopics = (client: MqttClient) => {
                 logger.error('❌ Error parsing MQTT config result message:', parseError);
             }
         } else if (topic.startsWith('device_send/')) {
-            await deviceUpdateData(topic, message);
+            await deviceUpdateData(topic, message, messageId as number);
         } else if (topic.startsWith('device/config/result/')) {
             try {
                 const result = JSON.parse(message.toString());

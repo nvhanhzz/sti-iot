@@ -51,14 +51,12 @@ const ViewDevice: React.FC = () => {
         if (deviceIdFromUrl) {
             const filtered = dataIots.filter(item => item.id === parseInt(deviceIdFromUrl) && !item.isdelete);
             setFilteredDataIots(filtered);
-            console.log(`Filtering data for device ID: ${deviceIdFromUrl}`, filtered);
         } else {
             setFilteredDataIots([]);
         }
     }, [deviceIdFromUrl, dataIots]);
 
     const handleSocketEvent = useCallback((eventData: any) => {
-        debugger;
         setDataIots((prevData) => { // Update base dataIots
             return prevData.map((item) => {
                 if (item.id === eventData.device_id) {
