@@ -1,0 +1,17 @@
+node_modules/
+npm-debug.log
+.env
+.git
+.gitignore
+# Nếu bạn biên dịch TypeScript, thường có thư mục đầu ra
+# hãy thêm nó vào đây để không sao chép các tệp đã biên dịch lại
+# (chúng sẽ được tạo lại bên trong container nếu bạn có bước build trong Dockerfile)
+# dist/
+# build/
+
+# Các tệp tạm thời hoặc nhật ký không cần thiết
+tmp/
+*.log
+*.tmp
+
+mysql_data/

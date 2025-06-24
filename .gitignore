@@ -1,1 +1,5 @@
 BackendTs/mysql_data/
+BackendTs/dist/
+BackendTs/node_modules/
+BackendTs/logs/
+BackendTs/.idea/

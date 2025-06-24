@@ -81,20 +81,31 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: myts-backend
+      context: . # Ngữ cảnh build là thư mục hiện tại (BackendTs)
+      dockerfile: Dockerfile # Sử dụng Dockerfile trong cùng thư mục
+    container_name: myts-backend # Tên dễ nhận biết cho container
+    # Ánh xạ cổng: Host_PORT:Container_PORT
+    # Đảm bảo biến môi trường PORT được định nghĩa trong .env file hoặc trực tiếp
+    # Ví dụ: nếu PORT=3335 trong .env và ứng dụng lắng nghe cổng 3335 trong container
     ports:
       - "${PORT}:${PORT}"
     volumes:
+      # Gắn kết toàn bộ thư mục mã nguồn từ host vào /app trong container.
+      # Điều này cho phép bạn thay đổi mã nguồn trên host và thấy sự thay đổi ngay lập tức
+      # trong container mà không cần rebuild image (hữu ích cho development).
       - .:/app
+      # Tạo một anonymous volume tại /app/node_modules.
+      # Điều này RẤT QUAN TRỌNG để ngăn thư mục node_modules từ host (nếu có)
+      # ghi đè lên thư mục node_modules được tạo ra bên trong container bởi 'npm ci'.
+      # Nó đảm bảo rằng các dependencies được cài đặt và tương thích với môi trường Alpine của container.
       - /app/node_modules
     depends_on:
       mysql:
-        condition: service_started
+        condition: service_started # Đợi MySQL khởi động
       mongodb:
-        condition: service_healthy
-    restart: always
+        condition: service_healthy # Đợi MongoDB báo cáo là sẵn sàng (qua healthcheck)
+    restart: always # Luôn khởi động lại container nếu nó dừng lại (trừ khi dừng thủ công)
+
 
 #  nginx:
 #    image: nginx:stable-alpine # Sử dụng image Nginx
