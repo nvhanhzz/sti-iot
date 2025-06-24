@@ -6,7 +6,7 @@ import {
     getPacketCountsOverTime,
     getTopMissedDevices,
     getPacketCountsByCommand,
-    getDeviceList
+    getDeviceList, getFailedCommandStatistics
 } from "../controllers/dashboard.controller";
 
 const router = express.Router();
@@ -374,5 +374,7 @@ router.get("/packet-counts-by-command", getPacketCountsByCommand);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/devices", getDeviceList);
+
+router.get("/packet-fail", getFailedCommandStatistics);
 
 export default router;

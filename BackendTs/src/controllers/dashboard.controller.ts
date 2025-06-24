@@ -1,5 +1,3 @@
-// src/controllers/dashboard.controller.ts
-
 import { Request, Response } from 'express';
 import IotStatistic from '../models/nosql/iot_statistic.models';
 import { MasterIotInterface } from '../interface';
@@ -16,12 +14,15 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(weekOfYear); // Make sure weekOfYear is also extended
 
-// === INTERFACES === (Giữ nguyên)
+// === INTERFACES ===
+// Cập nhật DashboardQueryBase để bao gồm các tham số phân trang
 interface DashboardQueryBase {
     startTime?: string; // Nhận từ FE là seconds string
     endTime?: string;   // Nhận từ FE là seconds string
     deviceId?: string;
     cmd?: string;
+    page?: string;      // Trang hiện tại (string từ query params)
+    limit?: string;     // Số lượng mục trên mỗi trang (string từ query params)
 }
 
 interface PacketCountsOverTimeQuery extends DashboardQueryBase {
@@ -90,7 +91,15 @@ interface HourlyPerformanceMetricData {
     avgBatteryLevelPercentage?: number;
 }
 
-// === HELPER FUNCTIONS === (Sửa đổi `prepareMatchQuery` nếu cần, và `getDeviceMapping`)
+// Interface mới cho dữ liệu trả về của API getFailedCommandStatistics
+interface FailedCommandStatistic {
+    deviceId: string;
+    cmd: string;
+    timestamp: number; // Unix timestamp in seconds
+    isMissed: boolean;
+}
+
+// === HELPER FUNCTIONS ===
 
 const getDeviceMapping = (): Map<string, { deviceName: string; mac: string }> => {
     try {
@@ -143,7 +152,7 @@ const prepareMatchQuery = (query: DashboardQueryBase) => {
         if (parsedEndTimeSeconds) matchQuery.timestamp.$lte = parsedEndTimeSeconds;
     }
     if (query.deviceId) matchQuery.deviceId = query.deviceId;
-    if (query.cmd) matchQuery.cmd = query.cmd;
+    if (query.cmd) matchQuery.cmd = query.cmd; // Giữ lại dòng này cho các controller khác sử dụng
 
     return matchQuery;
 };
@@ -182,7 +191,7 @@ export const getDeviceList = async (req: Request, res: Response) => {
     }
 };
 
-// 1. Controller cho Tổng quan gói tin (Không thay đổi)
+// 1. Controller cho Tổng quan gói tin
 export const getOverallSummary = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
         const matchQuery = prepareMatchQuery(req.query);
@@ -244,18 +253,17 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
         }
 
         let groupFormat: string;
-        // Sử dụng múi giờ +07:00 (Asia/Ho_Chi_Minh) cho aggregation
-        const targetTimezone = "Asia/Ho_Chi_Minh"; // Hoặc "+07:00"
+        const targetTimezone = "Asia/Ho_Chi_Minh";
 
         switch (interval) {
             case 'hourly':
-                groupFormat = "%Y-%m-%d %H"; // Format: "2024-06-20 15"
+                groupFormat = "%Y-%m-%d %H";
                 break;
             case 'daily':
-                groupFormat = "%Y-%m-%d"; // Format: "2024-06-20"
+                groupFormat = "%Y-%m-%d";
                 break;
             case 'weekly':
-                groupFormat = "%Y-%U"; // Format: "2024-25" (year-week number, Sunday start)
+                groupFormat = "%Y-%U";
                 break;
             default:
                 groupFormat = "%Y-%m-%d %H";
@@ -269,7 +277,7 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
                         $dateToString: {
                             format: groupFormat,
                             date: { $toDate: { $multiply: ["$timestamp", 1000] } },
-                            timezone: targetTimezone // Đảm bảo output của MongoDB theo +07:00
+                            timezone: targetTimezone
                         }
                     },
                     successfulPackets: { $sum: { $cond: [{ $eq: ["$isMissed", false] }, 1, 0] } },
@@ -303,27 +311,18 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
                 const [year, weekStr] = item.timeBucketString.split('-');
                 const week = parseInt(weekStr);
 
-                // Dùng dayjs.tz() để parse chuỗi ở múi giờ đích (Asia/Ho_Chi_Minh)
-                // và tính toán tuần dựa trên Chủ Nhật.
-                // firstDayOfYear: Jan 1st of the year, in the target timezone
                 const jan1st = dayjs.tz(`${year}-01-01`, targetTimezone);
-                // Find the first Sunday of the year (which could be Jan 1st or later), in the target timezone
                 const firstSundayOfYear = jan1st.day() === 0 ? jan1st : jan1st.day(7);
-
-                // Add `week` weeks to find the Sunday of the target week.
-                // This aligns with MongoDB's %U which is Sunday-based and 0-indexed for the first week.
                 parsedDate = firstSundayOfYear.add(week, 'weeks');
 
             } else if (interval === 'hourly') {
-                // Parse chuỗi "YYYY-MM-DD HH" và xác định nó ở múi giờ đích
                 parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD HH", targetTimezone);
             } else { // daily
-                // Parse chuỗi "YYYY-MM-DD" và xác định nó ở múi giờ đích
                 parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD", targetTimezone);
             }
 
             if (!parsedDate.isValid()) {
-                logger.error(`Failed to parse date string "<span class="math-inline">\{item\.timeBucketString\}" for interval "</span>{interval}" in timezone ${targetTimezone}`);
+                logger.error(`Failed to parse date string "${item.timeBucketString}" for interval "${interval}" in timezone ${targetTimezone}`);
                 return {
                     timeBucket: null,
                     successfulPackets: item.successfulPackets,
@@ -332,7 +331,6 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
                 };
             }
 
-            // Trả về Unix timestamp (giây) của thời điểm đó (đã ở múi giờ +07:00)
             return {
                 timeBucket: parsedDate.unix(),
                 successfulPackets: item.successfulPackets,
@@ -349,7 +347,7 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
     }
 };
 
-// 3. Controller cho Top N thiết bị có tỷ lệ gửi lại cao nhất (Không thay đổi)
+// 3. Controller cho Top N thiết bị có tỷ lệ gửi lại cao nhất
 export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevicesQuery>, res: Response) => {
     try {
         const { topLimit = '5' } = req.query;
@@ -415,7 +413,7 @@ export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevi
     }
 };
 
-// 4. Controller cho thống kê gói tin theo loại lệnh (Không thay đổi)
+// 4. Controller cho thống kê gói tin theo loại lệnh
 export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
     try {
         const matchQuery = prepareMatchQuery(req.query);
@@ -440,7 +438,7 @@ export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, Dashboar
                     missRatePercentage: {
                         $cond: {
                             if: { $gt: ["$totalPackets", 0] },
-                            then: { $multiply: [{ $divide: ["$missedPackets", "$totalPackets"] }, 100] },
+                            then: { $multiply: [{ $divide: ["$missedPackets", { $add: ["$successfulPackets", "$missedPackets"] }] }, 100] },
                             else: 0
                         }
                     }
@@ -460,5 +458,75 @@ export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, Dashboar
     } catch (error: any) {
         logger.error("Error in getPacketCountsByCommand:", error.message);
         res.status(400).json({ message: error.message || "Failed to get packet counts by command." });
+    }
+};
+
+/**
+ * Lấy các bản ghi thông số IoT với các CMD lỗi cụ thể:
+ * CMD_STATUS_WIFI_WEAK, CMD_STATUS_MQTT_LOST, CMD_STATUS_ACK_FAIL.
+ * Hỗ trợ lọc theo thời gian (startTime, endTime), deviceId và phân trang.
+ */
+export const getFailedCommandStatistics = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
+    try {
+        // Lấy các tham số phân trang từ query string
+        const page = parseInt(req.query.page as string) || 1; // Mặc định là trang 1
+        const limit = parseInt(req.query.limit as string) || 10; // Mặc định 10 mục mỗi trang
+        const skip = (page - 1) * limit;
+
+        // Chuẩn bị matchQuery từ các tham số thời gian và deviceId
+        // Xóa thuộc tính 'cmd' và các tham số phân trang khỏi req.query
+        // trước khi truyền vào prepareMatchQuery để nó không thêm chúng vào matchQuery.
+        const queryParamsWithoutPaginationAndCmd = { ...req.query };
+        delete queryParamsWithoutPaginationAndCmd.page;
+        delete queryParamsWithoutPaginationAndCmd.limit;
+        delete queryParamsWithoutPaginationAndCmd.cmd; // Xóa cmd nếu có để nó không xung đột với $in
+
+        const baseMatchQuery = prepareMatchQuery(queryParamsWithoutPaginationAndCmd);
+
+        // Định nghĩa các CMD lỗi cần lấy
+        const errorCommands = [
+            "CMD_STATUS_WIFI_WEAK",
+            "CMD_STATUS_MQTT_LOST",
+            "CMD_STATUS_ACK_FAIL"
+        ];
+
+        // Kết hợp matchQuery cơ bản với điều kiện lọc CMD lỗi
+        const finalMatchQuery = {
+            ...baseMatchQuery,
+            cmd: { $in: errorCommands } // Chỉ lấy các cmd nằm trong danh sách lỗi
+        };
+
+        // Đếm tổng số tài liệu khớp với điều kiện lọc (không phân trang)
+        const totalDocuments = await IotStatistic.countDocuments(finalMatchQuery);
+
+        // Thực hiện truy vấn MongoDB với phân trang
+        const results = await IotStatistic.find(
+            finalMatchQuery,
+            {
+                deviceId: 1,
+                cmd: 1,
+                timestamp: 1,
+                isMissed: 1,
+                _id: 0
+            } as any // Ép kiểu đối tượng projection thành 'any' để TypeScript không báo lỗi
+        )
+            .sort({ timestamp: -1, deviceId: 1 }) // Sắp xếp theo thời gian mới nhất và deviceId
+            .skip(skip)   // Bỏ qua số lượng tài liệu theo trang
+            .limit(limit) // Giới hạn số lượng tài liệu trả về
+            .lean<FailedCommandStatistic[]>(); // Sử dụng .lean() để lấy POJO thay vì Mongoose Documents, giúp tăng hiệu suất
+
+        res.status(200).json({
+            data: results,
+            pagination: {
+                totalDocuments: totalDocuments,
+                currentPage: page,
+                limit: limit,
+                totalPages: Math.ceil(totalDocuments / limit)
+            }
+        });
+
+    } catch (error: any) {
+        logger.error("Error in getFailedCommandStatistics:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get failed command statistics." });
     }
 };

@@ -2604,5 +2604,50 @@ export const commands: Command[] = [
                 "isDeleted": false
             }
         ]
+    },
+    {
+        "name": "CMD_STATUS_WIFI_WEAK",
+        "hex_symbols": "240",
+        "descriptions": "Wifi yếu.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            }
+        ]
+    },
+    {
+        "name": "CMD_STATUS_MQTT_LOST",
+        "hex_symbols": "241",
+        "descriptions": "Mất gói mqtt.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            }
+        ]
+    },
+    {
+        "name": "CMD_STATUS_ACK_FAIL",
+        "hex_symbols": "242",
+        "descriptions": "ACK fail.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            }
+        ]
     }
 ]

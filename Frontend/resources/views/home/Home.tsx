@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AutoComplete, Button, Card, Col, DatePicker, Input, Row, Select, Spin, Statistic, Table } from 'antd';
+import { Alert, AutoComplete, Card, Col, DatePicker, Row, Select, Spin, Statistic, Table } from 'antd';
 import {
     Bar,
     CartesianGrid,
@@ -104,7 +104,11 @@ const commandsMapping = [
     { "name": "CMD_PUSH_IO_DI1_BUTTON", "description": "Nút DI 1 (I/O)" },
     { "name": "CMD_PUSH_IO_DI2_BUTTON", "description": "Nút DI 2 (I/O)" },
     { "name": "CMD_PUSH_IO_DI3_BUTTON", "description": "Nút DI 3 (I/O)" },
-    { "name": "CMD_PUSH_IO_DI4_BUTTON", "description": "Nút DI 4 (I/O)" }
+    { "name": "CMD_PUSH_IO_DI4_BUTTON", "description": "Nút DI 4 (I/O)" },
+    // Thêm các lệnh lỗi vào mapping để có description nếu cần
+    { "name": "CMD_STATUS_WIFI_WEAK", "description": "Lỗi WiFi Yếu" },
+    { "name": "CMD_STATUS_MQTT_LOST", "description": "Lỗi Mất kết nối MQTT" },
+    { "name": "CMD_STATUS_ACK_FAIL", "description": "Lỗi ACK Thất bại" }
 ];
 
 const cmdDescriptionMap = new Map(commandsMapping.map(cmd => [cmd.description.toLowerCase(), cmd.name]));
@@ -123,6 +127,8 @@ interface CommonDashboardQueryParams {
     endTime: number | null;
     deviceId?: string;
     cmd?: string;
+    page?: number;   // Thêm page
+    limit?: number;  // Thêm limit
 }
 
 interface OverallSummaryData {
@@ -140,15 +146,6 @@ interface PacketCountOverTimeData {
     missedPackets: number;
     missRatePercentage: number;
 }
-interface TopMissedDeviceData {
-    deviceId: string;
-    deviceName: string;
-    mac: string;
-    totalPackets: number;
-    missedPackets: number;
-    missRatePercentage: number;
-    lastSeen: number;
-}
 interface PacketCountsByCommandData {
     cmd: string;
     totalPackets: number;
@@ -164,6 +161,27 @@ interface PieChartDataItem {
     missedPackets?: number;
     missRatePercentageForCommand?: number;
 }
+
+// --- NEW INTERFACE FOR PAGINATED RESPONSE ---
+interface PaginatedResponse<T> {
+    data: T[];
+    pagination: {
+        totalDocuments: number;
+        currentPage: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+// --- NEW INTERFACE FOR FAILED COMMAND DATA ---
+interface FailedCommandDataItem {
+    deviceId: string;
+    cmd: string;
+    timestamp: number;
+    isMissed: boolean;
+}
+// --- END NEW INTERFACES ---
+
 
 const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' | 'weekly'): string => {
     const date = dayjs(timestamp);
@@ -370,12 +388,10 @@ const handleResponse = async (res: Response) => {
     return res.json();
 };
 
-// --- NEW API CALL FOR DEVICE LIST ---
 const fetchDeviceListApi = async (): Promise<DeviceListItem[]> => {
-    const url = `${API_DASHBOARD_PREFIX}/devices`; // Assuming this path for your device list
+    const url = `${API_DASHBOARD_PREFIX}/devices`;
     return handleResponse(await fetch(url));
 };
-// --- END NEW API CALL ---
 
 const fetchOverallSummaryApi = async (params: CommonDashboardQueryParams): Promise<OverallSummaryData> => {
     const queryParams = createSearchParams(params);
@@ -392,20 +408,19 @@ const fetchPacketCountsOverTimeApi = async (params: PacketCountsOverTimeApiParam
     return await handleResponse(await fetch(url));
 };
 
-interface TopMissedDevicesApiParams extends CommonDashboardQueryParams {
-    topLimit: string;
-}
-const fetchTopMissedDevicesApi = async (params: TopMissedDevicesApiParams): Promise<TopMissedDeviceData[]> => {
-    const queryParams = createSearchParams(params);
-    const url = `${API_DASHBOARD_PREFIX}/top-missed-devices?${queryParams.toString()}`;
-    return await handleResponse(await fetch(url));
-};
-
 const fetchPacketCountsByCommandApi = async (params: CommonDashboardQueryParams): Promise<PacketCountsByCommandData[]> => {
     const queryParams = createSearchParams(params);
     const url = `${API_DASHBOARD_PREFIX}/packet-counts-by-command?${queryParams.toString()}`;
     return handleResponse(await fetch(url));
 };
+
+// --- NEW API CALL FOR FAILED COMMAND STATISTICS ---
+const fetchFailedCommandStatisticsApi = async (params: CommonDashboardQueryParams): Promise<PaginatedResponse<FailedCommandDataItem>> => {
+    const queryParams = createSearchParams(params);
+    const url = `${API_DASHBOARD_PREFIX}/packet-fail?${queryParams.toString()}`; // Endpoint mới của bạn
+    return handleResponse(await fetch(url));
+};
+// --- END NEW API CALL ---
 
 interface OverallSummaryCardProps {
     commonParams: CommonDashboardQueryParams;
@@ -881,107 +896,94 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
     );
 });
 
-interface TopMissedDevicesCardProps {
+// --- NEW COMPONENT FOR FAILED COMMAND STATISTICS ---
+interface FailedCommandStatisticsCardProps {
     commonParams: CommonDashboardQueryParams;
-    initialTopLimit?: string;
 }
-const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ commonParams, initialTopLimit = '5' }) => {
-    const [data, setData] = useState<TopMissedDeviceData[] | null>(null);
+
+const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = React.memo(({ commonParams }) => {
+    const [data, setData] = useState<FailedCommandDataItem[] | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [topLimit, setTopLimit] = useState<string>(initialTopLimit);
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        limit: 10,
+        totalDocuments: 0,
+        totalPages: 0,
+    });
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const limitNum = parseInt(topLimit);
-            if (isNaN(limitNum) || limitNum < 1) {
-                throw new Error("Tham số 'Top N' không hợp lệ. Phải là số dương.");
-            }
             if (!commonParams.startTime || !commonParams.endTime) {
                 setData(null);
+                setPagination({ currentPage: 1, limit: 10, totalDocuments: 0, totalPages: 0 });
                 return;
             }
 
-            const paramsWithLimit: TopMissedDevicesApiParams = { ...commonParams, topLimit: topLimit };
-            const result = await fetchTopMissedDevicesApi(paramsWithLimit);
-            setData(result);
+            const paramsWithPagination = {
+                ...commonParams,
+                page: pagination.currentPage,
+                limit: pagination.limit,
+            };
+
+            const result = await fetchFailedCommandStatisticsApi(paramsWithPagination);
+            setData(result.data);
+            setPagination(result.pagination);
         } catch (err: any) {
-            console.error("Error fetching TopMissedDevices:", err);
-            setError(err.message || "Lỗi tải top thiết bị gửi lại.");
+            console.error("Error fetching FailedCommandStatistics:", err);
+            setError(err.message || "Lỗi tải thống kê lệnh lỗi.");
             setData(null);
+            setPagination({ currentPage: 1, limit: 10, totalDocuments: 0, totalPages: 0 });
         } finally {
             setLoading(false);
         }
-    }, [commonParams, topLimit]);
+    }, [commonParams, pagination.currentPage, pagination.limit]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
+    const getCommandDescription = (cmd: string): string => {
+        return commandsMapping.find(mapping => mapping.name === cmd)?.description || cmd;
+    };
+
     const columns = useMemo(() => [
         {
-            title: 'ID',
+            title: 'ID Thiết bị',
             dataIndex: 'deviceId',
             key: 'deviceId',
-            width: 60,
+            width: 100,
             fixed: 'left' as const,
             render: (text: string) => <span style={{ fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>{text}</span>
         },
         {
-            title: 'Tên Thiết bị',
-            dataIndex: 'deviceName',
-            key: 'deviceName',
-            ellipsis: true,
-            render: (text: string) => <span style={{ color: CHART_COLORS.textSecondary }}>{text}</span>
-        },
-        {
-            title: 'MAC Address',
-            dataIndex: 'mac',
-            key: 'mac',
-            width: 170,
-            render: (mac: string) => <code style={{ backgroundColor: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>{mac}</code>
-        },
-        {
-            title: 'Tổng gói',
-            dataIndex: 'totalPackets',
-            key: 'totalPackets',
-            width: 100,
-            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.totalPackets - b.totalPackets,
-            render: (value: number) => formatNumber(value)
-        },
-        {
-            title: 'Gửi lại',
-            dataIndex: 'missedPackets',
-            key: 'missedPackets',
-            width: 80,
-            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missedPackets - b.missedPackets,
-            render: (value: number) => (
+            title: 'Lệnh lỗi',
+            dataIndex: 'cmd',
+            key: 'cmd',
+            width: 180,
+            render: (cmd: string) => (
                 <span style={{ color: CHART_COLORS.missed, fontWeight: 'bold' }}>
-                    {formatNumber(value)}
+                    {getCommandDescription(cmd)}
                 </span>
-            )
+            ),
         },
         {
-            title: '% Gửi lại',
-            dataIndex: 'missRatePercentage',
-            key: 'missRatePercentage',
+            title: 'Trạng thái',
+            dataIndex: 'isMissed',
+            key: 'isMissed',
             width: 100,
-            sorter: (a: TopMissedDeviceData, b: TopMissedDeviceData) => a.missRatePercentage - b.missRatePercentage,
-            render: (value: number) => (
-                <span style={{
-                    color: value > 5 ? CHART_COLORS.missed : CHART_COLORS.success,
-                    fontWeight: 'bold'
-                }}>
-                    {formatPercentage(value)}
+            render: (isMissed: boolean) => (
+                <span style={{ color: isMissed ? CHART_COLORS.missed : CHART_COLORS.success }}>
+                    {isMissed ? 'Gửi lại' : 'Realtime'}
                 </span>
-            )
+            ),
         },
         {
-            title: 'Lần cuối gửi',
-            dataIndex: 'lastSeen',
-            key: 'lastSeen',
+            title: 'Thời gian',
+            dataIndex: 'timestamp',
+            key: 'timestamp',
             width: 150,
             render: (timestamp: number) => {
                 if (!timestamp) return 'N/A';
@@ -994,24 +996,14 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
                 const seconds = String(date.getSeconds()).padStart(2, '0');
                 return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
             }
-        }
+        },
     ], []);
 
     const cardTitle = (
         <Row align="middle" justify="space-between" style={{ width: '100%' }}>
-            <Col>🔝 Top {topLimit} thiết bị có tỷ lệ gửi lại cao nhất</Col>
+            <Col>⚠️ Thống kê lệnh lỗi</Col>
             <Col>
-                <Input
-                    type="number"
-                    min={1}
-                    max={50}
-                    value={topLimit}
-                    onChange={(e) => setTopLimit(e.target.value)}
-                    onPressEnter={fetchData}
-                    style={{ width: 80 }}
-                    size="small"
-                />
-                <Button onClick={fetchData} size="small" style={{ marginLeft: 8 }}>Áp dụng</Button>
+                {/* Có thể thêm các filter khác ở đây nếu muốn */}
             </Col>
         </Row>
     );
@@ -1021,7 +1013,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
-                        <Spin tip="Đang tải top thiết bị..." />
+                        <Spin tip="Đang tải lệnh lỗi..." />
                     </div>
                 </Card>
             </Col>
@@ -1032,7 +1024,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
         return (
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
-                    <Alert message="Lỗi tải Top thiết bị gửi lại" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                    <Alert message="Lỗi tải Thống kê lệnh lỗi" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
         );
@@ -1042,7 +1034,7 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
         return (
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
-                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu top thiết bị gửi lại." type="info" showIcon style={{ borderRadius: 8 }} />
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu lệnh lỗi trong khoảng thời gian đã chọn." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
         );
@@ -1058,10 +1050,24 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
                 <Table
                     dataSource={data}
                     columns={columns}
-                    rowKey="deviceId"
-                    pagination={false}
+                    rowKey={(record, index) => `${record.deviceId}-${record.timestamp}-${index}`} // Unique key
+                    pagination={{
+                        current: pagination.currentPage,
+                        pageSize: pagination.limit,
+                        total: pagination.totalDocuments,
+                        onChange: (page, pageSize) => {
+                            setPagination(prev => ({
+                                ...prev,
+                                currentPage: page,
+                                limit: pageSize,
+                            }));
+                        },
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '25', '50', '100'],
+                        showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
+                    }}
                     size="small"
-                    scroll={{ x: 800 }}
+                    scroll={{ x: 600, y: 250 }} // Cho phép cuộn ngang và giới hạn chiều cao
                     bordered
                     style={{ border: '1px solid #f0f0f0', borderRadius: 8 }}
                 />
@@ -1069,14 +1075,12 @@ const TopMissedDevicesCard: React.FC<TopMissedDevicesCardProps> = React.memo(({ 
         </Col>
     );
 });
+// --- END NEW COMPONENT ---
 
 const Dashboard: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
-    // Change deviceId state to store the selected device's ID
     const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(undefined);
-    // State to hold the current device search input value
     const [deviceSearchInput, setDeviceSearchInput] = useState<string>('');
-    // State to hold the list of all devices for AutoComplete options
     const [deviceOptions, setDeviceOptions] = useState<{ value: string; label: React.ReactNode; deviceId: string }[]>([]);
     const [cmdDescriptionGlobalFilter, setCmdDescriptionGlobalFilter] = useState<string>('');
     const [actualCmdGlobalToSend, setActualCmdGlobalToSend] = useState<string | undefined>(undefined);
@@ -1119,10 +1123,12 @@ const Dashboard: React.FC = () => {
         setActualCmdGlobalToSend(foundCmd);
     }, [cmdDescriptionGlobalFilter]);
 
+    // commonParams giờ sẽ không chứa page/limit vì chúng được quản lý trong từng component con
+    // hoặc cho API mới, sẽ được truyền riêng.
     const commonParams: CommonDashboardQueryParams = useMemo(() => ({
         startTime: dateRange[0]?.unix() || null,
         endTime: dateRange[1]?.unix() || null,
-        deviceId: selectedDeviceId, // Use selectedDeviceId here
+        deviceId: selectedDeviceId,
         cmd: actualCmdGlobalToSend
     }), [dateRange, selectedDeviceId, actualCmdGlobalToSend]);
 
@@ -1130,20 +1136,15 @@ const Dashboard: React.FC = () => {
         setCmdDescriptionGlobalFilter(value);
     }, []);
 
-    // Handle device search input changes
     const onDeviceSearch = useCallback((searchText: string) => {
         setDeviceSearchInput(searchText);
-        // Do not update selectedDeviceId here directly,
-        // it should only update on selection from AutoComplete dropdown
     }, []);
 
-    // Handle device selection from AutoComplete dropdown
     const onDeviceSelect = useCallback((value: string, option: any) => {
-        setSelectedDeviceId(option.deviceId); // Set the actual device ID
-        setDeviceSearchInput(value); // Keep the displayed text in the input
+        setSelectedDeviceId(option.deviceId);
+        setDeviceSearchInput(value);
     }, []);
 
-    // Handle clearing the device input
     const onDeviceClear = useCallback(() => {
         setSelectedDeviceId(undefined);
         setDeviceSearchInput('');
@@ -1229,7 +1230,8 @@ const Dashboard: React.FC = () => {
                 </Row>
                 <Row gutter={[5, 5]}>
                     <TimeSeriesCard commonParams={commonParams} />
-                    <TopMissedDevicesCard commonParams={commonParams} />
+                    {/* THAY THẾ TopMissedDevicesCard BẰNG FailedCommandStatisticsCard */}
+                    <FailedCommandStatisticsCard commonParams={commonParams} />
                 </Row>
             </div>
         </>
