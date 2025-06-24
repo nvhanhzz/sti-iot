@@ -540,16 +540,11 @@ export const commands: Command[] = [
         "isDeleted": false,
         "iot_cmd_field": [
             {
-                "name": "request",
-                "descriptions": "Trường yêu cầu timestamp.",
+                "name": "timestamp",
+                "descriptions": "Thời gian dữ liệu được gửi.",
                 "unit": null,
                 "isDeleted": false
             },
-            {
-                "name": "message_id",
-                "isDeleted": false,
-                "descriptions": "ID của tin nhắn."
-            }
         ]
     },
     {

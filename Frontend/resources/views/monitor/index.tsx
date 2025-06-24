@@ -3,10 +3,10 @@ import { useSocket } from "../../../context/SocketContext";
 import moment, { Moment } from "moment";
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { DatePicker, message } from 'antd'; // Import message here
+import { DatePicker, message, AutoComplete, Button } from 'antd'; // Import AutoComplete và Button từ antd
 import 'antd/dist/reset.css';
 
-import ClearableInput from './ClearableInput';
+// import ClearableInput from './ClearableInput'; // Không cần ClearableInput nữa
 import "./Monitor.css";
 
 // Import React Icons
@@ -53,14 +53,22 @@ interface TableColumn {
 
 // FilterInputValues sẽ sử dụng deviceName cho input của người dùng
 type FilterInputValues = {
-    deviceName?: string; // Người dùng nhập tên thiết bị
-    cmd?: string;
+    deviceName?: string; // Người dùng nhập tên thiết bị (cho UI)
+    cmd?: string;        // Người dùng nhập tên lệnh (cho UI)
     startTime?: string;
     endTime?: string;
 };
 
+// --- NEW INTERFACE for Device List (similar to Home.tsx) ---
+interface DeviceListItem {
+    id: string;
+    name: string;
+    mac?: string;
+}
+// --- END NEW INTERFACE ---
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3335';
+const API_DASHBOARD_PREFIX = `${API_BASE_URL}/api/dashboard`; // Sử dụng API_DASHBOARD_PREFIX cho các API liên quan đến dashboard
 
 // --- Inline CSS Styles ---
 const styles = {
@@ -93,7 +101,7 @@ const styles = {
         marginBottom: '2px',
         fontSize: '13px',
     } as CSSProperties,
-    filterInput: {
+    filterInput: { // This style will be mostly for Ant Design inputs, some props might override
         padding: '10px 12px',
         border: '1px solid #ddd',
         borderRadius: '3px',
@@ -323,6 +331,82 @@ const styles = {
     } as CSSProperties,
 };
 
+// --- Command Mapping (copied from Home.tsx) ---
+const commandsMapping = [
+    { "name": "CMD_CONNECT", "description": "Kết nối & Trạng thái" },
+    { "name": "CMD_VERSION", "description": "Phiên bản Firmware" },
+    { "name": "CMD_ADC_CHANNEL1", "description": "Giá trị ADC 1" },
+    { "name": "CMD_ADC_CHANNEL2", "description": "Giá trị ADC 2" },
+    { "name": "CMD_PUSH_IO_DI1_STATUS", "description": "Trạng thái DI 1" },
+    { "name": "CMD_PUSH_IO_DI2_STATUS", "description": "Trạng thái DI 2" },
+    { "name": "CMD_PUSH_IO_DI3_STATUS", "description": "Trạng thái DI 3" },
+    { "name": "CMD_PUSH_IO_DI4_STATUS", "description": "Trạng thái DI 4" },
+    { "name": "CMD_OUTPUT_CHANNEL1", "description": "Trạng thái Output 1" },
+    { "name": "CMD_OUTPUT_CHANNEL2", "description": "Trạng thái Output 2" },
+    { "name": "CMD_OUTPUT_CHANNEL3", "description": "Trạng thái Output 3" },
+    { "name": "CMD_OUTPUT_CHANNEL4", "description": "Trạng thái Output 4" },
+    { "name": "CMD_PUSH_MODBUS_RS485", "description": "Dữ liệu Modbus RS485" },
+    { "name": "CMD_PUSH_MODBUS_RS232", "description": "Dữ liệu Modbus RS232" },
+    { "name": "CMD_PUSH_MODBUS_TCP", "description": "Dữ liệu Modbus TCP" },
+    { "name": "CMD_PUSH_SERIAL_RS485", "description": "Dữ liệu Serial RS485" },
+    { "name": "CMD_PUSH_SERIAL_RS232", "description": "Dữ liệu Serial RS232" },
+    { "name": "CMD_PUSH_SERIAL_TCP", "description": "Dữ liệu Serial TCP" },
+    { "name": "CMD_REQUEST_TIMESTAMP", "description": "Yêu cầu Timestamp" },
+    { "name": "CMD_PUSH_TCP", "description": "Dữ liệu TCP" },
+    { "name": "CMD_PUSH_UDP", "description": "Dữ liệu UDP" },
+    { "name": "CMD_PUSH_IO_DI1", "description": "Trạng thái DI 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI2", "description": "Trạng thái DI 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI3", "description": "Trạng thái DI 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI4", "description": "Trạng thái DI 4 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI5", "description": "Trạng thái DI 5 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI6", "description": "Trạng thái DI 6 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI7", "description": "Trạng thái DI 7 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI8", "description": "Trạng thái DI 8 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO1", "description": "Trạng thái DO 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO2", "description": "Trạng thái DO 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO3", "description": "Trạng thái DO 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO4", "description": "Trạng thái DO 4 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO5", "description": "Trạng thái DO 5 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO6", "description": "Trạng thái DO 6 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO7", "description": "Trạng thái DO 7 (I/O)" },
+    { "name": "CMD_PUSH_IO_DO8", "description": "Trạng thái DO 8 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI1", "description": "Dữ liệu AI 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI2", "description": "Dữ liệu AI 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI3", "description": "Dữ liệu AI 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI4", "description": "Dữ liệu AI 4 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI5", "description": "Dữ liệu AI 5 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI6", "description": "Dữ liệu AI 6 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI7", "description": "Dữ liệu AI 7 (I/O)" },
+    { "name": "CMD_PUSH_IO_AI8", "description": "Dữ liệu AI 8 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO1", "description": "Dữ liệu AO 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO2", "description": "Dữ liệu AO 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO3", "description": "Dữ liệu AO 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO4", "description": "Dữ liệu AO 4 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO5", "description": "Dữ liệu AO 5 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO6", "description": "Dữ liệu AO 6 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO7", "description": "Dữ liệu AO 7 (I/O)" },
+    { "name": "CMD_PUSH_IO_AO8", "description": "Dữ liệu AO 8 (I/O)" },
+    { "name": "CMD_PUSH_IO_RS232", "description": "Dữ liệu RS232 (I/O)" },
+    { "name": "CMD_PUSH_IO_RS485", "description": "Dữ liệu RS485 (I/O)" },
+    { "name": "CMD_NOTIFY_TCP", "description": "Trạng thái TCP" },
+    { "name": "CMD_NOTIFY_UDP", "description": "Trạng thái UDP" },
+    { "name": "CMD_PUSH_IO_DI1_PULSE", "description": "Xung DI 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI2_PULSE", "description": "Xung DI 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI3_PULSE", "description": "Xung DI 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI4_PULSE", "description": "Xung DI 4 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI1_BUTTON", "description": "Nút DI 1 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI2_BUTTON", "description": "Nút DI 2 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI3_BUTTON", "description": "Nút DI 3 (I/O)" },
+    { "name": "CMD_PUSH_IO_DI4_BUTTON", "description": "Nút DI 4 (I/O)" },
+    { "name": "CMD_STATUS_WIFI_WEAK", "description": "Lỗi WiFi Yếu" },
+    { "name": "CMD_STATUS_MQTT_LOST", "description": "Lỗi Mất kết nối MQTT" },
+    { "name": "CMD_STATUS_ACK_FAIL", "description": "Lỗi ACK Thất bại" }
+];
+
+const descriptionOptions = commandsMapping.map(cmd => ({ value: cmd.description }));
+// --- End Command Mapping ---
+
+
 const Monitor: React.FC = () => {
     const socket = useSocket();
     const navigate = useNavigate();
@@ -366,9 +450,13 @@ const Monitor: React.FC = () => {
 
     const [selectedColumnKeys, setSelectedColumnKeys] = useState<Set<string>>(new Set());
     const [isColumnPickerOpen, setIsColumnPickerOpen] = useState<boolean>(false);
-    const columnPickerRef = useRef<HTMLDivElement>(null);
+    const columnPickerRef = useRef<HTMLDivElement>(null); // Corrected: HTMLDivElement
 
     const [isPaused, setIsPaused] = useState<boolean>(false);
+
+    // --- State for AutoComplete Options (NEW) ---
+    const [deviceOptions, setDeviceOptions] = useState<{ value: string; label: React.ReactNode; deviceId: string }[]>([]);
+    const [deviceSearchInput, setDeviceSearchInput] = useState<string>(''); // For the AutoComplete's controlled value
 
     // --- Helper Functions ---
     const titleCase = useCallback((str: string): string => {
@@ -379,8 +467,6 @@ const Monitor: React.FC = () => {
     const updateDeviceNameIdMap = useCallback((data: MonitorDataItem[]) => {
         data.forEach(item => {
             if (item.deviceName && item.deviceId) {
-                // For simplicity, we just add/overwrite.
-                // If device names are NOT unique and you need specific behavior, adjust this.
                 if (!deviceNameIdMapRef.current.has(item.deviceName)) {
                     deviceNameIdMapRef.current.set(item.deviceName, item.deviceId);
                 }
@@ -402,6 +488,7 @@ const Monitor: React.FC = () => {
 
         // Sử dụng deviceId đã được resolved cho API backend
         if (currentResolvedDeviceId) params.append('deviceId', currentResolvedDeviceId);
+        // Khi gửi 'cmd' đến API, cần gửi tên CMD (CMD_CONNECT), không phải mô tả ('Kết nối & Trạng thái')
         if (currentAppliedFilters.cmd) params.append('cmd', currentAppliedFilters.cmd);
 
         if (currentAppliedFilters.startTime) {
@@ -426,6 +513,16 @@ const Monitor: React.FC = () => {
 
         return params.toString();
     }, []);
+
+    // --- API Calls (NEW / Adapted from Home.tsx) ---
+    const fetchDeviceListApi = async (): Promise<DeviceListItem[]> => {
+        const url = `${API_DASHBOARD_PREFIX}/devices`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch device list: ${response.statusText}`);
+        }
+        return response.json();
+    };
 
     // --- Column Generation Logic ---
     const generateColumns = useCallback((currentData: MonitorDataItem[]) => {
@@ -491,9 +588,10 @@ const Monitor: React.FC = () => {
                 return new Set(finalColumns.filter(c => c.hideable !== false || c.key === 'stt').map(c => c.key));
             } else {
                 const newSet = new Set<string>();
-                prevKeys.forEach(key => {
+                // Sửa lỗi: Thay revKeys bằng previouslyKnownKeys
+                previouslyKnownKeys.forEach(key => {
                     if (finalColumns.some(col => col.key === key)) {
-                        newSet.add(key);
+                        newSet.add(key); // Changed from col.key to key
                     }
                 });
                 newSet.add('stt'); // Đảm bảo STT luôn được chọn
@@ -695,7 +793,7 @@ const Monitor: React.FC = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const initialFilters: FilterInputValues = {
-            deviceName: params.get('deviceName') || '', // Read deviceName from URL
+            deviceName: params.get('deviceName') || '',
             cmd: params.get('cmd') || '',
             startTime: '',
             endTime: '',
@@ -722,29 +820,21 @@ const Monitor: React.FC = () => {
         const initialSortOrder = (params.get('sortOrder') as 'asc' | 'desc') || 'desc';
 
         setPendingFilters(initialFilters); // Update pending filters for UI
+        setDeviceSearchInput(initialFilters.deviceName || ''); // Set AutoComplete input value
 
-        // For initial load, if deviceName is in URL, try to resolve it to deviceId.
-        // This will rely on the deviceNameIdMapRef being populated when fetchData runs.
-        // It's a "chicken and egg" problem if the deviceName is only available in the fetched data itself.
-        // A robust solution for initial load would involve a dedicated API endpoint
-        // to lookup deviceId by deviceName before the first data fetch.
-        // For this scenario, we'll assume the initial fetchData triggered by the next useEffect
-        // will eventually populate deviceNameIdMapRef, and the filter might not be perfectly applied
-        // on the very first load if the map is empty and the deviceName is not in the first page of data.
-        // However, once some data is loaded, the map will build up.
-
+        // For initial load, try to resolve deviceId based on deviceName from URL
         const initialDeviceName = initialFilters.deviceName;
         if (initialDeviceName) {
-            const resolvedIdFromURL = deviceNameIdMapRef.current.get(initialDeviceName);
-            if (resolvedIdFromURL) {
-                setResolvedDeviceIdToSend(resolvedIdFromURL);
+            const resolvedIdFromMap = deviceNameIdMapRef.current.get(initialDeviceName);
+            if (resolvedIdFromMap) {
+                setResolvedDeviceIdToSend(resolvedIdFromMap);
             } else {
-                console.warn(`Could not resolve device ID for name "${initialDeviceName}" from URL on initial load. The filter might not be fully effective until relevant data is loaded.`);
-                // If it's crucial to apply the filter immediately, you might need a separate API call here
-                // For example: `const id = await fetchDeviceIdByNameAPI(initialDeviceName); setResolvedDeviceIdToSend(id);`
+                // If not in map, might need to fetch device list first, or allow fetchData to resolve later.
+                // For robustness, could consider fetching single device by name here if needed.
+                console.warn(`Could not immediately resolve device ID for name "${initialDeviceName}" from URL.`);
             }
         } else {
-            setResolvedDeviceIdToSend(undefined); // Clear if no deviceName in URL
+            setResolvedDeviceIdToSend(undefined);
         }
 
         setAppliedFilters(initialFilters);
@@ -757,6 +847,40 @@ const Monitor: React.FC = () => {
         setSorter({ field: initialSortBy, order: initialSortOrder });
 
     }, [location.search]);
+
+    // Effect to fetch initial device list for AutoComplete options (NEW)
+    useEffect(() => {
+        const loadDevices = async () => {
+            try {
+                const devices = await fetchDeviceListApi();
+                const options = devices.map(device => ({
+                    value: `${device.name}${device.mac ? ` (${device.mac})` : ''}`, // Display name (MAC)
+                    label: (
+                        <div>
+                            <strong>{device.name}</strong> {device.mac && `(${device.mac})`}
+                            <br />
+                            <small style={{ color: '#666' }}>ID: {device.id}</small>
+                        </div>
+                    ),
+                    deviceId: device.id // Store actual deviceId to send to API
+                }));
+                setDeviceOptions(options);
+
+                // After loading devices, try to resolve the initial deviceName if set from URL
+                if (pendingFilters.deviceName) {
+                    const resolvedIdFromFetch = devices.find(d => d.name === pendingFilters.deviceName || d.mac === pendingFilters.deviceName)?.id;
+                    if (resolvedIdFromFetch) {
+                        setResolvedDeviceIdToSend(resolvedIdFromFetch);
+                    }
+                }
+
+            } catch (err) {
+                console.error("Failed to load device list:", err);
+                message.error("Không thể tải danh sách thiết bị.");
+            }
+        };
+        loadDevices();
+    }, []); // Empty dependency array means this runs once on mount
 
     // Effect to fetch monitoring data when filters, sorter, pagination change
     useEffect(() => {
@@ -801,8 +925,39 @@ const Monitor: React.FC = () => {
     // --- Handlers ---
 
     // Handle change for text inputs (deviceName, cmd)
-    const handleFilterInputChange = useCallback((field: 'deviceName' | 'cmd', value: string) => {
-        setPendingFilters(prev => ({ ...prev, [field]: value }));
+    // For AutoComplete, onChange is called with the value in the input box.
+    // onSelect is called when an option is chosen.
+    const handleDeviceSearch = useCallback((value: string) => {
+        setDeviceSearchInput(value); // Update the controlled input
+        setPendingFilters(prev => ({ ...prev, deviceName: value })); // Update pending filter value
+    }, []);
+
+    const handleDeviceSelect = useCallback((value: string) => {
+        setDeviceSearchInput(value); // Set selected value to input
+        setPendingFilters(prev => ({ ...prev, deviceName: value })); // Update pending filter
+        // setResolvedDeviceIdToSend(option.deviceId); // Set the actual ID for API calls
+    }, []);
+
+    const handleDeviceClear = useCallback(() => {
+        setDeviceSearchInput('');
+        setPendingFilters(prev => ({ ...prev, deviceName: '' }));
+        setResolvedDeviceIdToSend(undefined);
+    }, []);
+
+    const handleCmdSearch = useCallback((value: string) => {
+        // Find the actual command name from its description for pendingFilters
+        const foundCmdName = commandsMapping.find(cmd => cmd.description.toLowerCase() === value.toLowerCase())?.name || value;
+        setPendingFilters(prev => ({ ...prev, cmd: foundCmdName }));
+    }, []);
+
+    const handleCmdSelect = useCallback((value: string) => {
+        // On select, the value is the description, find the command name
+        const foundCmdName = commandsMapping.find(cmd => cmd.description.toLowerCase() === value.toLowerCase())?.name || value;
+        setPendingFilters(prev => ({ ...prev, cmd: foundCmdName }));
+    }, []);
+
+    const handleCmdClear = useCallback(() => {
+        setPendingFilters(prev => ({ ...prev, cmd: '' }));
     }, []);
 
     // Handle change for DatePicker inputs (startTime, endTime)
@@ -819,10 +974,29 @@ const Monitor: React.FC = () => {
 
         let resolvedId: string | undefined = undefined;
         if (newAppliedFilters.deviceName) {
-            // Try to get deviceId from the map
+            // Try to get deviceId from the deviceNameIdMapRef (from loaded data/socket events)
             resolvedId = deviceNameIdMapRef.current.get(newAppliedFilters.deviceName);
+
+            // If not found in map, try to find in current deviceOptions by matching its 'value' (display string)
+            // dOption.value typically includes both name and MAC, e.g., "Device A (AA:BB:CC)"
+            if (!resolvedId && deviceOptions.length > 0) {
+                const inputNameLower = newAppliedFilters.deviceName?.toLowerCase();
+                // Check if the inputNameLower is explicitly the deviceName or mac for stricter matching
+                const foundOption = deviceOptions.find(dOption =>
+                        inputNameLower && (dOption.value.toLowerCase() === inputNameLower ||
+                            (dOption.label as any)?.props?.children?.some((child: any) =>
+                                typeof child === 'string' && child.toLowerCase().includes(inputNameLower)
+                            ) ||
+                            dOption.deviceId.toLowerCase().includes(inputNameLower)
+                        )
+                );
+                if (foundOption) {
+                    resolvedId = foundOption.deviceId;
+                }
+            }
+
             if (!resolvedId) {
-                message.warning(`"${newAppliedFilters.deviceName}" là tên thiết bị không hợp lệ`);
+                message.warning(`"${newAppliedFilters.deviceName}" là tên hoặc MAC thiết bị không hợp lệ.`);
                 setLoading(false);
                 return;
             }
@@ -843,12 +1017,13 @@ const Monitor: React.FC = () => {
         navigate(`?${newParams}`);
         // fetchData will be called by useEffect after resolvedDeviceIdToSend and appliedFilters update
         setLoading(false);
-    }, [pendingFilters, entriesPerPage, sorter.field, sorter.order, buildUrlParams, navigate]);
+    }, [pendingFilters, entriesPerPage, sorter.field, sorter.order, buildUrlParams, navigate, deviceOptions]); // Added deviceOptions to dependencies
 
     const handleClearFilters = useCallback(() => {
         setPendingFilters({});
         setAppliedFilters({});
         setResolvedDeviceIdToSend(undefined); // Clear resolved ID
+        setDeviceSearchInput(''); // Clear device search input
         setPagination(prev => ({ ...prev, currentPage: 1 }));
 
         const newParams = buildUrlParams(
@@ -1028,27 +1203,52 @@ const Monitor: React.FC = () => {
             <div style={styles.filterPanel}>
                 <div style={styles.filterGroup}>
                     <label style={styles.filterLabel} htmlFor="filterDeviceName">Tên thiết bị</label>
-                    <ClearableInput
-                        id="filterDeviceName"
-                        type="text"
-                        inputStyle={styles.filterInput}
-                        value={pendingFilters.deviceName || ''}
-                        onChange={(e) => handleFilterInputChange('deviceName', e.target.value)}
-                        onClear={() => handleFilterInputChange('deviceName', '')}
-                        placeholder="Nhập tên thiết bị"
+                    <AutoComplete
+                        options={deviceOptions}
+                        style={{ width: '250px', borderRadius: 0 }} // Adjusted width to match other inputs
+                        onSearch={handleDeviceSearch}
+                        onSelect={handleDeviceSelect}
+                        // onChange is important for clearing or typing non-suggested text
+                        onChange={handleDeviceSearch}
+                        value={deviceSearchInput}
+                        placeholder="Tìm theo tên hoặc MAC"
+                        allowClear
+                        size="large"
+                        filterOption={(inputValue, option) => {
+                            // option here is of type { value: string; label: React.ReactNode; deviceId: string }
+                            // @ts-ignore
+                            const optionText = String(option.value || '').toLowerCase(); // This holds "Device Name (MAC)"
+                            const input = inputValue.toLowerCase();
+                            return optionText.includes(input);
+                        }}
+                        onClear={handleDeviceClear}
                         disabled={loading}
                     />
                 </div>
                 <div style={styles.filterGroup}>
                     <label style={styles.filterLabel} htmlFor="filterCmd">Lệnh</label>
-                    <ClearableInput
-                        id="filterCmd"
-                        type="text"
-                        inputStyle={styles.filterInput}
-                        value={pendingFilters.cmd || ''}
-                        onChange={(e) => handleFilterInputChange('cmd', e.target.value)}
-                        onClear={() => handleFilterInputChange('cmd', '')}
-                        placeholder="Nhập lệnh"
+                    <AutoComplete
+                        options={descriptionOptions}
+                        style={{ width: '250px', borderRadius: 0 }} // Adjusted width
+                        onSearch={handleCmdSearch}
+                        onSelect={handleCmdSelect}
+                        // For controlled component, onChange should update the state
+                        onChange={(value) => {
+                            // When typing, value is the description string.
+                            // We store the command name (CMD_xxx) in pendingFilters.cmd.
+                            const foundCmdName = commandsMapping.find(cmd => cmd.description.toLowerCase() === value.toLowerCase())?.name || value;
+                            setPendingFilters(prev => ({ ...prev, cmd: foundCmdName }));
+                        }}
+                        // Display the description in the input, but store cmd.name in state
+                        value={pendingFilters.cmd ? (commandsMapping.find(c => c.name === pendingFilters.cmd)?.description || pendingFilters.cmd) : ''}
+                        placeholder="VD: Kết nối & Trạng thái"
+                        allowClear
+                        size="large"
+                        filterOption={(inputValue, option) =>
+                            // option here is of type { value: string; label: string }
+                            String(option?.value || '').toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 // Fixed option potentially undefined
+                        }
+                        onClear={handleCmdClear}
                         disabled={loading}
                     />
                 </div>
@@ -1061,7 +1261,7 @@ const Monitor: React.FC = () => {
                             showTime={{ format: 'HH:mm:ss' }}
                             format="DD-MM-YYYY HH:mm:ss"
                             allowClear
-                            style={{ ...styles.filterInput, width: '250px' }}
+                            style={{ ...styles.filterInput, width: '250px', height: '40px' }} // Adjusted width
                             placeholder="Thời gian bắt đầu"
                             disabled={loading}
                         />
@@ -1071,46 +1271,50 @@ const Monitor: React.FC = () => {
                             showTime={{ format: 'HH:mm:ss' }}
                             format="DD-MM-YYYY HH:mm:ss"
                             allowClear
-                            style={{ ...styles.filterInput, width: '250px' }}
+                            style={{ ...styles.filterInput, width: '250px', height: '40px' }} // Adjusted width
                             placeholder="Thời gian kết thúc"
                             disabled={loading}
                         />
                     </div>
                 </div>
                 <div style={styles.filterActions}>
-                    <button
-                        style={{ ...styles.button, ...styles.primaryButton }}
+                    <Button
+                        type="primary"
                         onClick={handleApplyFilters}
                         disabled={loading}
                         data-tooltip-id="global-tooltip"
                         data-tooltip-content="Áp dụng các bộ lọc đã chọn"
+                        icon={<FaFilter />}
+                        size="large" // Make it match other inputs
                     >
-                        <FaFilter /> Áp dụng Bộ lọc
-                    </button>
-                    <button
-                        style={styles.button}
+                        Áp dụng Bộ lọc
+                    </Button>
+                    <Button
                         onClick={handleClearFilters}
                         disabled={loading}
                         data-tooltip-id="global-tooltip"
                         data-tooltip-content="Xóa tất cả bộ lọc"
+                        icon={<FaTimes />}
+                        size="large" // Make it match other inputs
                     >
-                        <FaTimes /> Xóa Bộ lọc
-                    </button>
+                        Xóa Bộ lọc
+                    </Button>
                 </div>
             </div>
 
             {/* Header Section (Pause/Play, Entries per page, Column Picker) */}
             <div style={styles.headerSection}>
                 <div style={styles.controlButtonsContainer}>
-                    <button
-                        style={{ ...styles.button, ...(isPaused ? styles.primaryButton : {}) }}
+                    <Button
+                        type={isPaused ? 'primary' : 'default'}
                         onClick={togglePause}
                         data-tooltip-id="global-tooltip"
                         data-tooltip-content={isPaused ? "Tiếp tục nhận dữ liệu" : "Tạm dừng nhận dữ liệu"}
+                        icon={isPaused ? <FaPlay /> : <FaPause />}
+                        size="large"
                     >
-                        {isPaused ? <FaPlay /> : <FaPause />}
                         {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
-                    </button>
+                    </Button>
                 </div>
 
                 <div style={styles.entriesDropdown}>
@@ -1149,15 +1353,16 @@ const Monitor: React.FC = () => {
                 </div>
 
                 <div style={styles.columnPickerContainer} ref={columnPickerRef}>
-                    <button
-                        style={{ ...styles.button }}
+                    <Button
                         onClick={() => setIsColumnPickerOpen(prev => !prev)}
                         disabled={loading}
                         data-tooltip-id="global-tooltip"
                         data-tooltip-content="Chọn các cột để hiển thị/ẩn"
+                        icon={<FaColumns />}
+                        size="large"
                     >
-                        <FaColumns /> Chọn cột hiển thị
-                    </button>
+                        Chọn cột hiển thị
+                    </Button>
                     {isColumnPickerOpen && (
                         <div style={styles.columnPickerDropdown}>
                             {tableColumns

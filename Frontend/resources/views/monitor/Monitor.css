@@ -39,3 +39,11 @@ input:-ms-input-placeholder {
     color: #a0a0a0;
     opacity: 1;
 }
+
+.ant-select-selector {
+    border-radius: 0 !important;
+}
+
+button {
+    border-radius: 0 !important;
+}
