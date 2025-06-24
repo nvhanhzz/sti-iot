@@ -161,7 +161,8 @@ export const getDeviceList = async (req: Request, res: Response) => {
         const allIots: MasterIotInterface[] = MasterIotGlobal.getAll(); // Lấy tất cả thiết bị từ MasterIotGlobal
 
         if (!allIots || !Array.isArray(allIots)) {
-            return res.status(200).json([]); // Trả về mảng rỗng nếu không có thiết bị
+            res.status(200).json([]); // Trả về mảng rỗng nếu không có thiết bị
+            return;
         }
 
         // Map dữ liệu để trả về chỉ id, name và mac (nếu có)
@@ -238,7 +239,8 @@ export const getPacketCountsOverTime = async (req: Request<{}, {}, {}, PacketCou
 
         const validIntervals = ['hourly', 'daily', 'weekly'];
         if (!validIntervals.includes(interval)) {
-            return res.status(400).send({ message: `Tham số 'interval' không hợp lệ. Phải là một trong: ${validIntervals.join(', ')}.` });
+            res.status(400).send({ message: `Tham số 'interval' không hợp lệ. Phải là một trong: ${validIntervals.join(', ')}.` });
+            return;
         }
 
         let groupFormat: string;
@@ -353,7 +355,8 @@ export const getTopMissedDevices = async (req: Request<{}, {}, {}, TopMissedDevi
         const { topLimit = '5' } = req.query;
         const limitNumber = parseInt(topLimit);
         if (isNaN(limitNumber) || limitNumber < 1) {
-            return res.status(400).send({ message: "Tham số 'topLimit' không hợp lệ. Phải là số dương." });
+            res.status(400).send({ message: "Tham số 'topLimit' không hợp lệ. Phải là số dương." });
+            return;
         }
 
         const matchQuery = prepareMatchQuery(req.query);
@@ -457,136 +460,5 @@ export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, Dashboar
     } catch (error: any) {
         logger.error("Error in getPacketCountsByCommand:", error.message);
         res.status(400).json({ message: error.message || "Failed to get packet counts by command." });
-    }
-};
-
-// 5. Controller cho thống kê kết nối thiết bị (Không thay đổi, vẫn trả về giây)
-export const getDeviceConnectivity = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
-    try {
-        const matchQuery = prepareMatchQuery(req.query);
-        const deviceMap = getDeviceMapping();
-
-        const pipeline: PipelineStage[] = [
-            { $match: matchQuery },
-            {
-                $group: {
-                    _id: "$deviceId",
-                    lastConnectedTimestamp: { $max: "$timestamp" }, // lastConnectedTimestamp ở đây là giây từ DB
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    deviceId: "$_id",
-                    lastConnectedTimestamp: 1, // Đây là giây
-                }
-            }
-        ];
-
-        const results = await IotStatistic.aggregate(pipeline);
-
-        const deviceConnectivityData: DeviceConnectivityData[] = results.map(item => {
-            const deviceInfo = deviceMap.get(item.deviceId);
-            return {
-                deviceId: item.deviceId,
-                deviceName: deviceInfo?.deviceName || 'Unknown Device',
-                mac: deviceInfo?.mac || 'Unknown MAC',
-                isOnline: true,
-                lastConnected: item.lastConnectedTimestamp, // lastConnectedTimestamp đã là giây, TRẢ VỀ TRỰC TIẾP
-                disconnectCount: 0,
-                averageLatencyMs: undefined
-            };
-        });
-
-        const activeDeviceIds = new Set(results.map(d => d.deviceId));
-        deviceMap.forEach((info, id) => {
-            if (!activeDeviceIds.has(id)) {
-                deviceConnectivityData.push({
-                    deviceId: id,
-                    deviceName: info.deviceName,
-                    mac: info.mac,
-                    isOnline: false,
-                    lastConnected: 0, // hoặc một timestamp last_seen từ MasterIotGlobal (cũng là giây)
-                    disconnectCount: 0,
-                    averageLatencyMs: undefined
-                });
-            }
-        });
-
-        const sortedData = deviceConnectivityData.sort((a, b) => (a.isOnline === b.isOnline) ? 0 : a.isOnline ? -1 : 1);
-        res.status(200).json(sortedData);
-
-    } catch (err: any) {
-        logger.error("Error in getDeviceConnectivity:", err.message);
-        res.status(400).json({ message: err.message || "Failed to get device connectivity." });
-    }
-};
-
-// 6. Controller cho hiệu suất theo giờ (Đã sửa đổi logic parsing date và lỗi typo)
-export const getHourlyPerformanceMetrics = async (req: Request<{}, {}, {}, HourlyPerformanceMetricQuery>, res: Response) => {
-    try {
-        const matchQuery = prepareMatchQuery(req.query);
-
-        if (!matchQuery.deviceId) {
-            return res.status(400).json({ message: "Vui lòng cung cấp 'deviceId' để xem hiệu suất theo giờ." });
-        }
-
-        const pipeline: PipelineStage[] = [
-            { $match: matchQuery },
-            {
-                $group: {
-                    _id: {
-                        deviceId: "$deviceId",
-                        // $timestamp trong DB là giây, NHÂN 1000 để $toDate xử lý thành mili giây
-                        date: { $toDate: { $multiply: ["$timestamp", 1000] } },
-                        timezone: "Asia/Ho_Chi_Minh" // Đảm bảo output của MongoDB theo +07:00
-                    },
-                    avgCpu: { $avg: "$cpuUsage" },
-                    avgRam: { $avg: "$ramUsage" },
-                    avgBattery: { $avg: "$batteryLevel" }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    deviceId: "$_id.deviceId",
-                    timeBucketString: "$_id.date", // Lấy chuỗi định dạng từ group
-                    avgCpuUsagePercentage: "$avgCpu",
-                    avgRamUsageMB: "$avgRam",
-                    avgBatteryLevelPercentage: "$avgBattery"
-                }
-            },
-            { $sort: { "timeBucketString": 1, "deviceId": 1 } }
-        ];
-
-        const rawResults = await IotStatistic.aggregate(pipeline);
-        const mappedResults = rawResults.map(item => {
-            const parsedDate = dayjs.tz(item.timeBucketString, "YYYY-MM-DD HH", "Asia/Ho_Chi_Minh"); // Parse as +07:00
-
-            if (!parsedDate.isValid()) {
-                logger.error(`Failed to parse hourly date string "${item.timeBucketString}"`);
-                return {
-                    timeBucket: null,
-                    deviceId: item.deviceId,
-                    avgCpuUsagePercentage: undefined,
-                    avgRamUsageMB: undefined,
-                    avgBatteryLevelPercentage: undefined,
-                };
-            }
-
-            return {
-                timeBucket: parsedDate.unix(), // Trả về giây
-                deviceId: item.deviceId,
-                avgCpuUsagePercentage: item.avgCpuUsagePercentage !== undefined && item.avgCpuUsagePercentage !== null ? parseFloat(item.avgCpuUsagePercentage.toFixed(2)) : undefined,
-                avgRamUsageMB: item.avgRamUsageMB !== undefined && item.avgRamUsageMB !== null ? parseFloat(item.avgRamUsageMB.toFixed(2)) : undefined,
-                avgBatteryLevelPercentage: item.avgBatteryLevelPercentage !== undefined && item.avgBatteryLevelPercentage !== null ? parseFloat(item.avgBatteryLevelPercentage.toFixed(2)) : undefined,
-            };
-        });
-
-        res.status(200).json(mappedResults);
-
-    } catch (err: any) {
-        logger.error("Error in getHourlyPerformanceMetrics:", err.message);
-        res.status(400).json({ message: err.message || "Failed to get hourly performance metrics." });
     }
 };

@@ -115,7 +115,7 @@ export const commands: Command[] = [
         ]
     },
     {
-        "name": "CMD_INPUT_CHANNEL1",
+        "name": "CMD_PUSH_IO_DI1_STATUS",
         "hex_symbols": "6",
         "descriptions": "Gửi trạng thái của Digital Input 1 kèm theo thời gian.",
         "type": 1,
@@ -141,7 +141,7 @@ export const commands: Command[] = [
         ]
     },
     {
-        "name": "CMD_INPUT_CHANNEL2",
+        "name": "CMD_PUSH_IO_DI2_STATUS",
         "hex_symbols": "7",
         "descriptions": "Gửi trạng thái của Digital Input 2 kèm theo thời gian.",
         "type": 1,
@@ -167,7 +167,7 @@ export const commands: Command[] = [
         ]
     },
     {
-        "name": "CMD_INPUT_CHANNEL3",
+        "name": "CMD_PUSH_IO_DI3_STATUS",
         "hex_symbols": "8",
         "descriptions": "Gửi trạng thái của Digital Input 3 kèm theo thời gian.",
         "type": 1,
@@ -193,7 +193,7 @@ export const commands: Command[] = [
         ]
     },
     {
-        "name": "CMD_INPUT_CHANNEL4",
+        "name": "CMD_PUSH_IO_DI4_STATUS",
         "hex_symbols": "9",
         "descriptions": "Gửi trạng thái của Digital Input 4 kèm theo thời gian.",
         "type": 1,
@@ -2465,7 +2465,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI1_PULSE",
         "hex_symbols": "68",
         "descriptions": "Gửi dữ liệu xung (pulse) từ Digital Input 1 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2486,7 +2486,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI2_PULSE",
         "hex_symbols": "69",
         "descriptions": "Gửi dữ liệu xung (pulse) từ Digital Input 2 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2507,7 +2507,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI3_PULSE",
         "hex_symbols": "70",
         "descriptions": "Gửi dữ liệu xung (pulse) từ Digital Input 3 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2528,7 +2528,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI4_PULSE",
         "hex_symbols": "71",
         "descriptions": "Gửi dữ liệu xung (pulse) từ Digital Input 4 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2549,7 +2549,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI1_BUTTON",
         "hex_symbols": "72",
         "descriptions": "Gửi tín hiệu nhấn nút từ Digital Input 1 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2564,7 +2564,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI2_BUTTON",
         "hex_symbols": "73",
         "descriptions": "Gửi tín hiệu nhấn nút từ Digital Input 2 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2579,7 +2579,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI3_BUTTON",
         "hex_symbols": "74",
         "descriptions": "Gửi tín hiệu nhấn nút từ Digital Input 3 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {
@@ -2594,7 +2594,7 @@ export const commands: Command[] = [
         "name": "CMD_PUSH_IO_DI4_BUTTON",
         "hex_symbols": "75",
         "descriptions": "Gửi tín hiệu nhấn nút từ Digital Input 4 của thiết bị I/O kèm theo thời gian.",
-        "type": null,
+        "type": 1,
         "isDeleted": false,
         "iot_cmd_field": [
             {

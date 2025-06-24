@@ -6,7 +6,7 @@ const { Title, Text } = Typography;
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Chỉ giữ lại các HEX_COMMANDS được sử dụng
+// Giữ nguyên các HEX_COMMANDS ban đầu cho luồng điều khiển (output flow)
 const HEX_COMMANDS = {
     tcp: { on: '15 01 00 00 93', off: '16 01 00 00 A9' },
     udp: { on: '17 01 00 00 BF', off: '18 01 00 00 6D' },
@@ -16,8 +16,32 @@ const HEX_COMMANDS = {
     input4_control: { on: '06 01 07 01 A2', off: '06 01 07 00 A5' },
 } as const;
 
+// Các CMD báo cáo trạng thái mới từ thiết bị (input flow)
+const INPUT_STATUS_REPORT_CMDS = {
+    CMD_INPUT_CHANNEL1: {
+        status: 'CMD_PUSH_IO_DI1_STATUS',   // Digital Input 1 - Status mode
+        pulse: 'CMD_PUSH_IO_DI1_PULSE',    // Digital Input 1 - Pulse mode (Hz)
+        button: 'CMD_PUSH_IO_DI1_BUTTON',   // Digital Input 1 - Button mode
+    },
+    CMD_INPUT_CHANNEL2: {
+        status: 'CMD_PUSH_IO_DI2_STATUS',
+        pulse: 'CMD_PUSH_IO_DI2_PULSE',
+        button: 'CMD_PUSH_IO_DI2_BUTTON',
+    },
+    CMD_INPUT_CHANNEL3: {
+        status: 'CMD_PUSH_IO_DI3_STATUS',
+        pulse: 'CMD_PUSH_IO_DI3_PULSE',
+        button: 'CMD_PUSH_IO_DI3_BUTTON',
+    },
+    CMD_INPUT_CHANNEL4: {
+        status: 'CMD_PUSH_IO_DI4_STATUS',
+        pulse: 'CMD_PUSH_IO_DI4_PULSE',
+        button: 'CMD_PUSH_IO_DI4_BUTTON',
+    },
+};
+
 interface ConfigIotsProps {
-    dataIotsDetail: any; // dataIotsDetail bây giờ chứa deviceId
+    dataIotsDetail: any; // dataIotsDetail bây giờ chứa deviceId và mảng CMD trạng thái
     deviceMac: string; // Vẫn truyền deviceMac để nhất quán
     onControlSuccess: () => void;
     isConnected: boolean;
@@ -32,21 +56,49 @@ const titleButton: { [key: string]: string } = {
     "CMD_NOTIFY_UDP": "UDP"
 };
 
+// Cập nhật defaultButtons để bao gồm thông tin về các CMD báo cáo trạng thái
 const defaultButtons = [
-    { CMD: "CMD_INPUT_CHANNEL1", dataName: "CMD_INPUT_CHANNEL1", data: false, hexType: "input1_control" as keyof typeof HEX_COMMANDS },
-    { CMD: "CMD_INPUT_CHANNEL2", dataName: "CMD_INPUT_CHANNEL2", data: false, hexType: "input2_control" as keyof typeof HEX_COMMANDS },
-    { CMD: "CMD_INPUT_CHANNEL3", dataName: "CMD_INPUT_CHANNEL3", data: false, hexType: "input3_control" as keyof typeof HEX_COMMANDS },
-    { CMD: "CMD_INPUT_CHANNEL4", dataName: "CMD_INPUT_CHANNEL4", data: false, hexType: "input4_control" as keyof typeof HEX_COMMANDS },
+    {
+        CMD: "CMD_INPUT_CHANNEL1",
+        dataName: "CMD_INPUT_CHANNEL1",
+        data: false, // Trạng thái tổng thể ON/OFF, sẽ được cập nhật từ dataIotsDetail
+        hexType: "input1_control" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL1, // Ánh xạ tới các CMD báo cáo
+        currentActiveModeLabel: '' // Nhãn của chế độ đang hoạt động (ví dụ: "Status Mode")
+    },
+    {
+        CMD: "CMD_INPUT_CHANNEL2",
+        dataName: "CMD_INPUT_CHANNEL2",
+        data: false,
+        hexType: "input2_control" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL2,
+        currentActiveModeLabel: ''
+    },
+    {
+        CMD: "CMD_INPUT_CHANNEL3",
+        dataName: "CMD_INPUT_CHANNEL3",
+        data: false,
+        hexType: "input3_control" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL3,
+        currentActiveModeLabel: ''
+    },
+    {
+        CMD: "CMD_INPUT_CHANNEL4",
+        dataName: "CMD_INPUT_CHANNEL4",
+        data: false,
+        hexType: "input4_control" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL4,
+        currentActiveModeLabel: ''
+    },
     { CMD: "CMD_NOTIFY_TCP", dataName: "CMD_NOTIFY_TCP", data: false, hexType: "tcp" as keyof typeof HEX_COMMANDS },
     { CMD: "CMD_NOTIFY_UDP", dataName: "CMD_NOTIFY_UDP", data: false, hexType: "udp" as keyof typeof HEX_COMMANDS }
 ];
 
-// Định nghĩa kiểu dữ liệu cho một entry thống kê (không có deviceId)
+// Định nghĩa kiểu dữ liệu cho một entry thống kê
 interface CmdStats {
     missed: number;
     realTime: number;
 }
-// Đây là kiểu dữ liệu cho state cmdStatistics của component (chỉ chứa stats của device hiện tại)
 type StatisticsData = { [cmd: string]: CmdStats };
 
 /**
@@ -62,11 +114,10 @@ const formatCount = (num: number): string => {
     return num.toString();
 };
 
-
 const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onControlSuccess, isConnected }) => {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
-    const [cmdStatistics, setCmdStatistics] = useState<StatisticsData>({}); // State sẽ lưu stats cho deviceMac hiện tại
+    const [cmdStatistics, setCmdStatistics] = useState<StatisticsData>({});
     const socket = useSocket();
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
@@ -98,6 +149,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             message.warning("Thiết bị không kết nối.");
             return;
         }
+        // Luồng điều khiển (output flow) giữ nguyên: dựa vào item.data để gửi 'on'/'off'
         const currentStatus = item.data;
         const newStatus = !currentStatus;
         const hexCommandKey = newStatus ? 'on' : 'off';
@@ -116,20 +168,62 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         try {
             setLoading(prev => ({ ...prev, [loadingKey]: true }));
             await sendDeviceCommand(deviceMac, hexCommand);
+            // Optimistic update: Cập nhật trạng thái UI ngay lập tức
+            setData(prevData =>
+                prevData.map(d =>
+                    d.CMD === item.CMD
+                        ? { ...d, data: newStatus, currentActiveModeLabel: newStatus ? item.currentActiveModeLabel : '' }
+                        : d
+                )
+            );
         } catch (error) {
             // Error handled in sendDeviceCommand
+            // Nếu có lỗi, bạn có thể cần rollback trạng thái UI ở đây
         } finally {
             setLoading(prev => ({ ...prev, [loadingKey]: false }));
         }
     }, [sendDeviceCommand, deviceMac, isConnected]);
 
+    // Luồng xử lý trạng thái đầu vào (input flow) đã được thay đổi
     useEffect(() => {
-        let processedData = [...defaultButtons];
+        let processedData = defaultButtons.map(btn => ({ ...btn })); // Tạo bản sao sâu
+
         if (dataIotsDetail.data && Array.isArray(dataIotsDetail.data)) {
-            const relevantCMDs = defaultButtons.map(btn => btn.CMD);
             processedData = processedData.map(defaultItem => {
+                // Đối với các nút Input có nhiều CMD báo cáo trạng thái
+                if (defaultItem.statusReportCMDs) {
+                    let isActive = false;
+                    let activeModeLabel = '';
+
+                    // Duyệt qua từng CMD báo cáo trạng thái khả thi của nút này
+                    for (const modeKey in defaultItem.statusReportCMDs) {
+                        // @ts-ignore: Bỏ qua lỗi TypeScript vì chúng ta biết modeKey là một khóa hợp lệ
+                        const reportCmd = defaultItem.statusReportCMDs[modeKey];
+                        const deviceDataEntry = dataIotsDetail.data.find((item: any) => item.CMD === reportCmd);
+
+                        if (deviceDataEntry && Boolean(deviceDataEntry.data)) {
+                            isActive = true; // Nút này được coi là "ON"
+                            // Xác định nhãn của chế độ đang hoạt động
+                            switch (modeKey) {
+                                case 'status': activeModeLabel = 'Status Mode'; break;
+                                case 'pulse': activeModeLabel = 'Pulse Mode'; break;
+                                case 'button': activeModeLabel = 'Button Mode'; break;
+                                default: activeModeLabel = 'Unknown Mode';
+                            }
+                            break; // Đã tìm thấy chế độ đang hoạt động, thoát vòng lặp
+                        }
+                    }
+
+                    return {
+                        ...defaultItem,
+                        data: isActive, // Cập nhật trạng thái ON/OFF tổng thể của nút
+                        currentActiveModeLabel: isActive ? activeModeLabel : '', // Lưu nhãn chế độ đang hoạt động
+                    };
+                }
+                // Đối với các nút TCP/UDP (giữ nguyên cách xử lý ban đầu)
                 const deviceData = dataIotsDetail.data.find((item: any) =>
-                    relevantCMDs.includes(item.CMD) && item.CMD === defaultItem.CMD
+                    // Đảm bảo chỉ kiểm tra các CMD liên quan đến defaultButtons
+                    (defaultButtons.some(btn => btn.CMD === item.CMD)) && item.CMD === defaultItem.CMD
                 );
                 if (deviceData) {
                     return {
@@ -141,7 +235,7 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             });
         }
         setData(processedData);
-    }, [dataIotsDetail]);
+    }, [dataIotsDetail]); // Phụ thuộc vào dataIotsDetail để cập nhật trạng thái
 
     // --- Hàm để tải thống kê ban đầu từ API Backend ---
     const fetchInitialStatistics = useCallback(async (id: string) => {
@@ -153,7 +247,6 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             }
             const data: { deviceId: string } & { [cmd: string]: CmdStats } = await response.json();
             const { deviceId: _, ...cmdLevelStats } = data;
-            // Cập nhật state một cách an toàn
             setCmdStatistics(cmdLevelStats);
             console.log(`Initial statistics loaded for device ${id}:`, cmdLevelStats);
         } catch (error) {
@@ -166,30 +259,28 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         if (dataIotsDetail.id) {
             fetchInitialStatistics(dataIotsDetail.id);
         }
-    }, [dataIotsDetail.id, fetchInitialStatistics]); // Đã sửa dependency: chỉ cần dataIotsDetail.id
+    }, [dataIotsDetail.id, fetchInitialStatistics]);
 
     // Socket listener cho cập nhật thống kê thời gian thực
     const handleSocketEventStatistics = useCallback((eventData: Record<string, Record<string, CmdStats>>) => {
+        // @ts-ignore
         if (dataIotsDetail.id === eventData.deviceId) {
             // @ts-ignore
             setCmdStatistics(eventData);
         }
-    }, [deviceMac]);
+    }, [dataIotsDetail.id]); // Đã sửa dependency: chỉ cần dataIotsDetail.id
 
     useEffect(() => {
         if (socket) {
-            // console.log("Registering socket listener for server_emit_statistics");
             socket.on("server_emit_statistics", handleSocketEventStatistics);
         }
 
         return () => {
             if (socket) {
-                // console.log("Cleaning up socket listener: server_emit_statistics");
                 socket.off("server_emit_statistics", handleSocketEventStatistics);
             }
         };
-    }, [socket, handleSocketEventStatistics]); // Dependencies vẫn như cũ
-
+    }, [socket, handleSocketEventStatistics]);
 
     return (
         <Flex
@@ -200,14 +291,13 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             style={{ padding: '8px', height: 'auto', maxHeight: '450px', overflowY: 'auto' }}
         >
             {data.map((item: any) => {
-                const isOn = item.data;
+                const isOn = item.data; // item.data bây giờ là trạng thái ON/OFF tổng thể
                 const loadingKeyOn = `${item.hexType}-on`;
                 const loadingKeyOff = `${item.hexType}-off`;
                 const isCurrentlyLoading = loading[loadingKeyOn] || loading[loadingKeyOff];
 
-                // Lấy số liệu thống kê cho CMD hiện tại từ state của component
+                // Lấy số liệu thống kê cho CMD chính hiện tại từ state của component
                 const currentCmdStats = cmdStatistics[item.CMD] || { missed: 0, realTime: 0 };
-
 
                 return (
                     <Card
@@ -235,6 +325,12 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                             <Title level={5} style={{ marginBottom: '6px', fontSize: '13px', color: '#334155', lineHeight: '1.2' }}>
                                 {titleButton[item.dataName] || item.dataName}
                             </Title>
+                            {/* Hiển thị nhãn của chế độ đang hoạt động nếu nút Input đang ON */}
+                            {item.statusReportCMDs && isOn && item.currentActiveModeLabel && (
+                                <Text type="secondary" style={{ fontSize: '10px', display: 'block', color: '#60a5fa' }}>
+                                    {item.currentActiveModeLabel}
+                                </Text>
+                            )}
                             <Divider style={{ margin: '6px 0' }} />
                         </div>
                         <Flex justify="center" align="center" style={{ flexGrow: 1 }}>
