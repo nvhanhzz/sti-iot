@@ -45,6 +45,7 @@ export const ConvertHextoData = (hexStr: string, dataType: string | undefined) =
     let buffer = new ArrayBuffer(8);
     let view = new DataView(buffer);
 
+    // @ts-ignore
     switch (dataType.toLowerCase()) {
         case "uint8":
             // 1 byte = 2 ký tự hex

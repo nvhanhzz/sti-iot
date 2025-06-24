@@ -1,96 +1,10 @@
 import { iotsLogger } from "../config/logger/iots.logger";
-import { getDataIotCmdGlobal } from "../global/Iot_cmd.global";
-import { getPayloadTypeGlobal } from "../global/payload_type.global";
 import { ConvertHextoData, ConvertDatatoHex } from "../global/convertData.global";
 import { MasterPayloadGlobal, MasterIotCMDGlobal } from "../global";
-import {CMDFieldInterface, MasterIotCMDInterface, MasterPayloadInterface} from "../interface";
-//
-// export const ConvertDataHextoJson = async (buffer: Buffer) => {
-//     console.log("convert")
-//     try {
-//         iotsLogger.info(buffer);
-//         if (!Buffer.isBuffer(buffer)) {
-//             iotsLogger.info("Input is not a Buffer!");
-//             return null;
-//         }
-//         const IotCmdGlobal = await MasterIotCMDGlobal.getAll();
-//         const PayloadType = await MasterPayloadGlobal.getAll();
-//         const cmdCode = buffer[0];
-//         const cmdIndex = IotCmdGlobal.findIndex((item: any) => item.hex_symbols == String(cmdCode));
-//         const cmdPaket = IotCmdGlobal[cmdIndex] || { name: "UNKNOWN_CMD", decriptions: "UNKNOWN_CMD" };
-//         const cmdField = IotCmdGlobal[cmdIndex] ? (IotCmdGlobal[cmdIndex].iot_cmd_field ? IotCmdGlobal[cmdIndex].iot_cmd_field : []) : [];
-//
-//         const payload = [];
-//         let crc = null;
-//         let index = 1;
-//         let dataNumber = 0;
-//         while (index < buffer.length - 1) {
-//             if ((buffer.length - 1) - index > 1) {
-//                 let textdataLength = `${buffer[index].toString(16).toUpperCase().padStart(2, '0')}`;
-//                 let dataLength = Number(await ConvertHextoData(textdataLength, 'uint32'));
-//                 let sensorType = buffer[index + 1];
-//                 let PayloadTypeIndex = PayloadType.findIndex((item: any) => item.hex_symbols == sensorType);
-//                 let dataTypeFirst: any = PayloadType[PayloadTypeIndex];
-//                 if (dataTypeFirst) {
-//                     let dataType = dataTypeFirst.js_type;
-//                     let dataPayload = null;
-//                     let dataHexPayload = null;
-//                     if (dataLength > 0) {
-//                         let strData = '';
-//                         for (let i = 0; i < dataLength; i++) {
-//                             strData += `${buffer[index + 2 + i].toString(16).toUpperCase().padStart(2, '0')}`;
-//                         }
-//                         dataHexPayload = strData;
-//                         let dataAfter = await ConvertHextoData(strData, dataType);
-//                         dataPayload = dataAfter;
-//                     }
-//                     console.log(cmdField, dataNumber);
-//
-//                     debugger;
-//                     payload.push({
-//                         [`${cmdField[dataNumber].name}`]: dataPayload,
-//                         payload_name: `${cmdField[dataNumber].name}`,
-//                         payload_unit: `${cmdField[dataNumber].unit}`
-//                     });
-//                     dataNumber++;
-//                     index += 2 + Number(dataLength);
-//                 }
-//                 else {
-//                     console.log('Không Tìm Được Kiểu Dữ Liệu : ' + sensorType);
-//                     index += buffer.length;
-//                     return {
-//                         status: false,
-//                         data: 'Không Tìm Được Kiểu Dữ Liệu : ' + sensorType
-//                     }
-//                 }
-//             }
-//             else {
-//                 console.log('Sai Form Data Dữ Liệu Gửi Lên');
-//                 index += buffer.length;
-//                 return {
-//                     status: false,
-//                     data: 'Sai Form Data Dữ Liệu Gửi Lên'
-//                 }
-//             }
-//         }
-//         crc = `${buffer[buffer.length - 1]}`;
-//         return {
-//             "status": true,
-//             "CMD": cmdPaket.name,
-//             "CMD_Decriptions": cmdPaket.decriptions,
-//             "payload": payload,
-//             "crc": crc
-//         };
-//     } catch (error) {
-//         console.log(error);
-//         return {
-//             status: false,
-//             data: error
-//         }
-//     }
-//
-// }
-// --- Hàm tính CRC8 (giống hệt logic C++) ---
+import "../assets/payloadType";
+import {Command, commands, IotCmdField} from "../assets/cmd";
+import {PayloadType, payloadTypes} from "../assets/payloadType";
+
 const calculateCRC8 = (data: Buffer): number => {
     let crc = 0xFF;
     for (let i = 0; i < data.length; i++) {
@@ -110,7 +24,7 @@ const calculateCRC8 = (data: Buffer): number => {
 interface ParsedPacketResult {
     status: boolean;
     CMD?: string;
-    CMD_Decriptions?: string;
+    CMD_descriptions?: string;
     payload?: { [key: string]: any; payload_name: string; payload_unit: string; raw_hex: string; }[];
     crc?: string;
     data?: string; // For error messages
@@ -147,18 +61,19 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
         // --- Kết thúc kiểm tra CRC ---
 
         // Lấy dữ liệu từ global stores
-        const IotCmdGlobal: MasterIotCMDInterface[] = MasterIotCMDGlobal.getAll();
-        const PayloadType: MasterPayloadInterface[] = MasterPayloadGlobal.getAll();
+        const IotCmdGlobal = commands;
+        const PayloadType = payloadTypes;
+        debugger;
 
         // --- TÌM KIẾM CMD ---
         // So sánh cmdCodeByte (number) với item.hex_symbols (string số thập phân)
-        const cmdIndex = IotCmdGlobal.findIndex((item: MasterIotCMDInterface) => {
+        const cmdIndex = IotCmdGlobal.findIndex((item: Command) => {
             if (item.hex_symbols === undefined) return false;
             return parseInt(item.hex_symbols, 10) === cmdCodeByte;
         });
 
-        const cmdPaket: MasterIotCMDInterface = (cmdIndex !== -1) ? IotCmdGlobal[cmdIndex] : { name: "UNKNOWN_CMD", decriptions: "UNKNOWN_CMD", iot_cmd_field: [] };
-        const cmdFieldDefs: CMDFieldInterface[] = cmdPaket.iot_cmd_field || []; // Định nghĩa các trường trong payload
+        const cmdPaket: Command = (cmdIndex !== -1) ? IotCmdGlobal[cmdIndex] : { name: "UNKNOWN_CMD", descriptions: "UNKNOWN_CMD", iot_cmd_field: [] };
+        const cmdFieldDefs: IotCmdField[] = cmdPaket.iot_cmd_field || []; // Định nghĩa các trường trong payload
 
         const parsedPayloads: { [key: string]: any; payload_name: string; payload_unit: string; raw_hex: string; }[] = [];
         let currentBufferIndex = 1; // Bắt đầu từ byte thứ hai (sau cmdCode)
@@ -176,7 +91,7 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
 
             // --- TÌM KIẾM KIỂU PAYLOAD ---
             // So sánh sensorTypeByte (number) với item.hex_symbols (string "0xXX")
-            const payloadTypeDefinition = PayloadType.find((item: MasterPayloadInterface) => {
+            const payloadTypeDefinition = PayloadType.find((item: PayloadType) => {
                 if (item.hex_symbols === undefined) return false;
                 // Chuyển đổi "0xXX" thành số nguyên thập phân để so sánh
                 return parseInt(item.hex_symbols.replace('0x', ''), 16) === sensorTypeByte;
@@ -211,7 +126,7 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
             }
 
             // Gán tên payload từ cmdFieldDefs hoặc tên mặc định
-            const currentFieldDef: CMDFieldInterface | undefined = cmdFieldDefs[fieldDefCounter];
+            const currentFieldDef: IotCmdField | undefined = cmdFieldDefs[fieldDefCounter];
             const payloadName = currentFieldDef ? (currentFieldDef.name || `unknown_field_${fieldDefCounter}`) : `unknown_field_${fieldDefCounter}`;
             const payloadUnit = currentFieldDef ? (currentFieldDef.unit || "unknown") : "unknown";
 
@@ -234,7 +149,7 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
         return {
             "status": true,
             "CMD": cmdPaket.name,
-            "CMD_Decriptions": cmdPaket.decriptions,
+            "CMD_descriptions": cmdPaket.descriptions,
             "payload": parsedPayloads,
             "crc": receivedCRC.toString(16).toUpperCase().padStart(2, '0')
         };
@@ -262,7 +177,7 @@ export const ConvertDataJsonToHex = async (data: any) => {
     const crcBuffer = Buffer.from(crc, 'hex');
     console.log(topic, mac, cmd, payload, crc);
     const cmdFind = IotCmdGlobal.find((e: any) => {
-        return e.decriptions == cmd;
+        return e.descriptions == cmd;
     });
     if (cmdFind) {
         const cmdHex = cmdFind.hex_symbols;
