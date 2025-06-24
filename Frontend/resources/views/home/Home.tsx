@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AutoComplete, Card, Col, DatePicker, Row, Select, Spin, Statistic, Table } from 'antd';
+import { Alert, AutoComplete, Card, Col, DatePicker, Row, Select, Spin, Statistic } from 'antd';
 import {
     Bar,
     CartesianGrid,
@@ -31,7 +31,7 @@ const CHART_COLORS = {
     success: '#4680ff',
     missed: '#ff4d4f',
     missedLine: '#ff7875',
-    pieColors: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff7f', '#ff1493', '#1e90ff', '#ffa500'],
+    pieColors: ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff7f', '#ff1493', '#1e90ff', '#ffa500', '#D8BFD8', '#FFDAB9', '#DA70D6'], // Thêm màu cho các lỗi nếu cần
     grid: '#e0e0e0',
     tooltipBg: 'rgba(255, 255, 255, 0.95)',
     textPrimary: '#333',
@@ -114,21 +114,19 @@ const commandsMapping = [
 const cmdDescriptionMap = new Map(commandsMapping.map(cmd => [cmd.description.toLowerCase(), cmd.name]));
 const descriptionOptions = commandsMapping.map(cmd => ({ value: cmd.description }));
 
-// --- NEW INTERFACE ---
 interface DeviceListItem {
     id: string;
     name: string;
     mac?: string;
 }
-// --- END NEW INTERFACE ---
 
 interface CommonDashboardQueryParams {
     startTime: number | null;
     endTime: number | null;
     deviceId?: string;
     cmd?: string;
-    page?: number;   // Thêm page
-    limit?: number;  // Thêm limit
+    page?: number;
+    limit?: number;
 }
 
 interface OverallSummaryData {
@@ -162,25 +160,17 @@ interface PieChartDataItem {
     missRatePercentageForCommand?: number;
 }
 
-// --- NEW INTERFACE FOR PAGINATED RESPONSE ---
-interface PaginatedResponse<T> {
-    data: T[];
-    pagination: {
-        totalDocuments: number;
-        currentPage: number;
-        limit: number;
-        totalPages: number;
-    };
-}
-
-// --- NEW INTERFACE FOR FAILED COMMAND DATA ---
-interface FailedCommandDataItem {
-    deviceId: string;
+// === NEW INTERFACE for Error Type Summary Data ===
+interface ErrorTypeSummaryData {
     cmd: string;
-    timestamp: number;
-    isMissed: boolean;
+    totalPackets: number;
+    successfulPackets: number;
+    missedPackets: number;
+    percentageOfTotalErrors: number; // Tỷ lệ gói tin của lệnh này trên TỔNG các gói tin lỗi
+    successfulRateInCmd: number;     // Tỷ lệ Realtime (thành công) trong chính nhóm lệnh này
+    missRateInCmd: number;           // Tỷ lệ Gửi lại (thất bại) trong chính nhóm lệnh này
 }
-// --- END NEW INTERFACES ---
+// === END NEW INTERFACE ===
 
 
 const formatTimeBucketLabel = (timestamp: number, interval: 'hourly' | 'daily' | 'weekly'): string => {
@@ -414,10 +404,10 @@ const fetchPacketCountsByCommandApi = async (params: CommonDashboardQueryParams)
     return handleResponse(await fetch(url));
 };
 
-// --- NEW API CALL FOR FAILED COMMAND STATISTICS ---
-const fetchFailedCommandStatisticsApi = async (params: CommonDashboardQueryParams): Promise<PaginatedResponse<FailedCommandDataItem>> => {
+// --- NEW API CALL FOR ERROR TYPE SUMMARY ---
+const fetchErrorTypeSummaryApi = async (params: CommonDashboardQueryParams): Promise<ErrorTypeSummaryData[]> => {
     const queryParams = createSearchParams(params);
-    const url = `${API_DASHBOARD_PREFIX}/packet-fail?${queryParams.toString()}`; // Endpoint mới của bạn
+    const url = `${API_DASHBOARD_PREFIX}/error-type-summary?${queryParams.toString()}`; // Endpoint mới của bạn
     return handleResponse(await fetch(url));
 };
 // --- END NEW API CALL ---
@@ -896,21 +886,15 @@ const TimeSeriesCard: React.FC<TimeSeriesCardProps> = React.memo(({ commonParams
     );
 });
 
-// --- NEW COMPONENT FOR FAILED COMMAND STATISTICS ---
-interface FailedCommandStatisticsCardProps {
+// --- NEW COMPONENT FOR ERROR TYPE SUMMARY (replacing FailedCommandStatisticsCard) ---
+interface ErrorTypeSummaryCardProps {
     commonParams: CommonDashboardQueryParams;
 }
 
-const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = React.memo(({ commonParams }) => {
-    const [data, setData] = useState<FailedCommandDataItem[] | null>(null);
+const ErrorTypeSummaryCard: React.FC<ErrorTypeSummaryCardProps> = React.memo(({ commonParams }) => {
+    const [data, setData] = useState<ErrorTypeSummaryData[] | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        limit: 10,
-        totalDocuments: 0,
-        totalPages: 0,
-    });
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -918,93 +902,64 @@ const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = 
         try {
             if (!commonParams.startTime || !commonParams.endTime) {
                 setData(null);
-                setPagination({ currentPage: 1, limit: 10, totalDocuments: 0, totalPages: 0 });
                 return;
             }
 
-            const paramsWithPagination = {
-                ...commonParams,
-                page: pagination.currentPage,
-                limit: pagination.limit,
-            };
-
-            const result = await fetchFailedCommandStatisticsApi(paramsWithPagination);
-            setData(result.data);
-            setPagination(result.pagination);
+            const result = await fetchErrorTypeSummaryApi(commonParams);
+            setData(result);
         } catch (err: any) {
-            console.error("Error fetching FailedCommandStatistics:", err);
-            setError(err.message || "Lỗi tải thống kê lệnh lỗi.");
+            console.error("Error fetching ErrorTypeSummary:", err);
+            setError(err.message || "Lỗi tải thống kê loại lỗi.");
             setData(null);
-            setPagination({ currentPage: 1, limit: 10, totalDocuments: 0, totalPages: 0 });
         } finally {
             setLoading(false);
         }
-    }, [commonParams, pagination.currentPage, pagination.limit]);
+    }, [commonParams]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    const getCommandDescription = (cmd: string): string => {
-        return commandsMapping.find(mapping => mapping.name === cmd)?.description || cmd;
-    };
+    const pieData = useMemo(() => {
+        if (!data) return [];
+        // Chuyển đổi ErrorTypeSummaryData sang định dạng PieChartDataItem
+        return data.map((item) => ({
+            name: commandsMapping.find(cmd => cmd.name === item.cmd)?.description || item.cmd,
+            value: item.totalPackets, // Tổng gói tin của lỗi này
+            percentage: item.percentageOfTotalErrors.toFixed(1), // Tỷ lệ trên tổng các lỗi
+            successfulPackets: item.successfulPackets,
+            missedPackets: item.missedPackets,
+            missRatePercentageForCommand: item.missRateInCmd // Tỷ lệ gửi lại trong chính lệnh lỗi này
+        }));
+    }, [data]);
 
-    const columns = useMemo(() => [
-        {
-            title: 'ID Thiết bị',
-            dataIndex: 'deviceId',
-            key: 'deviceId',
-            width: 100,
-            fixed: 'left' as const,
-            render: (text: string) => <span style={{ fontWeight: 'bold', color: CHART_COLORS.textPrimary }}>{text}</span>
-        },
-        {
-            title: 'Lệnh lỗi',
-            dataIndex: 'cmd',
-            key: 'cmd',
-            width: 180,
-            render: (cmd: string) => (
-                <span style={{ color: CHART_COLORS.missed, fontWeight: 'bold' }}>
-                    {getCommandDescription(cmd)}
-                </span>
-            ),
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'isMissed',
-            key: 'isMissed',
-            width: 100,
-            render: (isMissed: boolean) => (
-                <span style={{ color: isMissed ? CHART_COLORS.missed : CHART_COLORS.success }}>
-                    {isMissed ? 'Gửi lại' : 'Realtime'}
-                </span>
-            ),
-        },
-        {
-            title: 'Thời gian',
-            dataIndex: 'timestamp',
-            key: 'timestamp',
-            width: 150,
-            render: (timestamp: number) => {
-                if (!timestamp) return 'N/A';
-                const date = new Date(timestamp * 1000);
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = String(date.getFullYear()).slice(-2);
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const seconds = String(date.getSeconds()).padStart(2, '0');
-                return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-            }
-        },
-    ], []);
+    const CustomErrorTypeLegend = ({ payload }: any) => {
+        if (!payload) return null;
+        return (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+                {payload.map((entry: any, index: number) => (
+                    <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                        <div style={{
+                            width: 16,
+                            height: 16,
+                            backgroundColor: entry.color,
+                            borderRadius: '50%',
+                            marginRight: '8px',
+                            border: '1px solid #fff'
+                        }}></div>
+                        <div style={{ fontSize: '13px', color: CHART_COLORS.textPrimary }}>
+                            <span style={{ fontWeight: 'bold' }}>{entry.payload.name}:</span> {formatNumber(entry.payload.value)} gói ({entry.payload.percentage}%)<br />
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        );
+    };
 
     const cardTitle = (
         <Row align="middle" justify="space-between" style={{ width: '100%' }}>
-            <Col>⚠️ Thống kê lệnh lỗi</Col>
-            <Col>
-                {/* Có thể thêm các filter khác ở đây nếu muốn */}
-            </Col>
+            <Col>🚨 Phân phối loại lỗi</Col>
+            <Col>{/* Có thể thêm các filter khác ở đây nếu muốn */}</Col>
         </Row>
     );
 
@@ -1013,7 +968,7 @@ const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = 
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
                     <div style={{ textAlign: 'center', padding: '100px 0' }}>
-                        <Spin tip="Đang tải lệnh lỗi..." />
+                        <Spin tip="Đang tải thống kê loại lỗi..." />
                     </div>
                 </Card>
             </Col>
@@ -1024,17 +979,17 @@ const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = 
         return (
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
-                    <Alert message="Lỗi tải Thống kê lệnh lỗi" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
+                    <Alert message="Lỗi tải Thống kê loại lỗi" description={error} type="warning" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
         );
     }
 
-    if (!data || data.length === 0) {
+    if (!pieData.length) {
         return (
             <Col xs={24} lg={12}>
                 <Card title={cardTitle} style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }} headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}>
-                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu lệnh lỗi trong khoảng thời gian đã chọn." type="info" showIcon style={{ borderRadius: 8 }} />
+                    <Alert message="Không có dữ liệu" description="Không tìm thấy dữ liệu thống kê loại lỗi trong khoảng thời gian đã chọn." type="info" showIcon style={{ borderRadius: 8 }} />
                 </Card>
             </Col>
         );
@@ -1047,35 +1002,38 @@ const FailedCommandStatisticsCard: React.FC<FailedCommandStatisticsCardProps> = 
                 style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: 400 }}
                 headStyle={{ borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', fontSize: '20px', paddingRight: '12px' }}
             >
-                <Table
-                    dataSource={data}
-                    columns={columns}
-                    rowKey={(record, index) => `${record.deviceId}-${record.timestamp}-${index}`} // Unique key
-                    pagination={{
-                        current: pagination.currentPage,
-                        pageSize: pagination.limit,
-                        total: pagination.totalDocuments,
-                        onChange: (page, pageSize) => {
-                            setPagination(prev => ({
-                                ...prev,
-                                currentPage: page,
-                                limit: pageSize,
-                            }));
-                        },
-                        showSizeChanger: true,
-                        pageSizeOptions: ['10', '25', '50', '100'],
-                        showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
-                    }}
-                    size="small"
-                    scroll={{ x: 600, y: 250 }} // Cho phép cuộn ngang và giới hạn chiều cao
-                    bordered
-                    style={{ border: '1px solid #f0f0f0', borderRadius: 8 }}
-                />
+                <div style={{ height: 330 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={120}
+                                paddingAngle={5}
+                                dataKey="value"
+                                label={({ name, percent }) => `${name}\n${(percent * 100).toFixed(1)}%`}
+                                labelLine={false}
+                            >
+                                {pieData.map((_entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={CHART_COLORS.pieColors[index % CHART_COLORS.pieColors.length]}
+                                        stroke="#fff"
+                                        strokeWidth={2}
+                                    />
+                                ))}
+                            </Pie>
+                            <Tooltip content={<CustomPieTooltip />} />
+                            <Legend content={<CustomErrorTypeLegend />} layout="vertical" align="right" verticalAlign="middle" />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
             </Card>
         </Col>
     );
 });
-// --- END NEW COMPONENT ---
+// --- END NEW COMPONENT FOR ERROR TYPE SUMMARY ---
 
 const Dashboard: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
@@ -1123,8 +1081,6 @@ const Dashboard: React.FC = () => {
         setActualCmdGlobalToSend(foundCmd);
     }, [cmdDescriptionGlobalFilter]);
 
-    // commonParams giờ sẽ không chứa page/limit vì chúng được quản lý trong từng component con
-    // hoặc cho API mới, sẽ được truyền riêng.
     const commonParams: CommonDashboardQueryParams = useMemo(() => ({
         startTime: dateRange[0]?.unix() || null,
         endTime: dateRange[1]?.unix() || null,
@@ -1230,8 +1186,8 @@ const Dashboard: React.FC = () => {
                 </Row>
                 <Row gutter={[5, 5]}>
                     <TimeSeriesCard commonParams={commonParams} />
-                    {/* THAY THẾ TopMissedDevicesCard BẰNG FailedCommandStatisticsCard */}
-                    <FailedCommandStatisticsCard commonParams={commonParams} />
+                    {/* THAY THẾ FailedCommandStatisticsCard BẰNG ErrorTypeSummaryCard */}
+                    <ErrorTypeSummaryCard commonParams={commonParams} />
                 </Row>
             </div>
         </>

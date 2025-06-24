@@ -15,7 +15,6 @@ dayjs.extend(timezone);
 dayjs.extend(weekOfYear); // Make sure weekOfYear is also extended
 
 // === INTERFACES ===
-// Cập nhật DashboardQueryBase để bao gồm các tham số phân trang
 interface DashboardQueryBase {
     startTime?: string; // Nhận từ FE là seconds string
     endTime?: string;   // Nhận từ FE là seconds string
@@ -49,7 +48,7 @@ interface OverallSummaryData {
 }
 
 interface PacketCountOverTimeData {
-    timeBucket: number; // Unix timestamp in SECONDS
+    timeBucket: number;
     successfulPackets: number;
     missedPackets: number;
     missRatePercentage: number;
@@ -62,7 +61,7 @@ interface TopMissedDeviceData {
     totalPackets: number;
     missedPackets: number;
     missRatePercentage: number;
-    lastSeen: number; // Unix timestamp in SECONDS
+    lastSeen: number;
 }
 
 interface PacketCountsByCommandData {
@@ -70,7 +69,6 @@ interface PacketCountsByCommandData {
     totalPackets: number;
     successfulPackets: number;
     missedPackets: number;
-    missRatePercentage: number;
 }
 
 interface DeviceConnectivityData {
@@ -78,26 +76,38 @@ interface DeviceConnectivityData {
     deviceName: string;
     mac: string;
     isOnline: boolean;
-    lastConnected: number; // Unix timestamp in SECONDS
+    lastConnected: number;
     disconnectCount: number;
     averageLatencyMs?: number;
 }
 
 interface HourlyPerformanceMetricData {
-    timeBucket: number; // Unix timestamp in SECONDS
+    timeBucket: number;
     deviceId: string;
     avgCpuUsagePercentage?: number;
     avgRamUsageMB?: number;
     avgBatteryLevelPercentage?: number;
 }
 
-// Interface mới cho dữ liệu trả về của API getFailedCommandStatistics
 interface FailedCommandStatistic {
     deviceId: string;
     cmd: string;
     timestamp: number; // Unix timestamp in seconds
     isMissed: boolean;
 }
+
+// === NEW INTERFACE for Error Type Summary ===
+interface ErrorTypeSummaryData {
+    cmd: string;
+    totalPackets: number;
+    successfulPackets: number;
+    missedPackets: number;
+    percentageOfTotalErrors: number; // Tỷ lệ gói tin của lệnh này trên TỔNG các gói tin lỗi
+    successfulRateInCmd: number;     // Tỷ lệ Realtime (thành công) trong chính nhóm lệnh này
+    missRateInCmd: number;           // Tỷ lệ Gửi lại (thất bại) trong chính nhóm lệnh này
+}
+// === END NEW INTERFACE ===
+
 
 // === HELPER FUNCTIONS ===
 
@@ -438,7 +448,7 @@ export const getPacketCountsByCommand = async (req: Request<{}, {}, {}, Dashboar
                     missRatePercentage: {
                         $cond: {
                             if: { $gt: ["$totalPackets", 0] },
-                            then: { $multiply: [{ $divide: ["$missedPackets", { $add: ["$successfulPackets", "$missedPackets"] }] }, 100] },
+                            then: { $multiply: [{ $divide: ["$missedPackets", "$totalPackets"] }, 100] },
                             else: 0
                         }
                     }
@@ -528,5 +538,122 @@ export const getFailedCommandStatistics = async (req: Request<{}, {}, {}, Dashbo
     } catch (error: any) {
         logger.error("Error in getFailedCommandStatistics:", error.message);
         res.status(400).json({ message: error.message || "Failed to get failed command statistics." });
+    }
+};
+
+/**
+ * Lấy thống kê tổng hợp về các loại lỗi cụ thể (WiFi Weak, MQTT Lost, ACK Fail).
+ * Trả về số lượng, tỷ lệ của từng loại lỗi trên tổng lỗi, và tỷ lệ thành công/gửi lại
+ * trong từng loại lỗi đó.
+ * Hỗ trợ lọc theo thời gian (startTime, endTime) và deviceId.
+ */
+export const getErrorTypeSummary = async (req: Request<{}, {}, {}, DashboardQueryBase>, res: Response) => {
+    try {
+        const baseMatchQuery = prepareMatchQuery(req.query);
+
+        const errorCommands = [
+            "CMD_STATUS_WIFI_WEAK",
+            "CMD_STATUS_MQTT_LOST",
+            "CMD_STATUS_ACK_FAIL"
+        ];
+
+        const finalMatchQuery = {
+            ...baseMatchQuery,
+            cmd: { $in: errorCommands }
+        };
+
+        const pipeline: PipelineStage[] = [
+            { $match: finalMatchQuery },
+            {
+                $facet: {
+                    // Branch 1: Get overall total packets for all matching error commands
+                    overallErrorStats: [
+                        { $group: { _id: null, totalErrorPackets: { $sum: 1 } } }
+                    ],
+                    // Branch 2: Get stats for each individual error command
+                    commandErrorStats: [
+                        {
+                            $group: {
+                                _id: "$cmd",
+                                totalPackets: { $sum: 1 },
+                                successfulPackets: { $sum: { $cond: [{ $eq: ["$isMissed", false] }, 1, 0] } },
+                                missedPackets: { $sum: { $cond: [{ $eq: ["$isMissed", true] }, 1, 0] } }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                cmd: "$_id",
+                                totalPackets: 1,
+                                successfulPackets: 1,
+                                missedPackets: 1,
+                                // Calculate rates within each command group
+                                successfulRateInCmd: {
+                                    $cond: {
+                                        if: { $gt: ["$totalPackets", 0] },
+                                        then: { $multiply: [{ $divide: ["$successfulPackets", "$totalPackets"] }, 100] },
+                                        else: 0
+                                    }
+                                },
+                                missRateInCmd: {
+                                    $cond: {
+                                        if: { $gt: ["$totalPackets", 0] },
+                                        then: { $multiply: [{ $divide: ["$missedPackets", "$totalPackets"] }, 100] },
+                                        else: 0
+                                    }
+                                }
+                            }
+                        },
+                        { $sort: { "totalPackets": -1 } } // Sort individual command stats
+                    ]
+                }
+            },
+            {
+                $project: {
+                    // Get totalErrorPackets from the overallErrorStats branch, default to 0 if not found
+                    overallTotal: { $arrayElemAt: ["$overallErrorStats.totalErrorPackets", 0] },
+                    commandStats: "$commandErrorStats"
+                }
+            },
+            {
+                // Unwind the commandStats array to process each command individually
+                $unwind: "$commandStats"
+            },
+            {
+                // Project final fields and calculate percentageOfTotalErrors
+                $project: {
+                    _id: 0,
+                    cmd: "$commandStats.cmd",
+                    totalPackets: "$commandStats.totalPackets",
+                    successfulPackets: "$commandStats.successfulPackets",
+                    missedPackets: "$commandStats.missedPackets",
+                    successfulRateInCmd: "$commandStats.successfulRateInCmd",
+                    missRateInCmd: "$commandStats.missRateInCmd",
+                    percentageOfTotalErrors: {
+                        $cond: {
+                            if: { $gt: ["$overallTotal", 0] },
+                            then: { $multiply: [{ $divide: ["$commandStats.totalPackets", "$overallTotal"] }, 100] },
+                            else: 0
+                        }
+                    }
+                }
+            }
+        ];
+
+        const results = await IotStatistic.aggregate<ErrorTypeSummaryData>(pipeline).allowDiskUse(true);
+
+        // Format percentages to 2 decimal places for cleaner output
+        const formattedResults = results.map(item => ({
+            ...item,
+            percentageOfTotalErrors: parseFloat(item.percentageOfTotalErrors.toFixed(2)),
+            successfulRateInCmd: parseFloat(item.successfulRateInCmd.toFixed(2)),
+            missRateInCmd: parseFloat(item.missRateInCmd.toFixed(2))
+        }));
+
+        res.status(200).json(formattedResults);
+
+    } catch (error: any) {
+        logger.error("Error in getErrorTypeSummary:", error.message);
+        res.status(400).json({ message: error.message || "Failed to get error type summary." });
     }
 };
