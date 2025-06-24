@@ -5,7 +5,7 @@ export interface IIotStatistic extends Document {
     cmd: string;
     isMissed: boolean;
     timestamp: number;
-    messageId?: number;
+    message_id?: number;
     [key: string]: any;
 }
 
@@ -14,12 +14,12 @@ const iotStatisticSchema = new Schema<IIotStatistic>({
     cmd: { type: String, required: true },
     isMissed: { type: Boolean, default: false },
     timestamp: { type: Number, required: true },
-    messageId: { type: Number, required: false },
+    message_id: { type: Number, required: false },
 }, { strict: false });
 
 iotStatisticSchema.index(
-    { messageId: 1, deviceId: 1, timestamp: 1 },
-    { unique: true, partialFilterExpression: { messageId: { $exists: true } } }
+    { message_id: 1, deviceId: 1, timestamp: 1 },
+    { unique: true, partialFilterExpression: { message_id: { $exists: true } } }
 );
 iotStatisticSchema.index({ timestamp: -1, _id: -1 });
 iotStatisticSchema.index({ deviceId: 1, timestamp: -1, _id: -1 });

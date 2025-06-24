@@ -608,11 +608,10 @@ export const calculateCRC8 = (data: Buffer): number => {
     return crc;
 };
 
-export const deviceUpdateData = async (topic: string, message: Buffer, messageId: number) => {
+export const deviceUpdateData = async (topic: string, message: Buffer) => {
     try {
         const mergedPayloads: any = {
-            isMissed: false,
-            messageId: messageId
+            isMissed: false
         };
         if (message[0] === MISSED_PACKET) {
             mergedPayloads.isMissed = true;
