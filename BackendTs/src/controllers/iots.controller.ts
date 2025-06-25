@@ -608,6 +608,9 @@ export const calculateCRC8 = (data: Buffer): number => {
     return crc;
 };
 
+const checkCmdInputButton = (cmd: string): boolean =>
+    ["CMD_PUSH_IO_DI1_BUTTON", "CMD_PUSH_IO_DI2_BUTTON", "CMD_PUSH_IO_DI3_BUTTON", "CMD_PUSH_IO_DI4_BUTTON"].includes(cmd);
+
 export const deviceUpdateData = async (topic: string, message: Buffer) => {
     try {
         const mergedPayloads: any = {
@@ -678,6 +681,54 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                     data: mergedPayloads.isMissed,
                     time: dataJson.time
                 }, ['device_id', 'dataName']);
+
+                if (checkCmdInputButton(dataJson.CMD)) {
+                    try {
+                        const deviceIot = MasterIotGlobal.findById(dataIot.id);
+
+                        if (!deviceIot || !deviceIot.digitalInputConfig) {
+                            console.warn(`Device ${dataIot.id} or its digitalInputConfig not found in MasterIotGlobal.`);
+                            return;
+                        }
+
+                        if (deviceIot.digitalInputConfig.modeDigitalInput === 3) {
+                            const currentStatus = deviceIot.digitalInputConfig.status;
+                            const newStatus = typeof currentStatus === 'boolean' ? !currentStatus : false;
+
+                            await models.IotSettings.update(
+                                {
+                                    digitalInputConfig: {
+                                        ...deviceIot.digitalInputConfig,
+                                        status: newStatus,
+                                        modeDigitalInput: 3
+                                    }
+                                },
+                                {
+                                    where: {
+                                        id: dataIot.id
+                                    }
+                                }
+                            );
+
+                            deviceIot.digitalInputConfig.status = newStatus;
+                            MasterIotGlobal.replaceById(deviceIot);
+
+                            DataMsgGlobal.replaceByMultipleKeys({
+                                device_id: dataIot.id,
+                                CMD: dataJson.CMD,
+                                CMD_Decriptions: dataJson.CMD_descriptions,
+                                dataName: `status`,
+                                payload_name: 'status',
+                                data: newStatus,
+                                time: dataJson.time
+                            }, ['device_id', 'dataName']);
+
+                            console.log(`Successfully updated status for ID ${dataIot.id} to ${newStatus}`);
+                        }
+                    } catch (error) {
+                        console.error("Error updating IotSettings:", error);
+                    }
+                }
 
                 mergedPayloads.cmd = dataJson.CMD;
                 mergedPayloads.deviceId = dataIot.id;
@@ -1486,6 +1537,12 @@ export const updateCanSettings = async (req: Request, res: Response) => {
 
 // 9. Cài đặt CAN
 export const updateInputSettings = async (req: Request, res: Response) => {
+    // Đảm bảo req.body.digitalInputConfig tồn tại trước khi truy cập
+    if (req.body && req.body.digitalInputConfig && req.body.digitalInputConfig.modeDigitalInput === 3) {
+        req.body.digitalInputConfig.status = false;
+    }
+
+    // Gọi hàm cập nhật
     await updateIotSection(req, res, "digitalInput");
 };
 

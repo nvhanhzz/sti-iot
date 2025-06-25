@@ -55,6 +55,11 @@ interface CanConfig {
     baudrate?: number;
 }
 
+interface DigitalInputConfig {
+    modeDigitalInput?: number;
+    status?: boolean;
+}
+
 export interface MasterIotInterface {
     id?: number;
     name?: string;
@@ -78,10 +83,9 @@ export interface MasterIotInterface {
     rs485Config?: Rs485Config;
     tcpConfig?: TcpConfig;
     rs232Config?: Rs232Config;
-
-    canConfig?: CanConfig; // Đã đổi can_baudrate thành camelCase
-
-    firmwareVersionId?: number; // Đã đổi firmware_version_id thành camelCase
+    canConfig?: CanConfig;
+    digitalInputConfig?: DigitalInputConfig;
+    firmwareVersionId?: number;
 }
 
 export interface IotStatusInterface {
