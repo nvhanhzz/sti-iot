@@ -611,6 +611,9 @@ export const calculateCRC8 = (data: Buffer): number => {
 const checkCmdInputButton = (cmd: string): boolean =>
     ["CMD_PUSH_IO_DI1_BUTTON", "CMD_PUSH_IO_DI2_BUTTON", "CMD_PUSH_IO_DI3_BUTTON", "CMD_PUSH_IO_DI4_BUTTON"].includes(cmd);
 
+const checkCmdInpuPulse = (cmd: string): boolean =>
+    ["CMD_PUSH_IO_DI1_PULSE", "CMD_PUSH_IO_DI2_PULSE", "CMD_PUSH_IO_DI3_PULSE", "CMD_PUSH_IO_DI4_PULSE"].includes(cmd);
+
 export const deviceUpdateData = async (topic: string, message: Buffer) => {
     try {
         const mergedPayloads: any = {
@@ -804,6 +807,8 @@ export const sendDataRealTime = async (id: number) => {
                 };
             await EmitData("iot_send_data_" + data.id, dataMsgDetail);
         }
+        const newDataMsgGlobal = DataMsgGlobal.getAll().filter(item => !checkCmdInputButton(item.CMD) && !checkCmdInpuPulse(item.CMD));
+        DataMsgGlobal.replaceAll(newDataMsgGlobal);
     }
 };
 

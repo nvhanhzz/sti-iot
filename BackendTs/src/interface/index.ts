@@ -131,11 +131,11 @@ export interface MasterIotCMDInterface {
 
 export interface DataMsgInterface {
     device_id?: number;
-    CMD?: string;
+    CMD: string;
     CMD_Decriptions?: string;
     dataName?: string;
     payload_name?: string;
-    data?: number,
+    data?: number | boolean,
     unit?: string,
     time?: string,
 }
