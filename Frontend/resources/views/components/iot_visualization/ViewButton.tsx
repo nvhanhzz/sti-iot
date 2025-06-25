@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Button, Card, Typography, Flex, Divider, message, Spin, Tooltip } from "antd";
-import { PoweroffOutlined } from "@ant-design/icons";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Button, Card, Typography, Divider, message, Spin, Tooltip } from "antd";
+import { PoweroffOutlined } from "@ant-design/icons"; // Đảm bảo import đúng từ 'antd/icons'
 import { useSocket } from "../../../../context/SocketContext.tsx";
 const { Title, Text } = Typography;
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Giữ nguyên các HEX_COMMANDS ban đầu cho luồng điều khiển (output flow)
+// Các lệnh HEX cho điều khiển thiết bị
 const HEX_COMMANDS = {
     tcp: { on: '15 01 00 00 93', off: '16 01 00 00 A9' },
     udp: { on: '17 01 00 00 BF', off: '18 01 00 00 6D' },
@@ -16,12 +16,12 @@ const HEX_COMMANDS = {
     input4_control: { on: '06 01 07 01 A2', off: '06 01 07 00 A5' },
 } as const;
 
-// Các CMD báo cáo trạng thái mới từ thiết bị (input flow)
+// Các lệnh báo cáo trạng thái cho các kênh đầu vào
 const INPUT_STATUS_REPORT_CMDS = {
     CMD_INPUT_CHANNEL1: {
-        status: 'CMD_PUSH_IO_DI1_STATUS',   // Digital Input 1 - Status mode
-        pulse: 'CMD_PUSH_IO_DI1_PULSE',    // Digital Input 1 - Pulse mode (Hz)
-        button: 'CMD_PUSH_IO_DI1_BUTTON',   // Digital Input 1 - Button mode
+        status: 'CMD_PUSH_IO_DI1_STATUS',
+        pulse: 'CMD_PUSH_IO_DI1_PULSE',
+        button: 'CMD_PUSH_IO_DI1_BUTTON',
     },
     CMD_INPUT_CHANNEL2: {
         status: 'CMD_PUSH_IO_DI2_STATUS',
@@ -40,13 +40,15 @@ const INPUT_STATUS_REPORT_CMDS = {
     },
 };
 
+// Interface cho props của component
 interface ConfigIotsProps {
-    dataIotsDetail: any; // dataIotsDetail bây giờ chứa deviceId và mảng CMD trạng thái
-    deviceMac: string; // Vẫn truyền deviceMac để nhất quán
+    dataIotsDetail: any;
+    deviceMac: string;
     onControlSuccess: () => void;
     isConnected: boolean;
 }
 
+// Map các CMD với tiêu đề hiển thị trên nút
 const titleButton: { [key: string]: string } = {
     "CMD_INPUT_CHANNEL1": "INPUT 1",
     "CMD_INPUT_CHANNEL2": "INPUT 2",
@@ -56,15 +58,17 @@ const titleButton: { [key: string]: string } = {
     "CMD_NOTIFY_UDP": "UDP"
 };
 
-// Cập nhật defaultButtons để bao gồm thông tin về các CMD báo cáo trạng thái
+// Cấu trúc mặc định cho các nút điều khiển
 const defaultButtons = [
     {
         CMD: "CMD_INPUT_CHANNEL1",
         dataName: "CMD_INPUT_CHANNEL1",
-        data: false, // Trạng thái tổng thể ON/OFF, sẽ được cập nhật từ dataIotsDetail
+        data: false,
         hexType: "input1_control" as keyof typeof HEX_COMMANDS,
-        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL1, // Ánh xạ tới các CMD báo cáo
-        currentActiveModeLabel: '' // Nhãn của chế độ đang hoạt động (ví dụ: "Status Mode")
+        statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL1,
+        currentActiveModeLabel: '',
+        displayValue: null as number | null,
+        modeDigitalInput: 1
     },
     {
         CMD: "CMD_INPUT_CHANNEL2",
@@ -72,7 +76,9 @@ const defaultButtons = [
         data: false,
         hexType: "input2_control" as keyof typeof HEX_COMMANDS,
         statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL2,
-        currentActiveModeLabel: ''
+        currentActiveModeLabel: '',
+        displayValue: null,
+        modeDigitalInput: 1
     },
     {
         CMD: "CMD_INPUT_CHANNEL3",
@@ -80,7 +86,9 @@ const defaultButtons = [
         data: false,
         hexType: "input3_control" as keyof typeof HEX_COMMANDS,
         statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL3,
-        currentActiveModeLabel: ''
+        currentActiveModeLabel: '',
+        displayValue: null,
+        modeDigitalInput: 1
     },
     {
         CMD: "CMD_INPUT_CHANNEL4",
@@ -88,13 +96,33 @@ const defaultButtons = [
         data: false,
         hexType: "input4_control" as keyof typeof HEX_COMMANDS,
         statusReportCMDs: INPUT_STATUS_REPORT_CMDS.CMD_INPUT_CHANNEL4,
-        currentActiveModeLabel: ''
+        currentActiveModeLabel: '',
+        displayValue: null,
+        modeDigitalInput: 1
     },
-    { CMD: "CMD_NOTIFY_TCP", dataName: "CMD_NOTIFY_TCP", data: false, hexType: "tcp" as keyof typeof HEX_COMMANDS },
-    { CMD: "CMD_NOTIFY_UDP", dataName: "CMD_NOTIFY_UDP", data: false, hexType: "udp" as keyof typeof HEX_COMMANDS }
+    {
+        CMD: "CMD_NOTIFY_TCP",
+        dataName: "CMD_NOTIFY_TCP",
+        data: false,
+        hexType: "tcp" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: undefined,
+        currentActiveModeLabel: '',
+        displayValue: null,
+        modeDigitalInput: 1
+    },
+    {
+        CMD: "CMD_NOTIFY_UDP",
+        dataName: "CMD_NOTIFY_UDP",
+        data: false,
+        hexType: "udp" as keyof typeof HEX_COMMANDS,
+        statusReportCMDs: undefined,
+        currentActiveModeLabel: '',
+        displayValue: null,
+        modeDigitalInput: 1
+    }
 ];
 
-// Định nghĩa kiểu dữ liệu cho một entry thống kê
+// Interface cho thống kê lệnh
 interface CmdStats {
     missed: number;
     realTime: number;
@@ -102,7 +130,7 @@ interface CmdStats {
 type StatisticsData = { [cmd: string]: CmdStats };
 
 /**
- * Helper function to format large numbers (e.g., 1200000 -> 1.2M)
+ * Hàm trợ giúp để định dạng số lớn (ví dụ: 1200000 -> 1.2M)
  */
 const formatCount = (num: number): string => {
     if (num >= 1000000) {
@@ -118,7 +146,11 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
     const [cmdStatistics, setCmdStatistics] = useState<StatisticsData>({});
+    const [pulseActiveStates, setPulseActiveStates] = useState<{ [cmd: string]: boolean }>({});
+    const pulseTimeoutRefs = useRef<{ [cmd: string]: NodeJS.Timeout }>({});
     const socket = useSocket();
+
+    const globalModeDigitalInput = dataIotsDetail.digitalInputConfig?.modeDigitalInput;
 
     const sendDeviceCommand = useCallback(async (mac: string, hexCommand: string): Promise<any> => {
         try {
@@ -149,81 +181,95 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             message.warning("Thiết bị không kết nối.");
             return;
         }
-        // Luồng điều khiển (output flow) giữ nguyên: dựa vào item.data để gửi 'on'/'off'
+
         const currentStatus = item.data;
         const newStatus = !currentStatus;
         const hexCommandKey = newStatus ? 'on' : 'off';
 
-        // @ts-ignore
         if (!item.hexType || !HEX_COMMANDS[item.hexType]?.[hexCommandKey]) {
             console.error(`Missing hex command for type: ${item.hexType} or status: ${hexCommandKey}`);
             message.error("Lỗi: Không tìm thấy lệnh điều khiển.");
             return;
         }
 
-        // @ts-ignore
         const hexCommand = HEX_COMMANDS[item.hexType][hexCommandKey];
         const loadingKey = `${item.hexType}-${hexCommandKey}`;
 
         try {
             setLoading(prev => ({ ...prev, [loadingKey]: true }));
             await sendDeviceCommand(deviceMac, hexCommand);
-            // Optimistic update: Cập nhật trạng thái UI ngay lập tức
-            setData(prevData =>
-                prevData.map(d =>
-                    d.CMD === item.CMD
-                        ? { ...d, data: newStatus, currentActiveModeLabel: newStatus ? item.currentActiveModeLabel : '' }
-                        : d
-                )
-            );
         } catch (error) {
             // Error handled in sendDeviceCommand
-            // Nếu có lỗi, bạn có thể cần rollback trạng thái UI ở đây
         } finally {
             setLoading(prev => ({ ...prev, [loadingKey]: false }));
         }
     }, [sendDeviceCommand, deviceMac, isConnected]);
 
-    // Luồng xử lý trạng thái đầu vào (input flow) đã được thay đổi
     useEffect(() => {
-        let processedData = defaultButtons.map(btn => ({ ...btn })); // Tạo bản sao sâu
+        let processedData = defaultButtons.map(btn => ({ ...btn }));
 
         if (dataIotsDetail.data && Array.isArray(dataIotsDetail.data)) {
-            processedData = processedData.map(defaultItem => {
-                // Đối với các nút Input có nhiều CMD báo cáo trạng thái
-                if (defaultItem.statusReportCMDs) {
-                    let isActive = false;
-                    let activeModeLabel = '';
+            const modeDigitalInput = globalModeDigitalInput;
 
-                    // Duyệt qua từng CMD báo cáo trạng thái khả thi của nút này
-                    for (const modeKey in defaultItem.statusReportCMDs) {
-                        // @ts-ignore: Bỏ qua lỗi TypeScript vì chúng ta biết modeKey là một khóa hợp lệ
-                        const reportCmd = defaultItem.statusReportCMDs[modeKey];
+            processedData = processedData.map(defaultItem => {
+                if (defaultItem.statusReportCMDs) {
+                    let isActive = defaultItem.data;
+                    let activeModeLabel = '';
+                    let displayValue: number | null = null;
+
+                    let desiredModeKey: 'status' | 'pulse' | 'button' | undefined;
+                    switch (modeDigitalInput) {
+                        case 1: desiredModeKey = 'status'; break;
+                        case 2: desiredModeKey = 'pulse'; break;
+                        case 3: desiredModeKey = 'button'; break;
+                        default: desiredModeKey = undefined;
+                    }
+
+                    if (desiredModeKey && defaultItem.statusReportCMDs[desiredModeKey]) {
+                        const reportCmd = defaultItem.statusReportCMDs[desiredModeKey];
                         const deviceDataEntry = dataIotsDetail.data.find((item: any) => item.CMD === reportCmd);
 
-                        if (deviceDataEntry && Boolean(deviceDataEntry.data)) {
-                            isActive = true; // Nút này được coi là "ON"
-                            // Xác định nhãn của chế độ đang hoạt động
-                            switch (modeKey) {
-                                case 'status': activeModeLabel = 'Status Mode'; break;
-                                case 'pulse': activeModeLabel = 'Pulse Mode'; break;
-                                case 'button': activeModeLabel = 'Button Mode'; break;
-                                default: activeModeLabel = 'Unknown Mode';
+                        if (deviceDataEntry) {
+                            switch (desiredModeKey) {
+                                case 'status':
+                                    isActive = Boolean(deviceDataEntry.data);
+                                    activeModeLabel = 'Status Mode';
+                                    break;
+                                case 'pulse':
+                                    displayValue = typeof deviceDataEntry.data === 'number' ? deviceDataEntry.data : null;
+                                    activeModeLabel = 'Pulse Mode';
+
+                                    setPulseActiveStates(prev => {
+                                        if (pulseTimeoutRefs.current[defaultItem.CMD]) {
+                                            clearTimeout(pulseTimeoutRefs.current[defaultItem.CMD]);
+                                        }
+                                        pulseTimeoutRefs.current[defaultItem.CMD] = setTimeout(() => {
+                                            setPulseActiveStates(p => ({ ...p, [defaultItem.CMD]: false }));
+                                        }, 500);
+                                        return { ...prev, [defaultItem.CMD]: true };
+                                    });
+                                    isActive = false;
+                                    break;
+                                case 'button':
+                                    isActive = !Boolean(deviceDataEntry.data);
+                                    activeModeLabel = 'Button Mode';
+                                    break;
                             }
-                            break; // Đã tìm thấy chế độ đang hoạt động, thoát vòng lặp
                         }
                     }
 
                     return {
                         ...defaultItem,
-                        data: isActive, // Cập nhật trạng thái ON/OFF tổng thể của nút
-                        currentActiveModeLabel: isActive ? activeModeLabel : '', // Lưu nhãn chế độ đang hoạt động
+                        data: isActive,
+                        currentActiveModeLabel: activeModeLabel,
+                        displayValue: displayValue,
+                        modeDigitalInput: modeDigitalInput
                     };
                 }
-                // Đối với các nút TCP/UDP (giữ nguyên cách xử lý ban đầu)
+
+                // Logic cho TCP/UDP
                 const deviceData = dataIotsDetail.data.find((item: any) =>
-                    // Đảm bảo chỉ kiểm tra các CMD liên quan đến defaultButtons
-                    (defaultButtons.some(btn => btn.CMD === item.CMD)) && item.CMD === defaultItem.CMD
+                    defaultItem.CMD === item.CMD
                 );
                 if (deviceData) {
                     return {
@@ -235,9 +281,13 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             });
         }
         setData(processedData);
-    }, [dataIotsDetail]); // Phụ thuộc vào dataIotsDetail để cập nhật trạng thái
 
-    // --- Hàm để tải thống kê ban đầu từ API Backend ---
+        return () => {
+            Object.values(pulseTimeoutRefs.current).forEach(clearTimeout);
+            pulseTimeoutRefs.current = {};
+        };
+    }, [dataIotsDetail, globalModeDigitalInput]);
+
     const fetchInitialStatistics = useCallback(async (id: string) => {
         if (!id) return;
         try {
@@ -248,7 +298,6 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
             const data: { deviceId: string } & { [cmd: string]: CmdStats } = await response.json();
             const { deviceId: _, ...cmdLevelStats } = data;
             setCmdStatistics(cmdLevelStats);
-            console.log(`Initial statistics loaded for device ${id}:`, cmdLevelStats);
         } catch (error) {
             console.error("Error fetching initial statistics:", error);
             message.error("Lỗi khi tải thống kê ban đầu.");
@@ -261,14 +310,11 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         }
     }, [dataIotsDetail.id, fetchInitialStatistics]);
 
-    // Socket listener cho cập nhật thống kê thời gian thực
     const handleSocketEventStatistics = useCallback((eventData: Record<string, Record<string, CmdStats>>) => {
-        // @ts-ignore
-        if (dataIotsDetail.id === eventData.deviceId) {
-            // @ts-ignore
-            setCmdStatistics(eventData);
+        if (dataIotsDetail.id === (eventData as any).deviceId) {
+            setCmdStatistics(eventData as StatisticsData);
         }
-    }, [dataIotsDetail.id]); // Đã sửa dependency: chỉ cần dataIotsDetail.id
+    }, [dataIotsDetail.id]);
 
     useEffect(() => {
         if (socket) {
@@ -283,98 +329,193 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
     }, [socket, handleSocketEventStatistics]);
 
     return (
-        <Flex
-            wrap="wrap"
-            gap="12px"
-            justify="space-around"
-            align="flex-start"
-            style={{ padding: '8px', height: 'auto', maxHeight: '450px', overflowY: 'auto' }}
-        >
-            {data.map((item: any) => {
-                const isOn = item.data; // item.data bây giờ là trạng thái ON/OFF tổng thể
-                const loadingKeyOn = `${item.hexType}-on`;
-                const loadingKeyOff = `${item.hexType}-off`;
-                const isCurrentlyLoading = loading[loadingKeyOn] || loading[loadingKeyOff];
+        <div style={{
+            maxHeight: '350px',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            backgroundColor: '#f8fafc',
+            borderRadius: '10px',
+            padding: 0
+        }}>
+            <div style={{
+                display: 'flex',
+                gap: '8px',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                width: '100%',
+            }}>
+                {data.map((item: any) => {
+                    const isOn = item.modeDigitalInput === 2
+                        ? pulseActiveStates[item.CMD]
+                        : item.data;
 
-                // Lấy số liệu thống kê cho CMD chính hiện tại từ state của component
-                const currentCmdStats = cmdStatistics[item.CMD] || { missed: 0, realTime: 0 };
+                    // const isInputChannel = item.statusReportCMDs !== undefined; // Không cần nữa
+                    const loadingKeyOn = `${item.hexType}-on`;
+                    const loadingKeyOff = `${item.hexType}-off`;
+                    const isCurrentlyLoading = loading[loadingKeyOn] || loading[loadingKeyOff];
+                    const currentCmdStats = cmdStatistics[item.CMD] || { missed: 0, realTime: 0 };
 
-                return (
-                    <Card
-                        key={item.CMD}
-                        hoverable
-                        style={{
-                            width: "140px",
-                            minHeight: "135px",
-                            textAlign: "center",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
-                            borderRadius: "8px",
-                            transition: "all 0.2s ease-in-out",
-                            borderColor: isOn && isConnected ? '#86efac' : (isConnected ? '#fca5a5' : '#e2e8f0'),
-                            borderWidth: '1px',
-                            opacity: isConnected ? 1 : 0.7,
-                            cursor: isConnected ? 'pointer' : 'not-allowed',
-                            backgroundColor: '#fff',
-                        }}
-                        bodyStyle={{ padding: '10px' }}
-                    >
-                        <div>
-                            <Title level={5} style={{ marginBottom: '6px', fontSize: '13px', color: '#334155', lineHeight: '1.2' }}>
-                                {titleButton[item.dataName] || item.dataName}
-                            </Title>
-                            {/* Hiển thị nhãn của chế độ đang hoạt động nếu nút Input đang ON */}
-                            {item.statusReportCMDs && isOn && item.currentActiveModeLabel && (
-                                <Text type="secondary" style={{ fontSize: '10px', display: 'block', color: '#60a5fa' }}>
-                                    {item.currentActiveModeLabel}
+                    const isPulseMode = item.statusReportCMDs !== undefined && globalModeDigitalInput === 2;
+
+
+                    // --- Logic màu sắc ĐƠN GIẢN HÓA và đồng bộ cho TẤT CẢ các card và button ---
+
+                    // Màu mặc định khi TẮT (hồng nhạt / tím nhạt)
+                    let cardBorderColor = '#e2e8f0'; // Màu border khi OFF
+                    let cardBackgroundColor = '#ffffff'; // Màu nền card khi OFF
+                    let buttonBackgroundColor = '#d8b4fe'; // Màu nút khi OFF (tím nhạt)
+                    let buttonShadowColor = 'rgba(216, 180, 254, 0.3)'; // Shadow khi OFF
+
+                    if (isConnected) {
+                        if (isOn) {
+                            // Khi BẬT (màu xanh lá)
+                            cardBorderColor = '#86efac';
+                            cardBackgroundColor = '#ecfdf5';
+                            buttonBackgroundColor = '#34d399';
+                            buttonShadowColor = 'rgba(52, 211, 153, 0.3)';
+                        } else {
+                            // Khi TẮT (màu hồng nhạt/tím nhạt như trong ảnh)
+                            cardBorderColor = '#e2e8f0'; // Giữ màu border trung tính hơn
+                            cardBackgroundColor = '#ffffff';
+                            buttonBackgroundColor = '#f472b6'; // Màu hồng
+                            buttonShadowColor = 'rgba(244, 114, 182, 0.3)';
+                        }
+                    } else {
+                        // Khi không kết nối, giữ màu xám/trắng và giảm opacity cho cả card và button
+                        cardBorderColor = '#e2e8f0'; // Xám nhạt
+                        cardBackgroundColor = '#ffffff'; // Trắng
+                        buttonBackgroundColor = '#f472b6'; // Hồng nhạt
+                        buttonShadowColor = 'rgba(244, 114, 182, 0.3)';
+                    }
+                    // --- Kết thúc Logic màu sắc ĐƠN GIẢN HÓA ---
+
+                    const cardStyle = {
+                        width: '130px',
+                        height: '130px',
+                        textAlign: 'center' as const,
+                        display: 'flex',
+                        flexDirection: 'column' as const,
+                        justifyContent: 'space-between',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s ease-in-out',
+                        opacity: isConnected ? 1 : 0.7,
+                        cursor: isConnected ? 'pointer' : 'not-allowed',
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
+                        borderWidth: '1px',
+                        // borderColor: cardBorderColor,
+                        // backgroundColor: cardBackgroundColor,
+                    };
+
+                    const buttonStyle = {
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: '18px',
+                        transition: "background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                        backgroundColor: buttonBackgroundColor,
+                        borderColor: buttonBackgroundColor, // Border cùng màu background
+                        color: "white",
+                        boxShadow: `0 4px 12px ${buttonShadowColor}`,
+                    };
+
+                    return (
+                        <Card
+                            key={item.CMD}
+                            hoverable={isConnected}
+                            style={cardStyle}
+                            bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
+                        >
+                            {/* Header của Card */}
+                            <div style={{ marginBottom: '4px' }}>
+                                <Title level={5} style={{
+                                    margin: 0,
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: '#334155',
+                                    lineHeight: '1.2'
+                                }}>
+                                    {titleButton[item.dataName] || item.dataName}
+                                </Title>
+
+                                {/* Đã xóa phần hiển thị item.hexType.toUpperCase() cho TCP/UDP */}
+
+                                <Divider style={{ margin: '4px 0' }} />
+                            </div>
+
+
+                            {/* Nhãn chế độ và giá trị hiển thị chỉ cho Input Channels */}
+                            {item.statusReportCMDs && (item.currentActiveModeLabel || item.displayValue !== null) && (
+                                <Text style={{
+                                    fontSize: '10px',
+                                    color: isPulseMode ? '#8b5cf6' : '#6b7280',
+                                    fontWeight: '500',
+                                    display: 'block',
+                                    position: `absolute`,
+                                    top: `28px`,
+                                    textAlign: `center`,
+                                    width: 'calc(100% - 16px)'
+                                }}>
+                                    {item.modeDigitalInput === 2 && item.displayValue !== null
+                                        ? `${item.displayValue.toPrecision(3)} Hz`
+                                        : item.currentActiveModeLabel}
                                 </Text>
                             )}
-                            <Divider style={{ margin: '6px 0' }} />
-                        </div>
-                        <Flex justify="center" align="center" style={{ flexGrow: 1 }}>
-                            <Button
-                                type="primary"
-                                size="large"
-                                loading={isCurrentlyLoading}
-                                onClick={() => handleCommand(item)}
-                                disabled={!isConnected || isCurrentlyLoading}
-                                style={{
-                                    backgroundColor: isOn && isConnected ? "#34d399" : "#f472b6",
-                                    borderColor: isOn && isConnected ? "#34d399" : "#f472b6",
-                                    color: "white",
-                                    width: "48px",
-                                    height: "48px",
-                                    borderRadius: "50%",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: '20px',
-                                    boxShadow: `0 4px 12px ${isOn && isConnected ? 'rgba(52, 211, 153, 0.3)' : 'rgba(244, 114, 182, 0.3)'}`,
-                                    transition: "background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-                                }}
-                            >
-                                {isCurrentlyLoading ? <Spin size="small" /> : <PoweroffOutlined />}
-                            </Button>
-                        </Flex>
-                        {/* Phần hiển thị thống kê tin nhắn với Tooltip */}
-                        <Flex justify="space-between" align="center" style={{ marginTop: '8px', padding: '0 4px' }}>
-                            <Tooltip title={`Số bản tin đã nhận theo thời gian thực: ${currentCmdStats.realTime.toString()}`}>
-                                <Text style={{ fontSize: '11px', color: '#34d399', fontWeight: 'bold', minWidth: '40px' }}>
-                                    RT: {formatCount(currentCmdStats.realTime)}
-                                </Text>
-                            </Tooltip>
-                            <Tooltip title={`Số bản tin đã nhận sau khi thiết bị gửi lại: ${currentCmdStats.missed.toString()}`}>
-                                <Text style={{ fontSize: '11px', color: '#f87171', fontWeight: 'bold', minWidth: '40px' }}>
-                                    MS: {formatCount(currentCmdStats.missed)}
-                                </Text>
-                            </Tooltip>
-                        </Flex>
-                    </Card>
-                );
-            })}
-        </Flex>
+
+                            {/* Nút điều khiển */}
+                            <div style={{
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    loading={isCurrentlyLoading}
+                                    onClick={() => handleCommand(item)}
+                                    disabled={!isConnected || isCurrentlyLoading}
+                                    style={buttonStyle}
+                                >
+                                    {isCurrentlyLoading ? <Spin size="small" /> : <PoweroffOutlined />}
+                                </Button>
+                            </div>
+
+                            {/* Thống kê */}
+                            <div style={{
+                                marginTop: '4px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <Tooltip title={`Real-time messages: ${currentCmdStats.realTime}`}>
+                                    <Text style={{
+                                        fontSize: '10px',
+                                        color: '#34d399',
+                                        fontWeight: 'bold',
+                                        minWidth: '35px'
+                                    }}>
+                                        RT: {formatCount(currentCmdStats.realTime)}
+                                    </Text>
+                                </Tooltip>
+                                <Tooltip title={`Missed messages: ${currentCmdStats.missed}`}>
+                                    <Text style={{
+                                        fontSize: '10px',
+                                        color: '#f87171',
+                                        fontWeight: 'bold',
+                                        minWidth: '35px'
+                                    }}>
+                                        MS: {formatCount(currentCmdStats.missed)}
+                                    </Text>
+                                </Tooltip>
+                            </div>
+                        </Card>
+                    );
+                })}
+            </div>
+        </div>
     );
 };
 

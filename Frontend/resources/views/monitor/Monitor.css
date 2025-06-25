@@ -44,6 +44,6 @@ input:-ms-input-placeholder {
     border-radius: 0 !important;
 }
 
-button {
+.button-form {
     border-radius: 0 !important;
 }

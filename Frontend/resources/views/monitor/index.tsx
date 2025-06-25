@@ -1286,6 +1286,7 @@ const Monitor: React.FC = () => {
                         data-tooltip-content="Áp dụng các bộ lọc đã chọn"
                         icon={<FaFilter />}
                         size="large" // Make it match other inputs
+                        className="button-form"
                     >
                         Áp dụng Bộ lọc
                     </Button>
@@ -1296,6 +1297,7 @@ const Monitor: React.FC = () => {
                         data-tooltip-content="Xóa tất cả bộ lọc"
                         icon={<FaTimes />}
                         size="large" // Make it match other inputs
+                        className="button-form"
                     >
                         Xóa Bộ lọc
                     </Button>
@@ -1312,6 +1314,7 @@ const Monitor: React.FC = () => {
                         data-tooltip-content={isPaused ? "Tiếp tục nhận dữ liệu" : "Tạm dừng nhận dữ liệu"}
                         icon={isPaused ? <FaPlay /> : <FaPause />}
                         size="large"
+                        className="button-form"
                     >
                         {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
                     </Button>
@@ -1360,6 +1363,7 @@ const Monitor: React.FC = () => {
                         data-tooltip-content="Chọn các cột để hiển thị/ẩn"
                         icon={<FaColumns />}
                         size="large"
+                        className="button-form"
                     >
                         Chọn cột hiển thị
                     </Button>

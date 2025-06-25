@@ -154,7 +154,6 @@ class IotService {
 
     async updateIotWifiSettings(id: string, data: { SSID?: string; PW?: string; IP?: string; GATEWAY?: string; SUBNET?: string; DNS?: string; }) {
         try {
-            // debugger; // Dòng debugger này có thể xóa sau khi debug xong
             const response = await httpRequest<{ response: HttpResponse }>("PUT", ApiManager.ApiUpdateIotWifiSettings(id), {
                 headers: {
                     Authorization: this.getAuthHeader(),

@@ -13,12 +13,14 @@ import {
     updateRs485Settings,
     updateCanSettings, updateWifiSettings,
     updateRs232Settings,
-    updateFirmwareVersion, updateTcpSettings, getStatisticsById, updateInputSettings
+    updateFirmwareVersion, updateTcpSettings, getStatisticsById, updateInputSettings, getDeviceByMac
 } from "../controllers/iots.controller";
 import { sendDataPayloadType, UpdateDataPayloadType } from "../controllers/payload_type.controller";
 import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendDataIotCmdField, SettingIotCmdField } from "../controllers/iot_cmd.controller";
 const router = express.Router();
 
+
+router.get("/get-device-by-mac/:mac", getDeviceByMac);
 router.get("/get-data-iots", sendDataIots);
 router.get("/get-distinct-iots", SendDistinctIots);
 router.post("/lock-iots", LockIots);

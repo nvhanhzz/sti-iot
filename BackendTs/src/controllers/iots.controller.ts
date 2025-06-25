@@ -659,8 +659,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                         const dataMsgDetail = {
                             device_id: dataIot.id,
                             CMD: dataJson.CMD,
-                            CMD_Decriptions: dataJson.CMD_Decriptions,
-                            dataName: `${dataJson.CMD_Decriptions} : ${payload.payload_name}`,
+                            CMD_Decriptions: dataJson.CMD_descriptions,
+                            dataName: `${dataJson.CMD_descriptions} : ${payload.payload_name}`,
                             payload_name: payload.payload_name,
                             data: payload[payload.payload_name],
                             unit: payload.payload_unit,
@@ -672,8 +672,8 @@ export const deviceUpdateData = async (topic: string, message: Buffer) => {
                 DataMsgGlobal.replaceByMultipleKeys({
                     device_id: dataIot.id,
                     CMD: dataJson.CMD,
-                    CMD_Decriptions: dataJson.CMD_Decriptions,
-                    dataName: `${dataJson.CMD_Decriptions} : isMissed`,
+                    CMD_Decriptions: dataJson.CMD_descriptions,
+                    dataName: `${dataJson.CMD_descriptions} : isMissed`,
                     payload_name: 'isMissed',
                     data: mergedPayloads.isMissed,
                     time: dataJson.time
@@ -1536,3 +1536,17 @@ export const updateFirmwareVersion = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getDeviceByMac = async (req: Request, res: Response) => {
+    const mac = req.params.mac;
+    const device = MasterIotGlobal.findByMac(mac);
+    if (!device) {
+        res.status(404).json({
+            message: "Device not found"
+        });
+    }
+
+    return res.status(200).json({
+        data: device
+    })
+}

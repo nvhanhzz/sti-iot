@@ -105,3 +105,7 @@
 .ant-row {
     margin-bottom: 3px;
 }
+
+.ant-card-head {
+    padding-left: 10px !important;
+}

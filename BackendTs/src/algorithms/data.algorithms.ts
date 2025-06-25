@@ -63,7 +63,6 @@ export const ConvertDataHextoJson = async (buffer: Buffer): Promise<ParsedPacket
         // Lấy dữ liệu từ global stores
         const IotCmdGlobal = commands;
         const PayloadType = payloadTypes;
-        debugger;
 
         // --- TÌM KIẾM CMD ---
         // So sánh cmdCodeByte (number) với item.hex_symbols (string số thập phân)

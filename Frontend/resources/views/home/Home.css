@@ -126,3 +126,7 @@ h1 {
 .ant-card-head {
     min-height: 45px !important;
 }
+
+.ant-picker-range {
+    border-radius: 0;
+}
