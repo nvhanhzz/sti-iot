@@ -2474,6 +2474,11 @@ export const commands: Command[] = [
                 "descriptions": "Dữ liệu xung từ DI1 (ví dụ: số lượng xung).",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2495,6 +2500,11 @@ export const commands: Command[] = [
                 "descriptions": "Dữ liệu xung từ DI2 (ví dụ: số lượng xung).",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2516,6 +2526,11 @@ export const commands: Command[] = [
                 "descriptions": "Dữ liệu xung từ DI3 (ví dụ: số lượng xung).",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2537,6 +2552,11 @@ export const commands: Command[] = [
                 "descriptions": "Dữ liệu xung từ DI4 (ví dụ: số lượng xung).",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2552,6 +2572,11 @@ export const commands: Command[] = [
                 "descriptions": "Thời gian nút được nhấn.",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2567,6 +2592,11 @@ export const commands: Command[] = [
                 "descriptions": "Thời gian nút được nhấn.",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2582,6 +2612,11 @@ export const commands: Command[] = [
                 "descriptions": "Thời gian nút được nhấn.",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2597,6 +2632,11 @@ export const commands: Command[] = [
                 "descriptions": "Thời gian nút được nhấn.",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2612,6 +2652,11 @@ export const commands: Command[] = [
                 "descriptions": "timestamp",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2627,6 +2672,11 @@ export const commands: Command[] = [
                 "descriptions": "timestamp",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     },
@@ -2642,6 +2692,11 @@ export const commands: Command[] = [
                 "descriptions": "timestamp",
                 "unit": null,
                 "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
             }
         ]
     }
