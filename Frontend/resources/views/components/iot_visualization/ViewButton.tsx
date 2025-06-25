@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Button, Card, Typography, Divider, message, Spin, Tooltip } from "antd";
-import { PoweroffOutlined } from "@ant-design/icons"; // Đảm bảo import đúng từ 'antd/icons'
+import { PoweroffOutlined } from "@ant-design/icons";
 import { useSocket } from "../../../../context/SocketContext.tsx";
 const { Title, Text } = Typography;
 
@@ -105,20 +105,20 @@ const defaultButtons = [
         dataName: "CMD_NOTIFY_TCP",
         data: false,
         hexType: "tcp" as keyof typeof HEX_COMMANDS,
-        statusReportCMDs: undefined,
+        statusReportCMDs: undefined, // TCP/UDP do not have status report commands
         currentActiveModeLabel: '',
         displayValue: null,
-        modeDigitalInput: 1
+        modeDigitalInput: 1 // Not applicable for TCP/UDP but kept for consistent type
     },
     {
         CMD: "CMD_NOTIFY_UDP",
         dataName: "CMD_NOTIFY_UDP",
         data: false,
         hexType: "udp" as keyof typeof HEX_COMMANDS,
-        statusReportCMDs: undefined,
+        statusReportCMDs: undefined, // TCP/UDP do not have status report commands
         currentActiveModeLabel: '',
         displayValue: null,
-        modeDigitalInput: 1
+        modeDigitalInput: 1 // Not applicable for TCP/UDP but kept for consistent type
     }
 ];
 
@@ -127,7 +127,8 @@ interface CmdStats {
     missed: number;
     realTime: number;
 }
-type StatisticsData = { [cmd: string]: CmdStats };
+// Cập nhật kiểu dữ liệu cho StatisticsData để map CMD chính của button
+type StatisticsData = { [buttonCmd: string]: CmdStats };
 
 /**
  * Hàm trợ giúp để định dạng số lớn (ví dụ: 1200000 -> 1.2M)
@@ -186,12 +187,14 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         const newStatus = !currentStatus;
         const hexCommandKey = newStatus ? 'on' : 'off';
 
+        // @ts-ignore
         if (!item.hexType || !HEX_COMMANDS[item.hexType]?.[hexCommandKey]) {
             console.error(`Missing hex command for type: ${item.hexType} or status: ${hexCommandKey}`);
             message.error("Lỗi: Không tìm thấy lệnh điều khiển.");
             return;
         }
 
+        // @ts-ignore
         const hexCommand = HEX_COMMANDS[item.hexType][hexCommandKey];
         const loadingKey = `${item.hexType}-${hexCommandKey}`;
 
@@ -288,6 +291,34 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
         };
     }, [dataIotsDetail, globalModeDigitalInput]);
 
+    // Helper function to aggregate statistics for a given button's CMD
+    const aggregateButtonStatistics = useCallback((allStats: Record<string, CmdStats>): StatisticsData => {
+        const aggregated: StatisticsData = {};
+
+        defaultButtons.forEach(button => {
+            let totalMissed = 0;
+            let totalRealTime = 0;
+
+            if (button.statusReportCMDs) {
+                // For Input Channels, sum up stats from status, pulse, and button CMDS
+                Object.values(button.statusReportCMDs).forEach(reportCmd => {
+                    if (allStats[reportCmd]) {
+                        totalMissed += allStats[reportCmd].missed;
+                        totalRealTime += allStats[reportCmd].realTime;
+                    }
+                });
+            } else {
+                // For TCP/UDP, directly use their CMD stats
+                if (allStats[button.CMD]) {
+                    totalMissed = allStats[button.CMD].missed;
+                    totalRealTime = allStats[button.CMD].realTime;
+                }
+            }
+            aggregated[button.CMD] = { missed: totalMissed, realTime: totalRealTime };
+        });
+        return aggregated;
+    }, []);
+
     const fetchInitialStatistics = useCallback(async (id: string) => {
         if (!id) return;
         try {
@@ -296,13 +327,13 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data: { deviceId: string } & { [cmd: string]: CmdStats } = await response.json();
-            const { deviceId: _, ...cmdLevelStats } = data;
-            setCmdStatistics(cmdLevelStats);
+            const { deviceId: _, ...cmdLevelStats } = data; // Destructure to get only CMD-level stats
+            setCmdStatistics(aggregateButtonStatistics(cmdLevelStats));
         } catch (error) {
             console.error("Error fetching initial statistics:", error);
             message.error("Lỗi khi tải thống kê ban đầu.");
         }
-    }, []);
+    }, [aggregateButtonStatistics]);
 
     useEffect(() => {
         if (dataIotsDetail.id) {
@@ -311,10 +342,14 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
     }, [dataIotsDetail.id, fetchInitialStatistics]);
 
     const handleSocketEventStatistics = useCallback((eventData: Record<string, Record<string, CmdStats>>) => {
+        // Ensure deviceId from socket event matches the current device
         if (dataIotsDetail.id === (eventData as any).deviceId) {
-            setCmdStatistics(eventData as StatisticsData);
+            // The eventData directly contains CMD-level stats, aggregate them
+            const { deviceId: _, ...cmdLevelStats } = eventData;
+            // @ts-ignore
+            setCmdStatistics(aggregateButtonStatistics(cmdLevelStats));
         }
-    }, [dataIotsDetail.id]);
+    }, [dataIotsDetail.id, aggregateButtonStatistics]);
 
     useEffect(() => {
         if (socket) {
@@ -349,41 +384,28 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                         ? pulseActiveStates[item.CMD]
                         : item.data;
 
-                    // const isInputChannel = item.statusReportCMDs !== undefined; // Không cần nữa
                     const loadingKeyOn = `${item.hexType}-on`;
                     const loadingKeyOff = `${item.hexType}-off`;
                     const isCurrentlyLoading = loading[loadingKeyOn] || loading[loadingKeyOff];
+                    // Use item.CMD directly to access aggregated statistics
                     const currentCmdStats = cmdStatistics[item.CMD] || { missed: 0, realTime: 0 };
 
                     const isPulseMode = item.statusReportCMDs !== undefined && globalModeDigitalInput === 2;
 
-
                     // --- Logic màu sắc ĐƠN GIẢN HÓA và đồng bộ cho TẤT CẢ các card và button ---
 
-                    // Màu mặc định khi TẮT (hồng nhạt / tím nhạt)
-                    let cardBorderColor = '#e2e8f0'; // Màu border khi OFF
-                    let cardBackgroundColor = '#ffffff'; // Màu nền card khi OFF
                     let buttonBackgroundColor = '#d8b4fe'; // Màu nút khi OFF (tím nhạt)
                     let buttonShadowColor = 'rgba(216, 180, 254, 0.3)'; // Shadow khi OFF
 
                     if (isConnected) {
                         if (isOn) {
-                            // Khi BẬT (màu xanh lá)
-                            cardBorderColor = '#86efac';
-                            cardBackgroundColor = '#ecfdf5';
                             buttonBackgroundColor = '#34d399';
                             buttonShadowColor = 'rgba(52, 211, 153, 0.3)';
                         } else {
-                            // Khi TẮT (màu hồng nhạt/tím nhạt như trong ảnh)
-                            cardBorderColor = '#e2e8f0'; // Giữ màu border trung tính hơn
-                            cardBackgroundColor = '#ffffff';
                             buttonBackgroundColor = '#f472b6'; // Màu hồng
                             buttonShadowColor = 'rgba(244, 114, 182, 0.3)';
                         }
                     } else {
-                        // Khi không kết nối, giữ màu xám/trắng và giảm opacity cho cả card và button
-                        cardBorderColor = '#e2e8f0'; // Xám nhạt
-                        cardBackgroundColor = '#ffffff'; // Trắng
                         buttonBackgroundColor = '#f472b6'; // Hồng nhạt
                         buttonShadowColor = 'rgba(244, 114, 182, 0.3)';
                     }
@@ -402,8 +424,8 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                         cursor: isConnected ? 'pointer' : 'not-allowed',
                         boxShadow: "0 2px 8px rgba(0,0,0,0.09)",
                         borderWidth: '1px',
-                        // borderColor: cardBorderColor,
-                        // backgroundColor: cardBackgroundColor,
+                        // borderColor: cardBorderColor, // Removed as it was affecting the aesthetic in tests
+                        // backgroundColor: cardBackgroundColor, // Removed as it was affecting the aesthetic in tests
                     };
 
                     const buttonStyle = {
@@ -440,11 +462,8 @@ const ViewButton: React.FC<ConfigIotsProps> = ({ dataIotsDetail, deviceMac, onCo
                                     {titleButton[item.dataName] || item.dataName}
                                 </Title>
 
-                                {/* Đã xóa phần hiển thị item.hexType.toUpperCase() cho TCP/UDP */}
-
                                 <Divider style={{ margin: '4px 0' }} />
                             </div>
-
 
                             {/* Nhãn chế độ và giá trị hiển thị chỉ cho Input Channels */}
                             {item.statusReportCMDs && (item.currentActiveModeLabel || item.displayValue !== null) && (
