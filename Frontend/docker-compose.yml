@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Dịch vụ cho môi trường Phát triển (Development)
+  fe_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_PORT: ${VITE_PORT}
+    command: npm run dev
+    env_file:
+      - .env
+
+  # Dịch vụ cho môi trường Production (Sản phẩm)
+  fe_prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" # Ánh xạ cổng 80 của host đến cổng 80 của container (Nginx)
+    env_file:
+      - .env # Đọc các biến môi trường từ file .env (sẽ được envsubst sử dụng)
+    # Không có 'depends_on' vì backend không nằm trong cùng compose file
