@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -15,6 +14,8 @@ services:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
+    networks:
+      - app-network
 
   mongodb:
     image: mongo:latest
@@ -27,24 +28,24 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
       TZ: Asia/Ho_Chi_Minh
+    networks:
+      - app-network
     healthcheck:
-      # CHỈNH SỬA Ở ĐÂY: Sử dụng iot_gateway
       test: echo 'db.runCommand("ping").ok' | mongosh mongodb:27017/iot_gateway --quiet
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
 
-  # Thêm dịch vụ DbGate
   dbgate:
-    image: dbgate/dbgate:latest # Sử dụng ảnh DbGate
-    container_name: myts-dbgate # Tên dễ nhận biết
+    image: dbgate/dbgate:latest
+    container_name: myts-dbgate
     ports:
-      - "3001:3000" # Ánh xạ cổng: host_port (cho DbGate):container_port (cổng mặc định của DbGate)
+      - "3001:3000"
     environment:
-      DG_AUTH_ENABLED: "false" # Tùy chọn: Tắt xác thực cho môi trường dev
-    # DbGate không cần phụ thuộc vào MongoDB nếu bạn cấu hình kết nối thủ công bên trong DbGate
-    # Nhưng nếu muốn đảm bảo MongoDB sẵn sàng, bạn có thể thêm:
+      DG_AUTH_ENABLED: "false"
+    networks:
+      - app-network
     depends_on:
       mongodb:
         condition: service_healthy
@@ -55,17 +56,26 @@ services:
     ports:
       - "1883:1883"     # MQTT
       - "8883:8883"     # MQTT SSL
-      - "8083:8083"     # API, MQTT over QUIC (EMQX 5.x), MQTT WebSocket
-      - "8084:8084"     # Dashboard HTTPS, MQTT over QUIC/SSL (EMQX 5.x), MQTT WebSocket SSL
-      - "18083:18083"   # EMQX Dashboard HTTP
+      - "8083:8083"     # WebSocket
+      - "8084:8084"     # WebSocket SSL
+      - "18083:18083"   # Dashboard
     environment:
-      EMQX_NAME: my_emqx_instance
-      EMQX_HOST: localhost
+      EMQX_NODE_NAME: emqx@127.0.0.1
+      EMQX_CLUSTER__DISCOVERY_STRATEGY: manual
     volumes:
       - emqx_data:/opt/emqx/data
       - emqx_etc:/opt/emqx/etc
       - emqx_log:/opt/emqx/log
     restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      # Thử với nc (netcat) để check port
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/1883' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -75,50 +85,42 @@ services:
       PMA_PORT: 3306
     ports:
       - "8081:80"
+    networks:
+      - app-network
     depends_on:
       - mysql
     restart: always
 
   backend:
     build:
-      context: . # Ngữ cảnh build là thư mục hiện tại (BackendTs)
-      dockerfile: Dockerfile # Sử dụng Dockerfile trong cùng thư mục
-    container_name: myts-backend # Tên dễ nhận biết cho container
-    # Ánh xạ cổng: Host_PORT:Container_PORT
-    # Đảm bảo biến môi trường PORT được định nghĩa trong .env file hoặc trực tiếp
-    # Ví dụ: nếu PORT=3335 trong .env và ứng dụng lắng nghe cổng 3335 trong container
+      context: .
+      dockerfile: Dockerfile
+    container_name: myts-backend
     ports:
       - "${PORT}:${PORT}"
     volumes:
-      # Gắn kết toàn bộ thư mục mã nguồn từ host vào /app trong container.
-      # Điều này cho phép bạn thay đổi mã nguồn trên host và thấy sự thay đổi ngay lập tức
-      # trong container mà không cần rebuild image (hữu ích cho development).
       - .:/app
-      # Tạo một anonymous volume tại /app/node_modules.
-      # Điều này RẤT QUAN TRỌNG để ngăn thư mục node_modules từ host (nếu có)
-      # ghi đè lên thư mục node_modules được tạo ra bên trong container bởi 'npm ci'.
-      # Nó đảm bảo rằng các dependencies được cài đặt và tương thích với môi trường Alpine của container.
       - /app/node_modules
+    networks:
+      - app-network
     depends_on:
       mysql:
-        condition: service_started # Đợi MySQL khởi động
+        condition: service_started
       mongodb:
-        condition: service_healthy # Đợi MongoDB báo cáo là sẵn sàng (qua healthcheck)
-    restart: always # Luôn khởi động lại container nếu nó dừng lại (trừ khi dừng thủ công)
+        condition: service_healthy
+      emqx:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
-
-#  nginx:
-#    image: nginx:stable-alpine # Sử dụng image Nginx
-#    container_name: firmware_nginx
-#    ports:
-#      - "80:80" # Map cổng 80 của host vào cổng 80 của container Nginx
-#    volumes:
-#      # Mount file cấu hình Nginx
-#      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-#      # Mount thư mục chứa file firmware từ host vào trong Nginx container
-#      # Thay đổi `./src/uploads` thành đường dẫn THỰC TẾ trên máy host của bạn
-##      - ./src/uploads:/usr/share/nginx/html/firmware_files:ro\
-#    restart: always
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   mongodb_data:
