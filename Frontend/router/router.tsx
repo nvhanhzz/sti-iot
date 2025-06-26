@@ -24,7 +24,7 @@ const AppRouter: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route element={<PrivateRoute />}>
                     <Route element={<Main />}>
-                        <Route path="/home" element={<Home />} />
+                        <Route path="/dashboard" element={<Home />} />
                         <Route path="/devices" element={<ListDevice />} />
                         <Route path="/devices/:id" element={<ViewDevice />} />
                         <Route path="/monitor" element={<Monitor />} />
@@ -39,7 +39,7 @@ const AppRouter: React.FC = () => {
                         {/*<Route path="/settings-packet" element={<SettingsPacket />} />*/}
                     </Route>
                 </Route>
-                <Route path="*" element={<Navigate to="/home" />} />
+                <Route path="*" element={<Navigate to="/dashboard" />} />
             </Routes>
         </AuthProvider>
     );

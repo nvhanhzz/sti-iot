@@ -37,7 +37,7 @@ const NavLeftLayout: React.FC<ChildProps> = ({ collapsed, mode }) => {
             class: 'nav-item',
             target: false,
             icon: <BsHouseDoor size={20} />,
-            link: '/home'
+            link: '/dashboard'
         },
         {
             key: 'settings.iot',

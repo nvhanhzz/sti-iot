@@ -696,7 +696,7 @@ const Monitor: React.FC = () => {
         } catch (error: unknown) {
             console.error("Lỗi khi tải dữ liệu:", error);
             if (error instanceof Error) {
-                message.error(`Lỗi khi tải dữ liệu: ${error.message}`); // Use Antd message
+                message.error(`${error.message}`); // Use Antd message
             } else {
                 message.error('Đã xảy ra lỗi không xác định khi tải dữ liệu.'); // Use Antd message
             }

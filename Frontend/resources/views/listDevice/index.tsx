@@ -238,7 +238,6 @@ const ListDevice: React.FC = () => {
             }
         } catch (error) {
             console.error('Lỗi khi tải dữ liệu:', error);
-            message.error('Lỗi khi tải dữ liệu!');
         } finally {
             setLoading(false);
         }
