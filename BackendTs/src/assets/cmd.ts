@@ -2699,5 +2699,25 @@ export const commands: Command[] = [
                 "descriptions": "ID của tin nhắn."
             }
         ]
+    },
+    {
+        "name": "CMD_LOSS_WIFI",
+        "hex_symbols": "243",
+        "descriptions": "Mất wifi.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
+            }
+        ]
     }
 ]
