@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.8' # Cảnh báo "version is obsolete" vẫn sẽ hiện, bạn có thể xóa dòng này nếu muốn sử dụng cú pháp mới nhất của Compose Specification.
 services:
   mysql:
     image: mysql:8.0
@@ -31,11 +31,12 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh mongodb:27017/iot_gateway --quiet
+      # Lệnh này kiểm tra xem MongoDB có phản hồi lệnh 'ping' hay không
+      test: ["CMD", "sh", "-c", "echo 'db.runCommand(\"ping\").ok' | mongosh mongodb:27017/iot_gateway --quiet"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 20s
 
   dbgate:
     image: dbgate/dbgate:latest
@@ -51,31 +52,38 @@ services:
         condition: service_healthy
 
   emqx:
-    image: emqx/emqx:5.0.24
+    build:
+      context: . # Đường dẫn đến thư mục chứa Dockerfile.emqx
+      dockerfile: Dockerfile.emqx # Tên Dockerfile của bạn
     container_name: emqx_node
     ports:
-      - "1883:1883"     # MQTT
-      - "8883:8883"     # MQTT SSL
-      - "8083:8083"     # WebSocket
-      - "8084:8084"     # WebSocket SSL
-      - "18083:18083"   # Dashboard
-    environment:
-      EMQX_NODE_NAME: emqx@127.0.0.1
-      EMQX_CLUSTER__DISCOVERY_STRATEGY: manual
+      # Ánh xạ tất cả các cổng MQTT và Dashboard ra host
+      - "1883:1883"      # MQTT port
+      - "8083:8083"      # MQTT over WebSocket
+      - "8084:8084"      # MQTT over SSL/TLS
+      - "8883:8883"      # MQTT over SSL/TLS
+      - "18083:18083"    # Dashboard/Management API
     volumes:
+      # Đảm bảo các volumes này được giữ lại để lưu trữ dữ liệu EMQX
       - emqx_data:/opt/emqx/data
       - emqx_etc:/opt/emqx/etc
       - emqx_log:/opt/emqx/log
-    restart: unless-stopped
+    environment:
+      # Đảm bảo các biến môi trường này được truyền vào EMQX
+      EMQX_NAME: emqx
+      EMQX_HOST: emqx_node
+      TZ: Asia/Ho_Chi_Minh
     networks:
-      - app-network
+      - app-network # Đảm bảo EMQX nằm trên mạng ứng dụng
+    restart: always
     healthcheck:
-      # Thử với nc (netcat) để check port
-      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/1883' || exit 1"]
-      interval: 30s
+      # Kiểm tra API Dashboard của EMQX. Sử dụng 2>&1 để thấy lỗi chi tiết nếu có.
+      test: [ "CMD-SHELL", "curl http://localhost:18083/api/v5/brokers 2>&1 || exit 1" ]
+      interval: 10s
       timeout: 10s
-      retries: 8
-      start_period: 90s
+      retries: 10
+      # Tăng start_period để EMQX có đủ thời gian khởi động hoàn toàn trước khi Docker đánh giá healthcheck
+      start_period: 120s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -94,7 +102,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile # Trỏ đến Dockerfile của backend (đã có wait-for-it.sh và bash/netcat)
     container_name: myts-backend
     ports:
       - "${PORT}:${PORT}"
@@ -105,18 +113,12 @@ services:
       - app-network
     depends_on:
       mysql:
-        condition: service_started
+        condition: service_started # wait-for-it.sh sẽ chờ MySQL sẵn sàng
       mongodb:
-        condition: service_healthy
+        condition: service_healthy # MongoDB đã có healthcheck tốt
       emqx:
-        condition: service_healthy
+        condition: service_started # wait-for-it.sh sẽ chờ EMQX sẵn sàng
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
 networks:
   app-network:

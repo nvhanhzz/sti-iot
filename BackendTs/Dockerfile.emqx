@@ -1,0 +1,17 @@
+# Dockerfile.emqx
+FROM emqx/emqx:latest
+
+# Chuyển sang user root để cài đặt gói
+USER root
+
+RUN mkdir -p /var/lib/apt/lists/partial && \
+    chmod 755 /var/lib/apt/lists/partial && \
+    apt-get update && \
+    apt-get install -y netcat-traditional curl --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# (Tùy chọn) Chuyển lại user mặc định của EMQX nếu cần
+# Nếu docker inspect trả về user khác root, bạn có thể muốn thêm dòng này:
+# USER <tên_user_mặc_định_của_emqx_trước_đó>
+
+# Giữ nguyên ENTRYPOINT và CMD của EMQX image gốc

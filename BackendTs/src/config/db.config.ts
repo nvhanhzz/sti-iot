@@ -22,8 +22,8 @@ export const connectDatabases = async () => {
             await sequelize.authenticate();
             queryLogger.info("MySQL Database connected");
 
-            // await sequelize.sync({ alter: true });
-            // queryLogger.info("MySQL Database schema synchronized.");
+            await sequelize.sync({ alter: true });
+            queryLogger.info("MySQL Database schema synchronized.");
 
         } catch (error) {
             queryLogger.error("MySQL connection error:", error);
