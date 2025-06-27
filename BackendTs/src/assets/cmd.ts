@@ -2654,12 +2654,6 @@ export const commands: Command[] = [
                 "isDeleted": false
             },
             {
-                "name": "recovery_time",
-                "descriptions": "Thời gian phục hồi",
-                "unit": null,
-                "isDeleted": false
-            },
-            {
                 "name": "message_id",
                 "isDeleted": false,
                 "descriptions": "ID của tin nhắn."
@@ -2676,38 +2670,6 @@ export const commands: Command[] = [
             {
                 "name": "timestamp",
                 "descriptions": "timestamp",
-                "unit": null,
-                "isDeleted": false
-            },
-            {
-                "name": "recovery_time",
-                "descriptions": "Thời gian phục hồi",
-                "unit": null,
-                "isDeleted": false
-            },
-            {
-                "name": "message_id",
-                "isDeleted": false,
-                "descriptions": "ID của tin nhắn."
-            }
-        ]
-    },
-    {
-        "name": "CMD_STATUS_ACK_FAIL",
-        "hex_symbols": "242",
-        "descriptions": "ACK fail.",
-        "type": 1,
-        "isDeleted": false,
-        "iot_cmd_field": [
-            {
-                "name": "timestamp",
-                "descriptions": "timestamp",
-                "unit": null,
-                "isDeleted": false
-            },
-            {
-                "name": "recovery_time",
-                "descriptions": "Thời gian phục hồi",
                 "unit": null,
                 "isDeleted": false
             },
@@ -2732,8 +2694,62 @@ export const commands: Command[] = [
                 "isDeleted": false
             },
             {
-                "name": "recovery_time",
-                "descriptions": "Thời gian phục hồi",
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
+            }
+        ]
+    },
+    {
+        "name": "CMD_STATUS_WIFI_LOST_RECOVERY",
+        "hex_symbols": "244",
+        "descriptions": "Kết nối lại wifi",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
+            }
+        ]
+    },
+    {
+        "name": "CMD_STATUS_WIFI_WEAK_RECOVERY",
+        "hex_symbols": "245",
+        "descriptions": "Mất gói mqtt.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
+                "name": "message_id",
+                "isDeleted": false,
+                "descriptions": "ID của tin nhắn."
+            }
+        ]
+    },
+    {
+        "name": "CMD_STATUS_MQTT_LOST_RECOVERY",
+        "hex_symbols": "246",
+        "descriptions": "Mất wifi.",
+        "type": 1,
+        "isDeleted": false,
+        "iot_cmd_field": [
+            {
+                "name": "timestamp",
+                "descriptions": "timestamp",
                 "unit": null,
                 "isDeleted": false
             },

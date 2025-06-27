@@ -20,6 +20,7 @@ import { sendDataIotCmd, SettingIotCmd, LockIotCmd, SendDistinctIotCmd, SendData
 const router = express.Router();
 
 
+// @ts-ignore
 router.get("/get-device-by-mac/:mac", getDeviceByMac);
 router.get("/get-data-iots", sendDataIots);
 router.get("/get-distinct-iots", SendDistinctIots);

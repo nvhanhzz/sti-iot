@@ -400,7 +400,11 @@ const commandsMapping = [
     { "name": "CMD_PUSH_IO_DI4_BUTTON", "description": "Nút DI 4 (I/O)" },
     { "name": "CMD_STATUS_WIFI_WEAK", "description": "Lỗi WiFi Yếu" },
     { "name": "CMD_STATUS_MQTT_LOST", "description": "Lỗi Mất kết nối MQTT" },
-    { "name": "CMD_STATUS_ACK_FAIL", "description": "Lỗi ACK Thất bại" }
+    { "name": "CMD_STATUS_WIFI_LOST", "description": "Lỗi Mất WiFi" },
+
+    { "name": "CMD_STATUS_WIFI_WEAK_RECOVERY", "description": "Khôi phục lỗi WiFi Yếu" },
+    { "name": "CMD_STATUS_MQTT_LOST_RECOVERY", "description": "Khôi phục lỗi Mất kết nối MQTT" },
+    { "name": "CMD_STATUS_WIFI_LOST_RECOVERY", "description": "Khôi phục lỗi Mất WiFi" },
 ];
 
 const descriptionOptions = commandsMapping.map(cmd => ({ value: cmd.description }));
@@ -1465,7 +1469,7 @@ const Monitor: React.FC = () => {
 
                                                 const displayValue = item[column.dataIndex as keyof MonitorDataItem];
 
-                                                if (column.key === 'timestamp' && typeof displayValue === 'number') {
+                                                if ((column.key === 'timestamp' || column.key === 'recovery_time') && typeof displayValue === 'number') {
                                                     return moment(displayValue * 1000).format('DD-MM-YYYY HH:mm:ss');
                                                 }
                                                 if (typeof displayValue === 'boolean') {
