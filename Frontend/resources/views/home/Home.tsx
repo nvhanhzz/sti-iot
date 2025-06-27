@@ -23,7 +23,8 @@ import "./Home.css";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const API_DASHBOARD_PREFIX = 'http://localhost:3335/api/dashboard';
+const BASE_URL_FOR_APIS: string = import.meta.env.VITE_API_BASE_URL;
+const API_DASHBOARD_PREFIX = `${BASE_URL_FOR_APIS}/api/dashboard`;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
@@ -108,7 +109,11 @@ const commandsMapping = [
     // Thêm các lệnh lỗi vào mapping để có description nếu cần
     { "name": "CMD_STATUS_WIFI_WEAK", "description": "Lỗi WiFi Yếu" },
     { "name": "CMD_STATUS_MQTT_LOST", "description": "Lỗi Mất kết nối MQTT" },
-    { "name": "CMD_STATUS_ACK_FAIL", "description": "Lỗi ACK Thất bại" }
+    { "name": "CMD_STATUS_ACK_FAIL", "description": "Lỗi ACK Thất bại" },
+
+    { "name": "CMD_STATUS_WIFI_WEAK_RECOVERY", "description": "Khôi phục lỗi WiFi Yếu" },
+    { "name": "CMD_STATUS_MQTT_LOST_RECOVERY", "description": "Khôi phục lỗi Mất kết nối MQTT" },
+    { "name": "CMD_STATUS_WIFI_LOST_RECOVERY", "description": "Khôi phục lỗi Mất WiFi" },
 ];
 
 const cmdDescriptionMap = new Map(commandsMapping.map(cmd => [cmd.description.toLowerCase(), cmd.name]));

@@ -17,6 +17,11 @@ RUN chmod +x ./node_modules/.bin/tsc
 # Sao chép toàn bộ mã nguồn còn lại của ứng dụng vào container
 COPY . .
 
+# *** THÊM HAI DÒNG NÀY ĐỂ TRUYỀN BIẾN MÔI TRƯỜNG VÀO BUILD ***
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# ************************************************************
+
 # Build ứng dụng React cho môi trường production
 # Lệnh này sẽ chạy script 'build' trong package.json của bạn
 RUN npm run build

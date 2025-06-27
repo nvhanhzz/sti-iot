@@ -67,7 +67,7 @@ interface DeviceListItem {
 }
 // --- END NEW INTERFACE ---
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3335';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_DASHBOARD_PREFIX = `${API_BASE_URL}/api/dashboard`; // Sử dụng API_DASHBOARD_PREFIX cho các API liên quan đến dashboard
 
 // --- Inline CSS Styles ---
