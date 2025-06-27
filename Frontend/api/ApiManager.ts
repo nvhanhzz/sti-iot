@@ -1,154 +1,130 @@
-const API_PORT = import.meta.env.VITE_API_PORT;
-const API_PORT_MASTERDATA = import.meta.env.VITE_API_PORT_MASTERDATA;
-const API_IP = import.meta.env.VITE_API_IP;
-const API_URL = `${window.location.protocol}//${API_IP ? API_IP : window.location.hostname}:${API_PORT}`;
-const API_URLMASTERDATA = `${window.location.protocol}//${API_IP ? API_IP : window.location.hostname}:${API_PORT_MASTERDATA}`;
-
-const LOGIN_PORT = import.meta.env.VITE_PORT_LOGIN;
-const LOGIN_URL = `${window.location.protocol}//${window.location.hostname}:${LOGIN_PORT}`;
+const BASE_URL_FOR_APIS: string = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
 
 class ApiManager {
-
-    //API Đăng nhập
-    loginUrl() {
-        return `${LOGIN_URL}/login`;
+    public loginUrl(): string {
+        return `${BASE_URL_FOR_APIS}/auth/login`;
     }
-    ApiLogin() {
-        return `${API_URL}/login`;
+    public ApiLogin(): string {
+        return `${BASE_URL_FOR_APIS}/api/login`;
     }
-    ApiGetRole() {
-        return `${API_URL}/user/get-data-role`;
+    public ApiGetRole(): string {
+        return `${BASE_URL_FOR_APIS}/api/user/get-data-role`;
     }
 
-    //API Tải File
-    ApiDownloadFile() {
-        return `${API_URLMASTERDATA}/download-file`;
+    public ApiDownloadFile(): string {
+        return `${BASE_URL_FOR_APIS}/download-file`;
     }
 
-    //API Trang Chủ
-    ApiGetDataHome() {
-        return `${API_URLMASTERDATA}/home`;
+    public ApiGetDataHome(): string {
+        return `${BASE_URL_FOR_APIS}/home`;
     }
-    ApiGetDataStock() {
-        return `${API_URLMASTERDATA}/warehouse-system/report/data-stock-ten-product`;
+    public ApiGetDataStock(): string {
+        return `${BASE_URL_FOR_APIS}/warehouse-system/report/data-stock-ten-product`;
     }
-    ApiGetDataAll() {
-        return `${API_URLMASTERDATA}/get-data-dash-board`;
-    }
-
-    //API Cài đặt khách hàng
-    ApiGetDataPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/get-data-packets`;
-    }
-    ApiGetDataDistinctPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/get-distinct-packets`;
-    }
-    ApiPostDataSettingsPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/setting-packets`;
-    }
-    ApiLookPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/lock-packets`;
-    }
-    ApiImportDataPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/import-file`;
-    }
-    ApiExportDataPacket() {
-        return `${API_URLMASTERDATA}/settings/packet/export-file`;
+    public ApiGetDataAll(): string {
+        return `${BASE_URL_FOR_APIS}/get-data-dash-board`;
     }
 
-    // API Cài đặt iot
-    ApiGetDataIots() {
-        return `${API_URLMASTERDATA}/api/iots/get-data-iots`;
+    public ApiGetDataPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/get-data-packets`;
     }
-    ApiGetDataIotsV2() {
-        return `${API_URLMASTERDATA}/api/v2/iots/get-data-iots`;
+    public ApiGetDataDistinctPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/get-distinct-packets`;
     }
-    ApiUpdateDataIots() {
-        return `${API_URLMASTERDATA}/api/iots/active-data-iots`;
+    public ApiPostDataSettingsPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/setting-packets`;
     }
-    ApiGetDataDistinctIot() {
-        return `${API_URLMASTERDATA}/api/iots/get-distinct-iots`;
+    public ApiLookPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/lock-packets`;
     }
-    ApiLockIot() {
-        return `${API_URLMASTERDATA}/api/iots/lock-iots`;
+    public ApiImportDataPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/import-file`;
     }
-    ApiDeviceSendData() {
-        return `${API_URLMASTERDATA}/api/iots/device-send-data`;
-    }
-
-    ApiUpdateIotBasicInfo(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/basic-info`;
-    }
-    ApiUpdateIotWifiSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/wifi-settings`;
-    }
-    ApiUpdateIotEthernetSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/ethernet-settings`;
-    }
-    ApiUpdateIotMqttSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/mqtt-settings`;
-    }
-    ApiUpdateIotRs485Settings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/rs485-settings`;
-    }
-    ApiUpdateIotRs232Settings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/rs232-settings`;
-    }
-    ApiUpdateIotCanSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/can-settings`;
-    }
-    ApiUpdateIotTcpSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/tcp-settings`;
-    }
-    ApiUpdateIotFirmwareVersion(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/firmware-version`;
-    }
-    ApiUpdateIotInputSettings(id: string) {
-        return `${API_URLMASTERDATA}/api/iots/${id}/input-settings`;
+    public ApiExportDataPacket(): string {
+        return `${BASE_URL_FOR_APIS}/settings/packet/export-file`;
     }
 
-    // Api Cài đặt payload
-    // ApiGetDataPayloadType() {
-    //     return `${API_URLMASTERDATA}/api/iots/payload-type/get-data-payload-type`;
-    // }
-    // ApiUpdateDataPayloadType() {
-    //     return `${API_URLMASTERDATA}/api/iots/payload-type/update-data-payload-type`;
-    // }
-
-    ApiGetDataPayloadType() {
-        return `${API_URLMASTERDATA}/api/payload-type/get-data-payload-type`;
+    public ApiGetDataIots(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/get-data-iots`;
     }
-    ApiUpdateDataPayloadType() {
-        return `${API_URLMASTERDATA}/api/payload-type/setting-payload-type`;
+    public ApiGetDataIotsV2(): string {
+        return `${BASE_URL_FOR_APIS}/api/v2/iots/get-data-iots`;
     }
-    ApiGetDataDistinctPayloadType() {
-        return `${API_URLMASTERDATA}/api/payload-type/get-distinct-payload-type`;
+    public ApiUpdateDataIots(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/active-data-iots`;
     }
-    ApiLockPayloadType() {
-        return `${API_URLMASTERDATA}/api/payload-type/lock-payload-type`;
+    public ApiGetDataDistinctIot(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/get-distinct-iots`;
+    }
+    public ApiLockIot(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/lock-iots`;
+    }
+    public ApiDeviceSendData(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/device-send-data`;
     }
 
+    public ApiUpdateIotBasicInfo(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/basic-info`;
+    }
+    public ApiUpdateIotWifiSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/wifi-settings`;
+    }
+    public ApiUpdateIotEthernetSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/ethernet-settings`;
+    }
+    public ApiUpdateIotMqttSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/mqtt-settings`;
+    }
+    public ApiUpdateIotRs485Settings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/rs485-settings`;
+    }
+    public ApiUpdateIotRs232Settings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/rs232-settings`;
+    }
+    public ApiUpdateIotCanSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/can-settings`;
+    }
+    public ApiUpdateIotTcpSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/tcp-settings`;
+    }
+    public ApiUpdateIotFirmwareVersion(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/firmware-version`;
+    }
+    public ApiUpdateIotInputSettings(id: string): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/${id}/input-settings`;
+    }
 
-    // Api Cài đặt Iot CMD
-    ApiGetDataCMD() {
-        return `${API_URLMASTERDATA}/api/iots/get-data-iot-command`;
+    public ApiGetDataPayloadType(): string {
+        return `${BASE_URL_FOR_APIS}/api/payload-type/get-data-payload-type`;
     }
-    ApiUpdateDataCMD() {
-        return `${API_URLMASTERDATA}/api/iots/setting-iot-command`;
+    public ApiUpdateDataPayloadType(): string {
+        return `${BASE_URL_FOR_APIS}/api/payload-type/setting-payload-type`;
     }
-    ApiGetDataDistinctIotCMD() {
-        return `${API_URLMASTERDATA}/api/iots/get-distinct-iot-command`;
+    public ApiGetDataDistinctPayloadType(): string {
+        return `${BASE_URL_FOR_APIS}/api/payload-type/get-distinct-payload-type`;
     }
-    ApiLockIotCMD() {
-        return `${API_URLMASTERDATA}/api/iots/lock-iot-command`;
-    }
-    ApiGetDataIotCMDField() {
-        return `${API_URLMASTERDATA}/api/iots/get-data-iot-command-field`;
-    }
-    ApiPostDataSettingsIotCMDField() {
-        return `${API_URLMASTERDATA}/api/iots/setting-iot-command-field`;
+    public ApiLockPayloadType(): string {
+        return `${BASE_URL_FOR_APIS}/api/payload-type/lock-payload-type`;
     }
 
+    public ApiGetDataCMD(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/get-data-iot-command`;
+    }
+    public ApiUpdateDataCMD(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/setting-iot-command`;
+    }
+    public ApiGetDataDistinctIotCMD(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/get-distinct-iot-command`;
+    }
+    public ApiLockIotCMD(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/lock-iot-command`;
+    }
+    public ApiGetDataIotCMDField(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/get-data-iot-command-field`;
+    }
+    public ApiPostDataSettingsIotCMDField(): string {
+        return `${BASE_URL_FOR_APIS}/api/iots/setting-iot-command-field`;
+    }
 }
 
 export default new ApiManager();

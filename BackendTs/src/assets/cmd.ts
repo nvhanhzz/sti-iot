@@ -2654,6 +2654,12 @@ export const commands: Command[] = [
                 "isDeleted": false
             },
             {
+                "name": "recovery_time",
+                "descriptions": "Thời gian phục hồi",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
                 "name": "message_id",
                 "isDeleted": false,
                 "descriptions": "ID của tin nhắn."
@@ -2670,6 +2676,12 @@ export const commands: Command[] = [
             {
                 "name": "timestamp",
                 "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
+                "name": "recovery_time",
+                "descriptions": "Thời gian phục hồi",
                 "unit": null,
                 "isDeleted": false
             },
@@ -2694,6 +2706,12 @@ export const commands: Command[] = [
                 "isDeleted": false
             },
             {
+                "name": "recovery_time",
+                "descriptions": "Thời gian phục hồi",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
                 "name": "message_id",
                 "isDeleted": false,
                 "descriptions": "ID của tin nhắn."
@@ -2710,6 +2728,12 @@ export const commands: Command[] = [
             {
                 "name": "timestamp",
                 "descriptions": "timestamp",
+                "unit": null,
+                "isDeleted": false
+            },
+            {
+                "name": "recovery_time",
+                "descriptions": "Thời gian phục hồi",
                 "unit": null,
                 "isDeleted": false
             },

@@ -178,6 +178,7 @@ interface DeviceListItem {
 export const getDeviceList = async (req: Request, res: Response) => {
     try {
         const allIots: MasterIotInterface[] = MasterIotGlobal.getAll(); // Lấy tất cả thiết bị từ MasterIotGlobal
+        console.log("---------------------", allIots);
 
         if (!allIots || !Array.isArray(allIots)) {
             res.status(200).json([]); // Trả về mảng rỗng nếu không có thiết bị
