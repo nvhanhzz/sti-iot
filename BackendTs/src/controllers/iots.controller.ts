@@ -204,7 +204,7 @@ const CMD_MODBUS_CONTROL = {
             address: ["uint16"] as const, // Modbus Register Address (unsigned 16-bit integer)
             function: ["uint8"] as const, // Modbus Function Code (unsigned 8-bit integer)
             // Thứ tự ưu tiên: uint16 -> uint8 -> bool
-            data: ["bool", "uint16"] as const // Data to write (unsigned 16-bit, unsigned 8-bit, boolean)
+            data: ["bool", "uint16", "string"] as const // Data to write (unsigned 16-bit, unsigned 8-bit, boolean)
         }
     },
     "CMD_REQUEST_MODBUS_TCP": {
